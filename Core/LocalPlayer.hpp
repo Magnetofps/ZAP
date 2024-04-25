@@ -141,9 +141,7 @@ struct LocalPlayer
             angle.y -= 360.f;
 
         while (angle.y < -180.f)
-        {
             angle.y += 360.f;
-        }
 
         return angle;
     }
@@ -165,9 +163,7 @@ struct LocalPlayer
             angle.y -= 360.f;
 
         while (angle.y < -180.f)
-        {
             angle.y += 360.f;
-        }
 
         return angle;
     }

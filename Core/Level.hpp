@@ -7,7 +7,6 @@
     namespace LvMap
     {
         bool m_mixtape;
-     
     }
      
     struct Level
@@ -25,8 +24,7 @@
             Name = Memory::ReadString(OFF_REGION + OFF_LEVEL);
             IsPlayable = !Name.empty() && Name != "mp_lobby";
             IsFiringRange = Name == "mp_rr_canyonlands_staging_mu1";
-            if (gameModePtr)
-            {
+            if (gameModePtr) {
                 Memory::Read(gameModePtr, &gameMode, sizeof(gameMode));
                 //m_mixtape = (gameMode == "control" || gameMode == "freedm" || gameMode == "arenas");
                 m_mixtape=mixtape[gameMode];

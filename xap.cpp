@@ -99,7 +99,7 @@ void X11EventListener()
 {
     Display *display = XOpenDisplay(nullptr);
     Window root = DefaultRootWindow(display);
-    XGrabKey(display, XKeysymToKeycode(display, XK_Insert), AnyModifier, root, False, GrabModeAsync, GrabModeAsync);
+    //XGrabKey(display, XKeysymToKeycode(display, XK_Insert), AnyModifier, root, False, GrabModeAsync, GrabModeAsync);
     XEvent event;
     while (!StopThread)
     {

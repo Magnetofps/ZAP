@@ -152,8 +152,10 @@ public:
         glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GLFW_TRUE);
         glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
         glfwWindowHint(GLFW_REFRESH_RATE, 75);
-
-        OverlayWindow = glfwCreateWindow(ScreenWidth, ScreenHeight, RandomString(RandomInt(10, 20)).c_str(), NULL, NULL);
+        
+        // Don't want a completely randomized window class / title so it can be found with regex to fix hyprland blur
+        std::string fortnite_title = "fortnite_battlepass_" + RandomString(RandomInt(10, 20));
+        OverlayWindow = glfwCreateWindow(ScreenWidth, ScreenHeight, fortnite_title.c_str(), NULL, NULL);
 
         glfwSetWindowPos(OverlayWindow, ScreenPosX, ScreenPosY);
         CaptureInput(true);

@@ -97,11 +97,11 @@ struct Player
         Name = Memory::ReadString1(BasePointer + OFF_NAME);
         Team = Memory::Read<int>(BasePointer + OFF_TEAM_NUMBER);
 
-        if (!IsPlayer() && !IsDummy())
-        {
+        if (!IsPlayer() && !IsDummy()) {
             BasePointer = 0;
             return;
         }
+
         IsDead = (IsDummy()) ? false : Memory::Read<short>(BasePointer + OFF_LIFE_STATE) > 0;
         IsKnocked = (IsDummy()) ? false : Memory::Read<short>(BasePointer + OFF_BLEEDOUT_STATE) > 0;
 
@@ -132,8 +132,7 @@ struct Player
         Shield = Memory::Read<int>(BasePointer + OFF_SHIELD);
         MaxShield = Memory::Read<int>(BasePointer + OFF_MAXSHIELD);
 
-        if (!IsDead && !IsKnocked && IsHostile)
-        {
+        if (!IsDead && !IsKnocked && IsHostile) {
             long WeaponHandle = Memory::Read<long>(BasePointer + OFF_WEAPON_HANDLE);
             long WeaponHandleMasked = WeaponHandle & 0xffff;
             WeaponEntity = Memory::Read<long>(OFF_REGION + OFF_ENTITY_LIST + (WeaponHandleMasked << 5));
@@ -146,10 +145,11 @@ struct Player
 
         if (Myself->IsValid()) {
         	IsLocal = Myself->BasePointer == BasePointer;
-                IsAlly = IsTeammate();
-                IsHostile = !IsAlly;
-                DistanceToLocalPlayer = Myself->LocalOrigin.Distance(LocalOrigin);
-                Distance2DToLocalPlayer = Myself->LocalOrigin.To2D().Distance(LocalOrigin.To2D());
+            IsAlly = IsTeammate();
+            IsHostile = !IsAlly;
+            DistanceToLocalPlayer = Myself->LocalOrigin.Distance(LocalOrigin);
+            Distance2DToLocalPlayer = Myself->LocalOrigin.To2D().Distance(LocalOrigin.To2D());
+
 		    if (IsVisible) {
 		        aimbotDesiredAngles = calcDesiredAngles();
 		        aimbotDesiredAnglesIncrement = calcDesiredAnglesIncrement();
@@ -180,67 +180,48 @@ struct Player
     {
         uintptr_t modelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
         std::string modelName = Memory::ReadLegend(modelOffset, 1024);
-        // Check for different player names
-        if (modelName.find("dummie") != std::string::npos)
-            modelName = "Dummy";
-        else if (modelName.find("ash") != std::string::npos)
-            modelName = "Ash";
-        else if (modelName.find("ballistic") != std::string::npos)
-            modelName = "Ballistic";
-        else if (modelName.find("bangalore") != std::string::npos)
-            modelName = "Bangalore";
-        else if (modelName.find("bloodhound") != std::string::npos)
-            modelName = "Bloodhound";
-        else if (modelName.find("catalyst") != std::string::npos)
-            modelName = "Catalyst";
-        else if (modelName.find("caustic") != std::string::npos)
-            modelName = "Caustic";
-        else if (modelName.find("conduit") != std::string::npos)
-            modelName = "Conduit";
-        else if (modelName.find("crypto") != std::string::npos)
-            modelName = "Crypto";
-        else if (modelName.find("fuse") != std::string::npos)
-            modelName = "Fuse";
-        else if (modelName.find("gibraltar") != std::string::npos)
-            modelName = "Gibraltar";
-        else if (modelName.find("horizon") != std::string::npos)
-            modelName = "Horizon";
-        else if (modelName.find("nova") != std::string::npos)
-            modelName = "Horizon";
-        else if (modelName.find("holo") != std::string::npos)
-            modelName = "Mirage";
-        else if (modelName.find("mirage") != std::string::npos)
-            modelName = "Mirage";
-        else if (modelName.find("lifeline") != std::string::npos)
-            modelName = "Lifeline";
-        else if (modelName.find("loba") != std::string::npos)
-            modelName = "Loba";
-        else if (modelName.find("madmaggie") != std::string::npos)
-            modelName = "Mad Maggie";
-        else if (modelName.find("newcastle") != std::string::npos)
-            modelName = "Newcastle";
-        else if (modelName.find("octane") != std::string::npos)
-            modelName = "Octane";
-        else if (modelName.find("pathfinder") != std::string::npos)
-            modelName = "Pathfinder";
-        else if (modelName.find("rampart") != std::string::npos)
-            modelName = "Rampart";
-        else if (modelName.find("revenant") != std::string::npos)
-            modelName = "Revenant";
-        else if (modelName.find("seer") != std::string::npos)
-            modelName = "Seer";
-        else if (modelName.find("stim") != std::string::npos)
-            modelName = "Octane";
-        else if (modelName.find("valkyrie") != std::string::npos)
-            modelName = "Valkyrie";
-        else if (modelName.find("vantage") != std::string::npos)
-            modelName = "Vantage";
-        else if (modelName.find("wattson") != std::string::npos)
-            modelName = "Wattson";
-        else if (modelName.find("wraith") != std::string::npos)
-            modelName = "Wraith";
 
-        return modelName;
+        std::unordered_map<std::string, std::string> modelNameMap = {
+            {"dummie", "Dummy"},
+            {"ash", "Ash"},
+            {"ballistic", "Ballistic"},
+            {"bangalore", "Bangalore"},
+            {"bloodhound", "Bloodhound"},
+            {"catalyst", "Catalyst"},
+            {"caustic", "Caustic"},
+            {"conduit", "Conduit"},
+            {"crypto", "Crypto"},
+            {"fuse", "Fuse"},
+            {"gibraltar", "Gibraltar"},
+            {"horizon", "Horizon"},
+            {"nova", "Nova"},
+            {"holo", "Holo"},
+            {"mirage", "Mirage"},
+            {"lifeline", "Lifeline"},
+            {"loba", "Loba"},
+            {"madmaggie", "Mad Maggie"},
+            {"newcastle", "Newcastle"},
+            {"octane", "Octane"},
+            {"pathfinder", "Pathfinder"},
+            {"rampart", "Rampart"},
+            {"revenant", "Revenant"},
+            {"seer", "Seer"},
+            {"stim", "Stim"},
+            {"valkyrie", "Valkyrie"},
+            {"vantage", "Vantage"},
+            {"wattson", "Wattson"},
+            {"wraith", "Wraith"},
+        }
+
+        std::string replacedName = modelName;
+        for (auto& entry : modelNameMap) {
+            if (modelName.find(entry.first) != std::string::npos) {
+                replacedName = entry.second;
+                break;
+            }
+        }
+
+        return replacedName;
     }
 
     bool IsItem()
@@ -250,8 +231,7 @@ struct Player
 
     float GetViewYaw()
     {
-        if (!IsDummy() || IsPlayer())
-        {
+        if (!IsDummy() || IsPlayer()) {
             return Memory::Read<float>(BasePointer + OFF_YAW);
         }
         return 0.0f;
@@ -264,15 +244,7 @@ struct Player
 
     bool IsCombatReady()
     {
-        if (!IsValid())
-            return false;
-        if (IsDummy())
-            return true;
-        if (IsDead)
-            return false;
-        if (IsKnocked)
-            return false;
-        return true;
+        return IsValid() && (!IsDead && !IsKnocked || IsDummy());
     }
 
     bool IsPlayer()
@@ -287,12 +259,9 @@ struct Player
 
     bool IsTeammate()
     {
-        if (LvMap::m_mixtape && Myself->Squad == -1)
-        {
+        if (LvMap::m_mixtape && Myself->Squad == -1) {
             return (Team & 1) == (Myself->Team & 1);
-        }
-        else
-        {
+        } else {
             return Team == Myself->Team;
         }
     }

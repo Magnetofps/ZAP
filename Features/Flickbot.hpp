@@ -46,8 +46,7 @@ struct Flickbot
 	std::chrono::milliseconds LastFlickTime;
 	std::chrono::milliseconds LastFlickBackTime;
 
-	Flickbot(XDisplay *X11Display, Level *Map, LocalPlayer *Myself, std::vector<Player *> *GamePlayers)
-	{
+	Flickbot(XDisplay *X11Display, Level *Map, LocalPlayer *Myself, std::vector<Player *> *GamePlayers) {
 		this->X11Display = X11Display;
 		this->Myself = Myself;
 		this->Map = Map;
@@ -56,9 +55,7 @@ struct Flickbot
 
 	bool Save()
 	{
-		try
-		{
-
+		try {
 			Config::Flickbot::Flickbot = Features::Flickbot::Flickbot;
 			Config::Flickbot::FlickbotMethod = Features::Flickbot::FlickbotMethod;
 			Config::Flickbot::FlickBind = static_cast<int>(Features::Flickbot::FlickBind);
@@ -122,9 +119,7 @@ struct Flickbot
 			Config::Flickbot::Knife = Features::Flickbot::Knife;
 
 			return true;
-		}
-		catch (...)
-		{
+		} catch (...) {
 			return false;
 		}
 	}
@@ -202,53 +197,45 @@ struct Flickbot
 
 	void Update()
 	{
-		if (!Features::Flickbot::Flickbot)
-		{
+		if (!Features::Flickbot::Flickbot) {
 			ReleaseTarget();
 			return;
 		}
 
-		if (Features::Flickbot::Flickbot)
-		{
+		if (Features::Flickbot::Flickbot) {
 
 			if (Myself->IsZooming)
 				FinalDistance = Features::Flickbot::ZoomDistance;
 			else
 				FinalDistance = Features::Flickbot::HipfireDistance;
 
-			if (!Myself->IsCombatReady())
-			{
+			if (!Myself->IsCombatReady()) {
 				CurrentTarget = nullptr;
 				return;
 			}
 
-			if (Features::Flickbot::FlickList.find(Myself->WeaponIndex) == Features::Flickbot::FlickList.end())
-			{
+			if (Features::Flickbot::FlickList.find(Myself->WeaponIndex) == Features::Flickbot::FlickList.end()) {
 				ReleaseTarget();
 				return;
 			}
 
-			if (Myself->IsHoldingGrenade)
-			{
+			if (Myself->IsHoldingGrenade) {
 				ReleaseTarget();
 				return;
 			}
 
-			if (!isKeybindDown())
-			{
+			if (!isKeybindDown()) {
 				ReleaseTarget();
 				return;
 			}
 
 			Player *Target = CurrentTarget;
-			if (!IsValidTarget(Target))
-			{
+			if (!IsValidTarget(Target)) {
 				if (TargetSelected)
 					return;
 
 				Target = FindBestTarget();
-				if (!IsValidTarget(Target))
-				{
+				if (!IsValidTarget(Target)) {
 					ReleaseTarget();
 					return;
 				}
@@ -258,11 +245,9 @@ struct Flickbot
 				TargetSelected = true;
 			}
 
-			if (TargetSelected && CurrentTarget)
-			{
+			if (TargetSelected && CurrentTarget) {
 				std::chrono::milliseconds Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-				if (Now >= LastAimTime + std::chrono::milliseconds(Features::Flickbot::Delay))
-				{
+				if (Now >= LastAimTime + std::chrono::milliseconds(Features::Flickbot::Delay)) {
 					StartAiming();
 					LastAimTime = Now + std::chrono::milliseconds((int)Utils::RandomRange(1, 10));
 				}
@@ -292,8 +277,7 @@ struct Flickbot
 			return;
 		DesiredAngles.NormalizeAngles();
 
-		if (Features::Flickbot::FlickbotMethod == 0) // Mouse
-		{
+		if (Features::Flickbot::FlickbotMethod == 0) { // Mouse
 			Vector2D FlickbotDelta = Vector2D(CalculatePitchIncrement(DesiredAngles), CalculateYawIncrement(DesiredAngles)).Multiply(25);
 			/*int totalYawIncrementInt = RoundHalfEven(AL1AF0(FlickbotDelta.x));
 			int totalPitchIncrementInt = RoundHalfEven(AL1AF0(FlickbotDelta.y * -1));*/
@@ -302,42 +286,33 @@ struct Flickbot
 			Vector2D CurrentAngles = Memory::Read<Vector2D>(Myself->BasePointer + OFF_VIEW_ANGLES);
 
 			// Flick Angles
-			if (InputManager::isKeyDownOrPress(Features::Flickbot::FlickBind))
-			{
+			if (InputManager::isKeyDownOrPress(Features::Flickbot::FlickBind)) {
 				X11Display->MoveMouse(FlickbotDelta.x, FlickbotDelta.y * -1);
-				if (Features::Flickbot::AutoShoot)
-				{
+				if (Features::Flickbot::AutoShoot) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(Features::Flickbot::AutoShootDelay));
 					X11Display->MouseClickLeft();
 				}
 
-				if (Features::Flickbot::FlickBack)
-				{
+				if (Features::Flickbot::FlickBack) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(Features::Flickbot::FlickBackDelay));
 					Myself->SetViewAngle(CurrentAngles);
 				}
 			}
-		}
-
-		else if (Features::Flickbot::FlickbotMethod == 1) // Memory
-		{
+		} else if (Features::Flickbot::FlickbotMethod == 1) { // Memory
 			Vector2D CurrentAngles = Memory::Read<Vector2D>(Myself->BasePointer + OFF_VIEW_ANGLES);
 
 			// Flick Angles
-			if (InputManager::isKeyDownOrPress(Features::Flickbot::FlickBind))
-			{
+			if (InputManager::isKeyDownOrPress(Features::Flickbot::FlickBind)) {
 				//Change QAngle To Vector2D
 				Vector2D VectorDesiredAngles = Vector2D(DesiredAngles.x, DesiredAngles.y);
 
 				Myself->SetViewAngle(VectorDesiredAngles);
-				if (Features::Flickbot::AutoShoot)
-				{
+				if (Features::Flickbot::AutoShoot) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(Features::Flickbot::AutoShootDelay));
 					X11Display->MouseClickLeft();
 				}
 
-				if (Features::Flickbot::FlickBack)
-				{
+				if (Features::Flickbot::FlickBack) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(Features::Flickbot::FlickBackDelay));
 					Myself->SetViewAngle(CurrentAngles);
 				}
@@ -351,14 +326,11 @@ struct Flickbot
 		QAngle Delta = Angle - ViewAngles;
 		Delta.NormalizeAngles();
 
-		if (Myself->IsZooming)
-		{
+		if (Myself->IsZooming) {
 			Features::Flickbot::Smooth = Features::Flickbot::ADSSmooth;
 			float SmoothValue = powf(Features::Flickbot::Smooth, 0.4f);
 			SmoothValue = std::min(0.99f, SmoothValue);
-		}
-		else if (!Myself->IsZooming)
-		{
+		} else if (!Myself->IsZooming) {
 			Features::Flickbot::Smooth = Features::Flickbot::HipfireSmooth;
 			float SmoothValue = powf(Features::Flickbot::Smooth, 0.4f);
 			SmoothValue = std::min(0.99f, SmoothValue);
@@ -401,30 +373,22 @@ struct Flickbot
 	bool GetAngleToTarget(Player *Target, QAngle &Angle)
 	{
 		Vector3D TargetPosition;
-		if (!Features::Flickbot::ClosestHitbox)
-		{
+		if (!Features::Flickbot::ClosestHitbox) {
 			TargetPosition = Target->GetBonePosition(Features::Flickbot::Hitbox);
 		}
-		if (Features::Flickbot::ClosestHitbox)
-		{
+		if (Features::Flickbot::ClosestHitbox) {
 			TargetPosition = Target->GetBonePosition(static_cast<HitboxType>(GetBestBone(Target)));
 		}
 		Vector3D TargetPos = Target->GetBonePosition(Features::Flickbot::Hitbox);
 		Vector3D TargetVelocity = Target->AbsoluteVelocity;
 		Vector3D CameraPosition = Myself->CameraPosition;
 
-		if (Myself->WeaponProjectileSpeed > 1.0f)
-		{
-			if (Features::Flickbot::PredictBulletDrop && Features::Flickbot::PredictMovement)
-			{
+		if (Myself->WeaponProjectileSpeed > 1.0f) {
+			if (Features::Flickbot::PredictBulletDrop && Features::Flickbot::PredictMovement) {
 				return Resolver::CalculateAimRotationNew(CameraPosition, TargetPos, TargetVelocity, Myself->WeaponProjectileSpeed, Myself->WeaponProjectileScale, Features::Flickbot::PreditcionAmount, Angle);
-			}
-			else if (Features::Flickbot::PredictBulletDrop)
-			{
+			} else if (Features::Flickbot::PredictBulletDrop) {
 				return Resolver::CalculateAimRotationNew(CameraPosition, TargetPos, Vector3D(0, 0, 0), Myself->WeaponProjectileSpeed, Myself->WeaponProjectileScale, Features::Flickbot::PreditcionAmount, Angle);
-			}
-			else if (Features::Flickbot::PredictMovement)
-			{
+			} else if (Features::Flickbot::PredictMovement) {
 				return Resolver::CalculateAimRotation(CameraPosition, TargetPos, TargetVelocity, Myself->WeaponProjectileSpeed, Angle);
 			}
 		}
@@ -508,13 +472,10 @@ struct Flickbot
 
 	float GetFOVScale()
 	{
-		if (Myself->IsValid())
-		{
-			if (Myself->IsZooming)
-			{
-				if (Myself->TargetZoomFOV > 1.0 && Myself->TargetZoomFOV < 90.0)
-				{
-					return tanf(DEG2RAD(Myself->TargetZoomFOV) * (0.64285714285));
+		if (Myself->IsValid()) {
+			if (Myself->IsZooming) {
+				if (Myself->TargetZoomFOV > 1.0 && Myself->TargetZoomFOV < 90.0) {
+					return tanf(DEG2RAD(Myself->TargetZoomFOV) * (0.64285714285)); // what is this magic number?!
 				}
 			}
 		}
@@ -525,12 +486,10 @@ struct Flickbot
 	{
 		float NearestDistance = 999;
 		int NearestBone = 2;
-		for (int i = 0; i < 6; i++)
-		{
+		for (int i = 0; i < 6; i++) {
 			HitboxType Bone = static_cast<HitboxType>(i);
 			double DistanceFromCrosshair = CalculateDistanceFromCrosshair(Target->GetBonePosition(Bone));
-			if (DistanceFromCrosshair < NearestDistance)
-			{
+			if (DistanceFromCrosshair < NearestDistance) {
 				NearestBone = i;
 				NearestDistance = DistanceFromCrosshair;
 			}
@@ -550,8 +509,7 @@ struct Flickbot
 			Player *p = Players->at(i);
 			if (!IsValidTarget(p))
 				continue;
-			if (p->DistanceToLocalPlayer < Conversion::ToGameUnits(Features::Flickbot::ZoomDistance))
-			{
+			if (p->DistanceToLocalPlayer < Conversion::ToGameUnits(Features::Flickbot::ZoomDistance)) {
 				HitboxType BestBone = static_cast<HitboxType>(GetBestBone(p));
 				Vector3D TargetPosition = p->GetBonePosition(BestBone);
 
