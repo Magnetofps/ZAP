@@ -211,7 +211,7 @@ struct Player
             {"vantage", "Vantage"},
             {"wattson", "Wattson"},
             {"wraith", "Wraith"},
-        }
+        };
 
         std::string replacedName = modelName;
         for (auto& entry : modelNameMap) {

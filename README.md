@@ -1,20 +1,9 @@
-# zap-client [Apex External Cheat For Linux]
-**Updated to Game Version v3.0.65.42 (Season 20) (22.04.24)**
+# ⚡ ZAP
+hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (X11).
 
-By **Gerosity**
+![](https://i.imgur.com/0bNmJQj.png)
 
-All credits to original owners
-
-Instructions are down below
-
-**There was a recent banwave and a lot of accounts were hit. Be careful & never cheat on a main account, its not worth it**
-
-# Other Repositories:
-https://github.com/Gerosity/zap-client-Read-Only-   - A read memory only version
-
-https://github.com/Gerosity/Apex-Protection         - A protection guide, not fully tested but its not like its going to hurt using it
-
-# Features:
+## Features
     Legitbot - Aimbot, RCS
     Ragebot - Aimbot, RCS
     Flickbot
@@ -25,66 +14,28 @@ https://github.com/Gerosity/Apex-Protection         - A protection guide, not fu
     Settings - Gamemode Switcher, Disable Overlay, Disable ESP, FPS Cap
     Configs - Custom Configs
 
-# Changelog:
-    22.04.24 - Version 1.0.6.1
-    Updated offsets to latest version (Game Version v3.0.65.42)
-    Busy atm but will eventually start working on a better and more optimised version of this
+<details>
+<summary><b>Changelog</b></summary>
 
-    8.04.24 - Version 1.0.6
-    Updated offsets to latest version (Game Version v3.0.63.32)
+    v1.0.6b - 22nd April 2024
+        Forked from zap-client by Gerosity
+        Reformatted codebase
+        Redesigned console output
+        General code cleanup (got rid of some if-else chains)
+        Removed "cool" looking delays in run.sh and initialization (was annoying)
 
-    1.04.24
-    Updated offsets to latest version (Game version v3.0.62.30)
+    view changelog for prior versions at Gerosity/zap-client
+</details>
 
-    30.03.24 - Version 1.0.5
-    Legitbot:
-        New Aimbot Mode (An old xap-client smoothing method), testing for now
-        Smoothing Modes (Static and randomised) (For randomised I recommend setting the values close together!)
-    Ragebot:
-        Fixes
-    Flickbot:
-        Fixes
-    Misc:
-        SuperGlide FPS (Set it to your in-game FPS, 75 is probably the best)
-    Settings:
-        Removed Gamemode Toggle - It now automatically switches based on what 
-        gamemode your playing
-    Other:
-        Randomised Overlay Name now actually works
-        Added a run.sh script which randomises the zapclient binary and hides PID once 
-        executed - use this instead of ./zapclient
+## Installation
+<details>
+<summary><b>View installation guide</b></summary>
 
-    26.03.24 - Version 1.0.3
-    Updated to latest game version (Game Version v3.0.62.29)
+**1. Install dependencies**
 
-    24.03.24 - Version 1.0.2
-    
-    Complete GUI Overhaul
-    Fixed issues with aimbot & triggerbot
-    Added Ragebot, Flickbot, Viewmodel Glow, Glow Customizations, ESP Features, BHop, QuickTurn, RapidFire, Overlay Settings
-    Bunch a stuff that I cant remember all at once
+    sudo apt install git cmake g++ gcc xorg-dev libudev-dev libglu1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxkbcommon-dev libwayland-dev libinput-dev libsoil-dev build-essential libx11-dev libxtst-dev
 
-# Before Installation
-**Install Linux**
-
-    Not hard at all, use Google & YouTube. Search "How to dual boot Linux and windows"
-
-**Install Steam & Apex**
-  
-    Use YouTube & Google for this.
-    if upon opening apex you get a black screen and it does not open, follow this: https://www.unknowncheats.me/forum/4012140-post13.html
-
-# Installation
-**1.Install dependencies**
-
-    sudo apt-get install -y libudev-dev
-    sudo apt install cmake xorg-dev libglu1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
-    sudo apt install -y libudev-dev libglu1-mesa-dev libxkbcommon-dev libwayland-dev git cmake g++ gcc libinput-dev libsoil-dev
-    sudo apt-get install build-essential
-    sudo apt-get install libx11-dev
-    sudo apt-get install libxtst-dev
-
-**2.Build glfw**
+**2. Build glfw**
 
     git clone https://github.com/glfw/glfw.git
     cd glfw
@@ -94,11 +45,13 @@ https://github.com/Gerosity/Apex-Protection         - A protection guide, not fu
     make
     sudo make install
 
-**3. Exit the terminal and re-open it (So that you dont build the cheat directly into the GLFW build folder, wont work otherwise)**
+**3. Navigate to directory for cheat files (I use /Documents/development/ for example)**
+
+    cd ~/Documents/
 
 **4. Clone repo**
 
-    git clone https://github.com/Gerosity/zap-client.git
+    git clone https://github.com/hir0xygen/zap-client.git
     cd zap-client
 
 **5. Build & Run**
@@ -110,14 +63,20 @@ https://github.com/Gerosity/Apex-Protection         - A protection guide, not fu
     chmod +x run.sh
     ./run.sh
 
-**6. Press Insert to toggle the Menu (You can only interact with the Menu and the game when the menu is active).**
-**Note: You will need to alt+tab between the cheat overlay and apex.**
+**6. Press insert to toggle the nenu (you can only interact with the nenu and the game when the menu is active)**
+**Note: You will need to tab between the cheat overlay and Apex**
+</details>
 
-# Previews:
+### Other repositories
+[Read-only version](https://github.com/Gerosity/zap-client-Read-Only-): a memory-read-only version of zap-client by Gerosity
+[Protection guide](https://github.com/Gerosity/Apex-Protection): a protection guide, not necessary but recommended
+
+### Previews
 https://www.youtube.com/watch?v=VBnAyOhTSIs
 https://www.youtube.com/watch?v=vCsmewJlgk0
 
-# Credits:
+### Credits
+    https://github.com/Gerosity/zap-client - parent of hir0xygen's fork
     https://github.com/Nexilist/xap-client - for the base, massive credits to them
     https://github.com/arturzxc/grinder - alternate aimbot mode, most of the misc features
     https://github.com/Braziliana/T_TApe - custom config system

@@ -48,19 +48,11 @@ log "Binary copied: $script_dir/$original_binary_name to $temp_binary_path"
 log "Executing binary: $temp_binary_name"
 
 # Credits and such
-sleep 1
 echo "Run Script For zap-client"
-sleep 1
 echo "Credits to: "
-sleep 0.5
 echo "0xAgartha - https://www.unknowncheats.me/forum/members/5290135.html"
-sleep 0.2
 echo "ghostrazzor - https://www.unknowncheats.me/forum/members/2764232.html"
-sleep 1
-echo "-----------------------------------------------------------------------"
-#Shit way of adding a separator but sorry not sorry
 echo "Executing $original_binary_name as $temp_binary_name"
-sleep 0.5
 
 # Execute the binary
 (sudo "./$temp_binary_name") & pid=$! # Get the PID of the executed binary

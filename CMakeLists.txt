@@ -31,7 +31,8 @@ find_package (X11 REQUIRED)
 link_directories(/usr/local/lib)
 
 # Add the executable target
-add_executable(zapclient xap.cpp)
+add_executable(zapclient xap.cpp
+        Utils/termcolor.hpp)
 
 # Link the executable against the ImGui library, GLFW/OpenGL libraries and X11 libraries
 target_link_libraries(zapclient
