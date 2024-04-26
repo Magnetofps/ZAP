@@ -42,10 +42,15 @@ struct Sense {
   Camera *GameCamera;
   LocalPlayer *Myself;
   std::vector<Player *> *Players;
-  std::chrono::milliseconds LastUpdateTime;
+  std::chrono::milliseconds LastSpectatorUpdateTime;
   int TotalSpectators = 0;
   int PlayersNear = 0;
   std::vector<std::string> Spectators;
+
+  std::chrono::milliseconds processingLastUpdate;
+  std::vector<double> processingTimes;
+  double processingTime;
+
   Level *Map;
 
   Sense(Level *Map, std::vector<Player *> *Players, Camera *GameCamera, LocalPlayer *Myself, XDisplay *X11Display) {
@@ -56,7 +61,7 @@ struct Sense {
     this->X11Display = X11Display;
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Sense::Enabled = Features::Sense::Enabled;
       Config::Sense::DrawFOVCircle = Features::Sense::DrawFOVCircle;
@@ -394,24 +399,27 @@ struct Sense {
       if (Features::Watermark::WatermarkPosition == 0) { // Top Right
         ImGui::SetNextWindowPos(ImVec2(10.0f, 22.0f), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
       }
-      ImGui::SetNextWindowBgAlpha(0.3f);
+      ImGui::SetNextWindowBgAlpha(0.75f);
       ImGui::Begin("Watermark", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
-      ImGuiStyle &style = ImGui::GetStyle();
-      if (Features::Watermark::Name) { ImGui::TextColored(style.Colors[ImGuiCol_Text], "ZAP 1.0.6b"); }
+      const ImGuiStyle &style = ImGui::GetStyle();
+      if (Features::Watermark::Name) {
+        ImGui::TextColored(ImVec4(1, 0.75, 0, 1), "ZAP 1.0.6b");
 
-      ImGui::SameLine();
-      ImGui::TextColored(ImVec4(1, 1, 1, 1), " - ");
-      ImGui::SameLine();
+        if (Features::Watermark::Spectators || Features::Watermark::ProcessingSpeed) {
+          ImGui::SameLine();
+          ImGui::Text(" - ");
+          ImGui::SameLine();
+        }
+      }
 
       if (Features::Watermark::Spectators) {
         std::chrono::milliseconds Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-        if (Now >= LastUpdateTime + std::chrono::milliseconds(1500)) {
+        if (Now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
           int TempTotalSpectators = 0;
           std::vector<std::string> TempSpectators;
 
-          for (int i = 0; i < Players->size(); i++) {
-            Player *p = Players->at(i);
+          for (const auto p : *Players) {
             if (p->BasePointer == Myself->BasePointer)
               continue;
             if (p->GetViewYaw() == Myself->ViewYaw && p->IsDead) {
@@ -422,21 +430,36 @@ struct Sense {
 
           TotalSpectators = TempTotalSpectators;
           Spectators = TempSpectators;
-          LastUpdateTime = Now;
+          LastSpectatorUpdateTime = Now;
         }
         ImGui::Text("spectators: ");
         ImGui::SameLine();
         ImGui::TextColored(TotalSpectators > 0 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1), "%d", TotalSpectators);
+
+        if (Features::Watermark::ProcessingSpeed) {
+          ImGui::SameLine();
+          ImGui::Text(" - ");
+          ImGui::SameLine();
+        }
       }
 
-      ImGui::SameLine();
-      ImGui::TextColored(ImVec4(1, 1, 1, 1), " - ");
-      ImGui::SameLine();
-
       if (Features::Watermark::ProcessingSpeed) {
+        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= processingLastUpdate + std::chrono::milliseconds(600)) {
+          const double averageProcessingTime = std::accumulate(processingTimes.begin(), processingTimes.end(), 0.0) / processingTimes.size();
+          processingTime = averageProcessingTime;
+          processingLastUpdate = now;
+        }
+
+        if (processingTimes.size() >= 10) {
+          processingTimes.erase(processingTimes.begin());
+        }
+        processingTimes.push_back(OverlayWindow.ProcessingTime);
+
         ImVec4 ProcessingTimeColor;
-        ProcessingTimeColor = OverlayWindow.ProcessingTime > 20 ? ProcessingTimeColor = ImVec4(1, 0.343, 0.475, 1) : ProcessingTimeColor = ImVec4(0.4, 1, 0.343, 1);
-        ImGui::TextColored(ProcessingTimeColor, "performance: %02dms ", OverlayWindow.ProcessingTime);
+        ProcessingTimeColor = processingTime > 20 ? ProcessingTimeColor = ImVec4(1, 0.343, 0.475, 1) : ProcessingTimeColor = ImVec4(0.4, 1, 0.343, 1);
+        ImGui::Text("performance: ");
+        ImGui::SameLine();
+        ImGui::TextColored(ProcessingTimeColor, "%.2fms", processingTime);
       }
 
       ImGui::End();
@@ -482,7 +505,7 @@ struct Sense {
       ImGui::Begin("Spectators", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
       std::chrono::milliseconds Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-      if (Now >= LastUpdateTime + std::chrono::milliseconds(1500)) {
+      if (Now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
         int TempTotalSpectators = 0;
         std::vector<std::string> TempSpectators;
         for (int i = 0; i < Players->size(); i++) {
@@ -497,7 +520,7 @@ struct Sense {
 
         TotalSpectators = TempTotalSpectators;
         Spectators = TempSpectators;
-        LastUpdateTime = Now;
+        LastSpectatorUpdateTime = Now;
       }
 
       ImGui::Text("Spectators: ");
