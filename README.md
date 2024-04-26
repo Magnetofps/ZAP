@@ -3,7 +3,7 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 
 ![](https://i.imgur.com/0bNmJQj.png)
 
-## Features
+## :page_facing_up: Features
     Legitbot - Aimbot, RCS
     Ragebot - Aimbot, RCS
     Flickbot
@@ -15,7 +15,7 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
     Configs - Custom Configs
 
 <details>
-<summary><b>Changelog</b></summary>
+<summary><b>:memo: Changelog</b></summary>
 
     v1.0.6b - 22nd April 2024
         Forked from zap-client by Gerosity
@@ -27,7 +27,7 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
     view changelog for prior versions at Gerosity/zap-client
 </details>
 
-## Installation
+## :card_file_box: Installation
 <details>
 <summary><b>View installation guide</b></summary>
 
@@ -68,11 +68,11 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 </details>
 
 ### Other repositories
-[Read-only version](https://github.com/Gerosity/zap-client-Read-Only-): a memory-read-only version of zap-client by Gerosity
+[Read-only version](https://github.com/Gerosity/zap-client-Read-Only-): a memory-read-only version of zap-client by Gerosity  
 [Protection guide](https://github.com/Gerosity/Apex-Protection): a protection guide, not necessary but recommended
 
 ### Previews
-https://www.youtube.com/watch?v=VBnAyOhTSIs
+https://www.youtube.com/watch?v=VBnAyOhTSIs  
 https://www.youtube.com/watch?v=vCsmewJlgk0
 
 ### Credits
