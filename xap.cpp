@@ -13,6 +13,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput2.h>
+#include <cstdlib>
+#include <pwd.h>
 
 // Internals
 #include "Core/Level.hpp"
@@ -475,21 +477,83 @@ void MiscThreadRun() {
   }
 }
 
+std::string slurpFile(const std::string& absolutePath) {
+  std::string contents;
+  std::ifstream file;
+  file.open(absolutePath, std::ios::in);
+
+  if (file.fail()) {
+    return contents;
+  }
+
+  char c;
+  while (file.get(c)) {
+    contents += c;
+  }
+
+  file.close();
+  std::erase(contents, '\n');
+  return contents;
+}
+
+bool isOutdated(const std::string& compatibleVersion) {
+  // Get currently logged in user, since getuid won't work when we're run as root
+  struct passwd *pw;
+  const char* username = nullptr;
+  while ((pw = getpwent()) != nullptr) {
+    if (strncmp(pw->pw_dir, "/home/", 6) == 0) {
+      username = pw->pw_name;
+      break;
+    }
+  }
+  endpwent();
+
+  if (username == nullptr) {
+    return true;
+  }
+
+  const std::string installPaths[] = {
+    R"(/.steam/steam/steamapps/common/Apex\ Legends/gameversion.txt)",
+    R"(/.local/share/Steam/steamapps/common/Apex Legends/gameversion.txt)",
+    R"(/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/common/Apex\ Legends/gameversion.txt)"
+  };
+
+  for (const auto & installPath : installPaths) {
+    std::stringstream fullPath;
+    fullPath << "/home/" << username << installPath;
+
+    if (std::string version = slurpFile(fullPath.str()); version == compatibleVersion) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Main
 int main(int argc, char *argv[]) {
   if (getuid()) {
-    std::cout << tc::red << " ! >> Please run as sudo" << std::endl;
+    std::cout << tc::red << " ! >> Please run as root" << std::endl;
     return -1;
   }
 
   std::system("clear");
+  const std::string compatibleVersion = "v3.0.66.45";
 
   std::cout << tc::color<255, 255, 0> << "\n       ____    __    ____ " << std::endl;
   std::cout << tc::color<255, 230, 0> << "      (_   )  /__\\  (  _ \\" << std::endl;
   std::cout << tc::color<255, 190, 0> << "       / /_  /(__)\\  )___/" << std::endl;
   std::cout << tc::color<255, 165, 0> << "      (____)(__)(__)(__)  \n" << tc::reset << std::endl;
   std::cout << tc::color<255, 100, 0> << "  ZAP 1.0.6b - hir0xygen's fork" << std::endl;
-  std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Apex Legends v3.0.66.45" << std::endl;
+  std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Apex Legends " << compatibleVersion << std::endl;
+
+  if (isOutdated(compatibleVersion)) {
+    std::cout << tc::red << " ! " << tc::reset << " >> There has been a game update, or the version check failed" << std::endl;
+    std::cout << tc::red << " ! " << tc::reset << " >> Continuing execution 3 seconds" << std::endl;
+    sleep(3);
+  } else {
+    std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Compatible game version installed" << std::endl;
+  }
 
   if (Memory::GetPID() == 0) {
     std::cout << " ⚡ >> Waiting for Apex" << std::endl;

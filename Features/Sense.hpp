@@ -491,11 +491,11 @@ struct Sense {
       }
     }
 
+    if (!Features::Settings::OverlayEnabled)
+      return;
     if (!Map->IsPlayable)
       return;
     if (Myself->IsDead)
-      return;
-    if (!Features::Settings::OverlayEnabled)
       return;
 
     if (Features::Sense::ShowSpectators) {
@@ -508,8 +508,7 @@ struct Sense {
       if (Now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
         int TempTotalSpectators = 0;
         std::vector<std::string> TempSpectators;
-        for (int i = 0; i < Players->size(); i++) {
-          Player *p = Players->at(i);
+        for (auto p : *Players) {
           if (p->BasePointer == Myself->BasePointer)
             continue;
           if (p->GetViewYaw() == Myself->ViewYaw && p->IsDead) {
@@ -528,7 +527,7 @@ struct Sense {
       ImGui::TextColored(TotalSpectators > 0 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1), "%d", TotalSpectators);
       if (static_cast<int>(Spectators.size()) > 0) {
         ImGui::Separator();
-        for (int i = 0; i < static_cast<int>(Spectators.size()); i++) { ImGui::TextColored(ImVec4(1, 0.343, 0.475, 1), "> %s", Spectators.at(i).c_str()); }
+        for (const auto & Spectator : Spectators) { ImGui::TextColored(ImVec4(1, 0.343, 0.475, 1), "> %s", Spectator.c_str()); }
       }
       ImGui::End();
     }

@@ -247,24 +247,21 @@ struct Misc {
   }
 
   void UpdateSuperGlide() {
-    if (Features::Misc::SuperGlideFPS == 0) // 75 FPS
-    {
+    if (Features::Misc::SuperGlideFPS == 0) { // 75 FPS
       HangOnWall1 = 0.1;
       HangOnWall2 = 0.12;
       TraversalProgress1 = 0.87f;
       HangOnWall3 = 0.1f;
       HangOnWall4 = 1.5f;
       StartJumpTime1 = 0.011;
-    } else if (Features::Misc::SuperGlideFPS == 1) // 144 FPS
-    {
+    } else if (Features::Misc::SuperGlideFPS == 1) { // 144 FPS
       HangOnWall1 = 0.05;
       HangOnWall2 = 0.07;
       TraversalProgress1 = 0.90f;
       HangOnWall3 = 0.05f;
       HangOnWall4 = 0.75f;
       StartJumpTime1 = 0.007;
-    } else if (Features::Misc::SuperGlideFPS == 1) // 240 FPS
-    {
+    } else if (Features::Misc::SuperGlideFPS == 2) { // 240 FPS
       HangOnWall1 = 0.033;
       HangOnWall2 = 0.04;
       TraversalProgress1 = 0.95f;

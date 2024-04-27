@@ -104,8 +104,7 @@ struct ConfigManager {
     }
   }
 
-  void LoadConfigs() // List Configs For The ListBox
-  {
+  void LoadConfigs() { // List Configs For The ListBox
     std::string configDirectory = "Configs";
     configFiles.clear();
     for (const auto &entry: std::filesystem::directory_iterator(configDirectory)) { if (entry.is_regular_file() && entry.path().extension() == ".ini") { configFiles.push_back(entry.path().stem().string()); } }
