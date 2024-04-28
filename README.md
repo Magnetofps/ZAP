@@ -31,6 +31,9 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 <details>
 <summary><b>View installation guide</b></summary>
 
+It's recommended you use GNOME or Cinammon as your desktop environment, though others might work.
+KDE Plasma is known not to allow the overlay to be drawn above the game.
+
 **1. Install dependencies**
 
     sudo apt install git cmake g++ gcc xorg-dev libudev-dev libglu1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxkbcommon-dev libwayland-dev libinput-dev libsoil-dev build-essential libx11-dev libxtst-dev

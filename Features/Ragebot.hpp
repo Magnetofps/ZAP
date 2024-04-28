@@ -53,7 +53,7 @@ struct Ragebot {
     this->Players = GamePlayers;
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Ragebot::RagebotEnabled = Features::Ragebot::RagebotEnabled;
       Config::Ragebot::RageAimbot = Features::Ragebot::RageAimbot;

@@ -1,4 +1,3 @@
-// Externals
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -9,14 +8,11 @@
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
-#include <GLFW/glfw3.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/XInput2.h>
 #include <cstdlib>
 #include <pwd.h>
 
-// Internals
 #include "Core/Level.hpp"
 #include "Core/Player.hpp"
 #include "Core/LocalPlayer.hpp"
@@ -30,19 +26,16 @@
 #include "Features/Triggerbot.hpp"
 #include "Features/Misc.hpp"
 #include "Features/Glow.hpp"
-// #include "Features/Test.hpp"
 
 #include "Overlay/Overlay.hpp"
 #include "Overlay/GUI.hpp"
 
-#include "Utils/Config.hpp"
 #include "Utils/ConfigManager.hpp"
 #include "Utils/Features.hpp"
 #include "Utils/Memory.hpp"
 #include "Utils/XDisplay.hpp"
 #include "Utils/termcolor.hpp"
 
-// Fuck this long ass name
 namespace tc = termcolor;
 
 // Objects
@@ -69,7 +62,6 @@ Ragebot *Rage = new Ragebot(X11Display, Map, Myself, Players);
 Triggerbot *Trigger = new Triggerbot(X11Display, Map, Myself, Players);
 Flickbot *Flick = new Flickbot(X11Display, Map, Myself, Players);
 Misc *MiscTab = new Misc(X11Display, Map, Myself, Players);
-// Test* Testing = new Test(X11Display, Map, Myself);
 Overlay *Home = new Overlay;
 AdvancedGUI *Advanced = new AdvancedGUI;
 Menu *GUI = new Menu(Myself, Advanced);
@@ -125,8 +117,18 @@ bool InitializeOverlayWindow() {
 // Interface
 ImVec4 ProcessingTimeColor;
 
+void CreateTabButton(const char* title, const Menu::MenuTabs tab, const ImVec2 size) {
+  const ImVec4 BaseTabButton = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.00f);
+  const ImVec4 BaseTabButtonActive = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.250f);
+  ImGui::PushStyleColor(ImGuiCol_Button, (GUI->CurrentTab == tab) ? BaseTabButtonActive : BaseTabButton);
+  if (ImGui::Button(title, size)) {
+    GUI->CurrentTab = tab;
+  }
+  ImGui::PopStyleColor(1);
+}
+
 void RenderUI() {
-  auto io = ImGui::GetIO();
+  const auto io = ImGui::GetIO();
   ImGui::SetNextWindowSize(io.DisplaySize);
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::Begin("##Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiSliderFlags_AlwaysClamp);
@@ -140,26 +142,13 @@ void RenderUI() {
   if (!Features::Home::IsMenuOpened)
     return;
 
-  ImDrawList *DrawList = ImGui::GetBackgroundDrawList();
-  ImColor OverlayRender = ImColor(1.0f, 1.0f, 1.0f, 0.6f);
-  ImColor SolidRender = ImColor(1.0f, 1.0f, 1.0f, 1.0f);
-  GUI->SetStyle();
-  // GUI->RenderBaseMenu();
-  /*if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-      ImGui::GetStyle().Alpha = 0.75f;
-  }
-  else if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-      ImGui::GetStyle().Alpha = 1.00f;
-  }*/
-
   // Window Size
   ImGui::SetNextWindowSizeConstraints(ImVec2(GUI->WindowWidth, GUI->WindowHeight), ImVec2(GUI->WindowWidth, GUI->WindowHeight));
   ImGui::SetNextWindowSize(ImVec2(GUI->WindowWidth, GUI->WindowHeight), ImGuiCond_FirstUseEver);
 
-  // Setup flags and begin window
   if (ImGui::Begin("##CheatGUI", &Features::Home::IsMenuOpened, GUI->WindowFlags)) {
-    // Setup "MenuSize" so that we can calculate control positions
-    ImVec2 MenuSize = ImGui::GetWindowSize();
+    const ImVec2 MenuSize = ImGui::GetWindowSize();
+
     // Render Left Panel
     ImGui::SetCursorPos(ImVec2(10, 32));
 
@@ -167,169 +156,38 @@ void RenderUI() {
 
     colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     if (ImGui::BeginChild("##LeftPanel", ImVec2(GUI->WindowWidth / 6 - 5, GUI->WindowHeight - 43), true, ImGuiWindowFlags_NoScrollbar)) {
-      colors[ImGuiCol_Border] = colors[ImGuiCol_Border];
       // Color the background of the tab button brighter if it is the active tab
-      ImVec4 *colors = ImGui::GetStyle().Colors;
-      ImVec4 TabButton1 = GUI->DetailColor;
-      ImVec4 TabButton2 = GUI->DetailColor;
-      ImVec4 TabButton3 = GUI->DetailColor;
-      ImVec4 TabButton4 = GUI->DetailColor;
-      ImVec4 TabButton5 = GUI->DetailColor;
-      ImVec4 TabButton6 = GUI->DetailColor;
-      ImVec4 TabButton7 = GUI->DetailColor;
-      ImVec4 TabButton8 = GUI->DetailColor;
-      ImVec4 TabButton9 = GUI->DetailColor;
-      TabButton1.w = 0.00f;
-      TabButton2.w = 0.00f;
-      TabButton3.w = 0.00f;
-      TabButton4.w = 0.00f;
-      TabButton5.w = 0.00f;
-      TabButton6.w = 0.00f;
-      TabButton7.w = 0.00f;
-      TabButton8.w = 0.00f;
-      TabButton9.w = 0.00f;
-      ImVec4 TabButton1Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);
-      ImVec4 TabButton2Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton3Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton4Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton5Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton6Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton7Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton8Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      ImVec4 TabButton9Hovered = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, GUI->DetailColor.w - 0.50f);;
-      TabButton1Hovered.w = 0.250f;
-      TabButton2Hovered.w = 0.250f;
-      TabButton3Hovered.w = 0.250f;
-      TabButton4Hovered.w = 0.250f;
-      TabButton5Hovered.w = 0.250f;
-      TabButton6Hovered.w = 0.250f;
-      TabButton7Hovered.w = 0.250f;
-      TabButton8Hovered.w = 0.250f;
-      TabButton9Hovered.w = 0.250f;
-      ImVec4 TabButton1Text = GUI->SelectedColor;
-      ImVec4 TabButton2Text = GUI->SelectedColor;
-      ImVec4 TabButton3Text = GUI->SelectedColor;
-      ImVec4 TabButton4Text = GUI->SelectedColor;
-      ImVec4 TabButton5Text = GUI->SelectedColor;
-      ImVec4 TabButton6Text = GUI->SelectedColor;
-      ImVec4 TabButton7Text = GUI->SelectedColor;
-      ImVec4 TabButton8Text = GUI->SelectedColor;
-      ImVec4 TabButton9Text = GUI->SelectedColor;
-      switch (GUI->CurrentTab) {
-        case GUI->MenuTabs::Legitbot:
-          TabButton1.w = 0.25f;
-          TabButton1Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton1Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Ragebot:
-          TabButton2.w = 0.25f;
-          TabButton2Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton2Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Flickbot:
-          TabButton3.w = 0.25f;
-          TabButton3Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton3Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Triggerbot:
-          TabButton4.w = 0.25f;
-          TabButton4Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton4Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Glow:
-          TabButton5.w = 0.25f;
-          TabButton5Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton5Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::ESP:
-          TabButton6.w = 0.25f;
-          TabButton6Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton6Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Misc:
-          TabButton7.w = 0.25f;
-          TabButton7Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton7Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Settings:
-          TabButton8.w = 0.25f;
-          TabButton8Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton8Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-        case GUI->MenuTabs::Config:
-          TabButton9.w = 0.25f;
-          TabButton9Hovered.w = GUI->DetailColor.w - 0.50f;
-          TabButton9Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-          break;
-      }
+      const ImVec4 BaseTabButton = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.00f);
+      const ImVec4 BaseTabButtonActive = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.250f);
+
       ImGuiStyle &Style = ImGui::GetStyle();
       constexpr int ButtonHeight = 43;
       Style.FrameBorderSize = 1;
 
-      colors[ImGuiCol_ButtonHovered] = TabButton1Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton1Hovered;
-      colors[ImGuiCol_Button] = TabButton1;
+      colors[ImGuiCol_ButtonHovered] = BaseTabButtonActive;
+      colors[ImGuiCol_ButtonActive] = BaseTabButtonActive;
+      colors[ImGuiCol_Button] = BaseTabButton;
       colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("LEGITBOT", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Legitbot; }
 
-      colors[ImGuiCol_ButtonHovered] = TabButton2Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton2Hovered;
-      colors[ImGuiCol_Button] = TabButton2;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("RAGEBOT", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Ragebot; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton3Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton3Hovered;
-      colors[ImGuiCol_Button] = TabButton3;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("FLICKBOT", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Flickbot; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton4Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton4Hovered;
-      colors[ImGuiCol_Button] = TabButton4;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("TRIGGERBOT", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Triggerbot; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton5Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton5Hovered;
-      colors[ImGuiCol_Button] = TabButton5;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("GLOW", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Glow; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton6Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton6Hovered;
-      colors[ImGuiCol_Button] = TabButton6;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("ESP", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::ESP; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton7Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton7Hovered;
-      colors[ImGuiCol_Button] = TabButton7;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("MISC", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Misc; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton8Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton8Hovered;
-      colors[ImGuiCol_Button] = TabButton8;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("SETTINGS", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Settings; }
-
-      colors[ImGuiCol_ButtonHovered] = TabButton9Hovered;
-      colors[ImGuiCol_ButtonActive] = TabButton9Hovered;
-      colors[ImGuiCol_Button] = TabButton9;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-      if (ImGui::Button("CONFIGS", ImVec2(MenuSize.x / 6 - 35, ButtonHeight))) { GUI->CurrentTab = GUI->MenuTabs::Config; }
+      CreateTabButton("LEGITBOT", Menu::Legitbot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("RAGEBOT", Menu::Ragebot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("FLICKBOT", Menu::Flickbot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("TRIGGERBOT", Menu::Triggerbot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("GLOW", Menu::Glow, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("ESP", Menu::ESP, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("MISC", Menu::Misc, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("SETTINGS", Menu::Settings, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
+      CreateTabButton("CONFIGS", Menu::Config, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
 
       ImGui::EndChild();
     }
 
-    std::string combined = "ZAP 1.0.6b";
-    const char *combinedText = combined.c_str();
-
-    ImVec2 WindowPosition = ImGui::GetWindowPos();
-    int TextPosition = WindowPosition.x + (GUI->WindowWidth / 2);
-    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition, WindowPosition.y + 10), ImColor(1.0, 1.0f, 1.0f, 1.0f), combinedText);
-    ImGui::GetForegroundDrawList()->AddLine(ImVec2(TextPosition - 5, WindowPosition.y + 23), ImVec2(TextPosition + 346, WindowPosition.y + 23), ImColor(255, 255, 255), 1);
+    std::stringstream MenuTitle;
+    MenuTitle << ZAP_VERSION << " for Apex " << GAME_VERSION;
+    const ImVec2 WindowPosition = ImGui::GetWindowPos();
+    const auto TextPosition = WindowPosition.x + GUI->WindowWidth / 2;
+    const auto TextSize = ImGui::CalcTextSize(MenuTitle.str().c_str()).x;
+    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition - TextSize / 2, WindowPosition.y + 10), ImColor(1.0, 1.0f, 1.0f, 1.0f), MenuTitle.str().c_str());
 
     // Render Right (Main) Panel
     ImGui::SetCursorPos(ImVec2(175, 32));
@@ -389,9 +247,9 @@ void RenderUI() {
     }
 
     // Add Vertical Separator Line
-    ImVec2 C = ImGui::GetWindowPos();
-    const ImVec2 Point1 = ImVec2(MenuSize.x / 6 + 6.5f + C.x, 32 + C.y);
-    const ImVec2 Point2 = ImVec2(MenuSize.x / 6 + 6.5f + C.x, 32 + (MenuSize.y - 43) + C.y);
+    const ImVec2 Window = ImGui::GetWindowPos();
+    const ImVec2 Point1 = ImVec2(MenuSize.x / 6 + 6.5f + Window.x, 32 + Window.y);
+    const ImVec2 Point2 = ImVec2(MenuSize.x / 6 + 6.5f + Window.x, 32 + (MenuSize.y - 43) + Window.y);
     ImGui::GetWindowDrawList()->AddLine(Point1, Point2, ImGui::ColorConvertFloat4ToU32(GUI->DetailColor), 1.0f);
 
     // End Drawlist Calls
@@ -400,25 +258,23 @@ void RenderUI() {
 }
 
 // Core
-bool UpdateCore() {
+void UpdateCore() {
   try {
     Map->Read();
-    if (!Map->IsPlayable) { return true; }
+    if (!Map->IsPlayable) { return; }
 
     Myself->Read();
-    if (!Myself->IsValid()) { return true; }
+    if (!Myself->IsValid()) { return; }
 
     Players->clear();
     if (Map->IsFiringRange) {
-      for (int i = 0; i < Dummies->size(); i++) {
-        Player *p = Dummies->at(i);
+      for (auto p : *Dummies) {
         p->Read();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
       }
     } else {
-      for (int i = 0; i < HumanPlayers->size(); i++) {
-        Player *p = HumanPlayers->at(i);
+      for (auto p : *HumanPlayers) {
         p->Read();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
@@ -437,14 +293,10 @@ bool UpdateCore() {
     MiscTab->Update();
     MapRadar->ActivateBigMap();
 
-    return true;
   } catch (const std::exception &ex) {
     std::system("clear");
     std::cout << "Error: " << ex.what() << std::endl;
-    return true;
   }
-
-  return false;
 }
 
 void MiscThreadRun() {
@@ -459,21 +311,17 @@ void MiscThreadRun() {
       continue;
     }
 
-    if (Features::Misc::SuperGlide) {
-      MiscTab->SuperGlide(); // Run superglide
-    }
+    if (Features::Misc::SuperGlide)
+      MiscTab->SuperGlide();
 
-    if (Features::Misc::BHop) {
-      MiscTab->BHop(); // Run bhop
-    }
+    if (Features::Misc::BHop)
+      MiscTab->BHop();
 
-    if (Features::Misc::QuickTurn) {
-      MiscTab->QuickTurn(); // Run quick turn
-    }
+    if (Features::Misc::QuickTurn)
+      MiscTab->QuickTurn();
 
-    if (Features::Misc::RapidFire) {
-      MiscTab->RapidFire(); // Run rapid fire
-    }
+    if (Features::Misc::RapidFire)
+      MiscTab->RapidFire();
   }
 }
 
@@ -496,7 +344,7 @@ std::string slurpFile(const std::string& absolutePath) {
   return contents;
 }
 
-bool isOutdated(const std::string& compatibleVersion) {
+bool isOutdated() { // Scan possible Steam installation paths for libraryfolders.vdf to then scan existing library folders for the games "gameversion.txt"
   // Get currently logged in user, since getuid won't work when we're run as root
   struct passwd *pw;
   const char* username = nullptr;
@@ -508,22 +356,42 @@ bool isOutdated(const std::string& compatibleVersion) {
   }
   endpwent();
 
-  if (username == nullptr) {
+  if (username == nullptr)
     return true;
-  }
 
-  const std::string installPaths[] = {
-    R"(/.steam/steam/steamapps/common/Apex\ Legends/gameversion.txt)",
-    R"(/.local/share/Steam/steamapps/common/Apex Legends/gameversion.txt)",
-    R"(/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/common/Apex\ Legends/gameversion.txt)"
+  const std::string steamPaths[] = {
+    "/.steam/steam/config/libraryfolders.vdf",
+    "(/.local/share/Steam/config/libraryfolders.vdf",
+    "/.var/app/com.valvesoftware.Steam/data/Steam/config/libraryfolders.vdf"
   };
 
-  for (const auto & installPath : installPaths) {
+  std::vector<std::string> extractedPaths;
+  for (const auto & steamPath : steamPaths) {
     std::stringstream fullPath;
-    fullPath << "/home/" << username << installPath;
+    fullPath << "/home/" << username << steamPath;
 
-    if (std::string version = slurpFile(fullPath.str()); version == compatibleVersion) {
-      return false;
+    std::string libraryfolders = slurpFile(fullPath.str());
+    size_t currentPos = 0;
+    while (true) {
+      const size_t pathPos = libraryfolders.find("path", currentPos);
+
+      if (pathPos == std::string::npos)
+        break;
+
+      const size_t pathStart = pathPos + 8;
+      const size_t pathEnd = libraryfolders.find('"', pathStart);
+
+      if (pathEnd != std::string::npos) {
+        std::string extractedPath = libraryfolders.substr(pathStart, pathEnd - pathStart);
+        std::stringstream finalPath;
+        finalPath << extractedPath << R"(/steamapps/common/Apex Legends/gameversion.txt)";
+
+        if (std::string version = slurpFile(finalPath.str()); version == GAME_VERSION) {
+          return false;
+        }
+      }
+
+      currentPos = pathEnd;
     }
   }
 
@@ -538,16 +406,15 @@ int main(int argc, char *argv[]) {
   }
 
   std::system("clear");
-  const std::string compatibleVersion = "v3.0.66.45";
 
   std::cout << tc::color<255, 255, 0> << "\n       ____    __    ____ " << std::endl;
   std::cout << tc::color<255, 230, 0> << "      (_   )  /__\\  (  _ \\" << std::endl;
   std::cout << tc::color<255, 190, 0> << "       / /_  /(__)\\  )___/" << std::endl;
   std::cout << tc::color<255, 165, 0> << "      (____)(__)(__)(__)  \n" << tc::reset << std::endl;
-  std::cout << tc::color<255, 100, 0> << "  ZAP 1.0.6b - hir0xygen's fork" << std::endl;
-  std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Apex Legends " << compatibleVersion << std::endl;
+  std::cout << tc::color<255, 100, 0> << "  ZAP " << ZAP_VERSION << " - hir0xygen's fork" << std::endl;
+  std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Apex Legends " << GAME_VERSION << std::endl;
 
-  if (isOutdated(compatibleVersion)) {
+  if (isOutdated()) {
     std::cout << tc::red << " ! " << tc::reset << " >> There has been a game update, or the version check failed" << std::endl;
     std::cout << tc::red << " ! " << tc::reset << " >> Continuing execution 3 seconds" << std::endl;
     sleep(3);

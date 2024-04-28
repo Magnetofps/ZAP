@@ -51,7 +51,7 @@ struct Legitbot {
     this->Map = Map;
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Aimbot::AimbotEnabled = Features::Aimbot::AimbotEnabled;
       Config::Aimbot::BindMethod = Features::Aimbot::BindMethod;
@@ -1326,8 +1326,7 @@ struct Legitbot {
       UpdateAimList();
       if (Features::Aimbot::AdvancedAim) { UpdateAimbotSettings(); }
 
-      if (Features::Aimbot::AimbotMode == 0 or Features::Aimbot::AimbotMode == 2) // Cubic Beizer (xap-client) & [New] Cubic Bezier (Testing)
-      {
+      if (Features::Aimbot::AimbotMode == 0 or Features::Aimbot::AimbotMode == 2) { // Cubic Beizer (xap-client) & [New] Cubic Bezier (Testing)
         if (!Myself->IsCombatReady()) {
           CurrentTarget = nullptr;
           return;
@@ -1344,19 +1343,17 @@ struct Legitbot {
         }
 
         if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
-          {
-            if (Features::Aimbot::OnFire && Features::Aimbot::OnADS) {
-              if (!Myself->IsInAttack) {
-                if (!Myself->IsZooming) {
-                  ReleaseTarget();
-                  return;
-                }
-              }
+          if (Features::Aimbot::OnFire && Features::Aimbot::OnADS) {
+            if (!Myself->IsInAttack) {
               if (!Myself->IsZooming) {
-                if (!Myself->IsInAttack) {
-                  ReleaseTarget();
-                  return;
-                }
+                ReleaseTarget();
+                return;
+              }
+            }
+            if (!Myself->IsZooming) {
+              if (!Myself->IsInAttack) {
+                ReleaseTarget();
+                return;
               }
             }
           }
@@ -1381,8 +1378,7 @@ struct Legitbot {
           }
         }
 
-        Player *Target = CurrentTarget;
-        if (!IsValidTarget(Target)) {
+        if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
           if (TargetSelected && !Features::Aimbot::TargetSwitching) { return; }
 
           Target = FindBestTarget();
@@ -1397,10 +1393,9 @@ struct Legitbot {
         }
 
         if (TargetSelected && CurrentTarget) {
-          std::chrono::milliseconds Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-          if (Now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
+          if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
             StartAiming();
-            LastAimTime = Now + std::chrono::milliseconds((int) Utils::RandomRange(1, 10));
+            LastAimTime = now + std::chrono::milliseconds(static_cast<int>(Utils::RandomRange(1, 10)));
           }
           return;
         }
@@ -1408,8 +1403,7 @@ struct Legitbot {
     }
 
     // Grinder Aimbot Mode
-    if (Features::Aimbot::InputMethod == 1) // Memory / Controller - Does not work
-    {
+    if (Features::Aimbot::InputMethod == 1) { // Memory / Controller - Does not work
       return;
     }
 
@@ -1417,7 +1411,7 @@ struct Legitbot {
       releaseTarget();
       return;
     }
-    if (Features::Aimbot::AimList.find(Myself->WeaponIndex) == Features::Aimbot::AimList.end())
+    if (!Features::Aimbot::AimList.contains(Myself->WeaponIndex))
       return;
     if (Myself->IsHoldingGrenade)
       return;

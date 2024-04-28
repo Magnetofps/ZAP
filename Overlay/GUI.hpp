@@ -36,8 +36,6 @@ struct Menu {
   int WindowWidth = 1000; // 1000 // 950 // 1000
   int WindowHeight = 495; // 600 // 450 // 648
 
-  //bool TeamGamemode = true;
-
   enum MenuTabs {
     Legitbot,
     Ragebot,
@@ -72,7 +70,7 @@ struct Menu {
   }
 
   // Padding between controls
-  const void Space(bool NoSeparator = false) {
+  static void Space(const bool NoSeparator = false) {
     ImGui::Spacing();
     if (!NoSeparator) {
       ImGui::Spacing();
@@ -83,20 +81,20 @@ struct Menu {
   }
 
   // Two Spacings In One! Who Would've Thought!
-  const void DoubleSpacing() {
+  static void DoubleSpacing() {
     ImGui::Spacing();
     ImGui::Spacing();
   }
 
   // Ok, Three Spacings In One Is Pushing It.
-  const void TripleSpacing() {
+  static void TripleSpacing() {
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Spacing();
   }
 
   // Help Marker
-  const void DrawHelpMarker(const char *desc) {
+  static void DrawHelpMarker(const char *desc) {
     ImGui::SameLine(ImGui::GetWindowWidth() - 50);
     ImGui::TextDisabled("[?]");
     if (ImGui::IsItemHovered()) {
@@ -123,7 +121,7 @@ struct Menu {
     }
   }
 
-  void ComboBox(const char *label, const char *desc, int *current_item, const char *items_separated_by_zeros, int height_in_items) {
+  static void ComboBox(const char *label, const char *desc, int *current_item, const char *items_separated_by_zeros, int height_in_items) {
     ImGui::Spacing();
     ImGui::SameLine(15);
     ImGui::TextColored(ImColor(255, 255, 255, 255), label);
@@ -135,10 +133,7 @@ struct Menu {
     ImGui::Spacing();
   }
 
-  // Render GUI Tabs
   void RenderLegitbot() {
-    ImVec2 TabSize;
-    TabSize = ImGui::GetWindowSize();
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
@@ -155,13 +150,6 @@ struct Menu {
     ImGui::SameLine();
     if (ImGui::SubTab(" VISUALS##AIMBOT", 3 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 3;
-    /*ImGui::SameLine();
-    // Add Vertical Separator Line
-    ImVec2 C = ImGui::GetWindowPos();
-    const ImVec2 Point1 = ImVec2(TabSize.x / 1.77 + 6.5f + C.x, 32 + C.y);
-    const ImVec2 Point2 = ImVec2(TabSize.x / 1.77 + 6.5f + C.x, C.y);
-    ImVec4 SeperatorColor = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImGui::GetWindowDrawList()->AddLine(Point1, Point2, ImGui::ColorConvertFloat4ToU32(SeperatorColor), 1.0f);*/
     ImGui::SameLine();
     if (ImGui::SubTab(" RCS", 4 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 4;
@@ -706,8 +694,6 @@ struct Menu {
   }
 
   void RenderRagebot() {
-    ImVec2 TabSize;
-    TabSize = ImGui::GetWindowSize();
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
@@ -903,11 +889,7 @@ struct Menu {
     ImGui::EndChild();
   }
 
-  //---------------------------------------------------------------------- Flickbot UI ----------------------------------------------------------------------
-
   void RenderFlickbot() {
-    ImVec2 TabSize;
-    TabSize = ImGui::GetWindowSize();
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
@@ -1082,8 +1064,6 @@ struct Menu {
     ImGui::EndChild();
   }
 
-  //---------------------------------------------------------------------- Triggerbot UI ----------------------------------------------------------------------
-
   void RenderTriggerbot() {
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
@@ -1117,30 +1097,30 @@ struct Menu {
       if (Features::Triggerbot::Enabled && !Features::Triggerbot::AdvancedTriggerbot) {
         ImGui::BeginChildFrame(2, ImVec2(WindowWidth - 220, 149), true); {
           ImGui::Spacing();
-          const char *BindMethodIndex[] = {"Memory", "Keybind"};
-          ImGui::ComboBox("Bind Method", &Features::Triggerbot::BindMethod, BindMethodIndex, IM_ARRAYSIZE(BindMethodIndex));
+          const char *BindMethodIndex[] = { "Memory", "Keybind" };
+          ImGui::ComboBox("Bind method", &Features::Triggerbot::BindMethod, BindMethodIndex, IM_ARRAYSIZE(BindMethodIndex));
           if (Features::Triggerbot::BindMethod == 0) {
-            ImGui::Checkbox("On ADS Only?", &Features::Triggerbot::OnADS);
+            ImGui::Checkbox("Require ADS", &Features::Triggerbot::OnADS);
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Fire only when ADS");
+              ImGui::SetTooltip("Fire only when aiming down sights");
             if (Features::Triggerbot::OnADS) {
-              ImGui::SameLine();
-              ImGui::Checkbox("Always On For Shotguns", &Features::Triggerbot::HipfireShotguns);
+              ImGui::Checkbox("Always on for shotguns", &Features::Triggerbot::HipfireShotguns);
               if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Overrides The Triggerbot Condition (OnADS?) For Shotguns Only.\nSimple Terms: Other Guns Require ADS, Shotguns Will Not.");
+                ImGui::SetTooltip("Don't require ADS on shotguns");
             }
           }
 
           if (Features::Triggerbot::BindMethod == 1) {
             int TriggerBind = static_cast<int>(Features::Triggerbot::TriggerBind);
-            ImGui::ComboBox("Triggerbot Bind", &TriggerBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+            ImGui::ComboBox("Bind", &TriggerBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
             Features::Triggerbot::TriggerBind = static_cast<InputKeyType>(TriggerBind);
           }
 
-          ImGui::Text("Settings");
-          ImGui::MainSliderFloat("Triggerbot Range", &Features::Triggerbot::Range, 0, 1000, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Triggerbot's activation range.");
+          ImGui::MainSliderFloat("Range", &Features::Triggerbot::Range, 0, 1000, "%.0f");
+          if (Features::Triggerbot::BindMethod == 0)
+            ImGui::MainSliderFloat("Range (hip fire)", &Features::Triggerbot::RangeHipfire, 0, 1000, "%.0f");
+              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+                ImGui::SetTooltip("If 'Require ADS' & 'Always on for shotguns' are enabled, this only applies to shotguns");
           ImGui::EndChildFrame();
         }
       }
@@ -1220,8 +1200,6 @@ struct Menu {
     ImGui::EndChild();
     ImGui::EndChild();
   }
-
-  //---------------------------------------------------------------------- Glow UI ----------------------------------------------------------------------
 
   void RenderGlow() {
     ImGui::SetCursorPos(ImVec2(0, 0));
@@ -1374,11 +1352,7 @@ struct Menu {
     ImGui::EndChild();
   }
 
-  //---------------------------------------------------------------------- ESP UI ----------------------------------------------------------------------
-
-  void RenderESP(Overlay OverlayWindow) {
-    ImVec2 TabSize;
-    TabSize = ImGui::GetWindowSize();
+  void RenderESP(const Overlay &OverlayWindow) {
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
@@ -2048,6 +2022,7 @@ struct Menu {
           ImGui::ColorEdit4("Crosshair Color", Features::Colors::CrosshairColor, ColorEditFlags);
         }
       }
+
       if (SelectedESPSubTabRight == 3) {
         ImGui::Spacing();
         ImGui::Text("Spectator List");
@@ -2095,201 +2070,156 @@ struct Menu {
     ImGui::EndChild();
   }
 
-  void RenderMisc() {
-    ImVec2 TabSize;
-    TabSize = ImGui::GetWindowSize();
-    ImGui::SetCursorPos(ImVec2(0, 0));
+  void RenderMisc() const {
+    ImGui::SetCursorPos(ImVec2(15, 15));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
-    ImGui::BeginGroup();
     ImGui::Spacing();
     ImGui::SameLine();
-    if (ImGui::SubTab("MOVEMENT##Misc", 0 == SelectedMiscSubTab, ImVec2(205, 25)))
-      SelectedMiscSubTab = 0;
-    ImGui::SameLine();
-    if (ImGui::SubTab("CAMERA##Misc", 1 == SelectedMiscSubTab, ImVec2(205, 25)))
-      SelectedMiscSubTab = 1;
-    ImGui::SameLine();
-    if (ImGui::SubTab("RAPID FIRE##Misc", 2 == SelectedMiscSubTab, ImVec2(205, 25)))
-      SelectedMiscSubTab = 2;
-    ImGui::SameLine();
-    if (ImGui::SubTab("SKIN CHANGER##Misc", 3 == SelectedMiscSubTab, ImVec2(205, 25)))
-      SelectedMiscSubTab = 3;
-    ImGui::EndGroup();
 
-    ImGui::SetCursorPos({15, 35});
+    ImGui::Columns(2, "Misc columns", false);
+    ImGui::Text("Movement");
+    ImGui::BeginChildFrame(1, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
+      ImGui::Spacing();
 
-    ImGui::BeginChild("workzone", ImVec2(WindowWidth - 186, WindowHeight - 90), false, ImGuiWindowFlags_NoScrollbar);
-
-    ImGui::Separator();
-    DoubleSpacing();
-
-    if (SelectedMiscSubTab == 0) {
-      ImGui::BeginChildFrame(1, ImVec2(WindowWidth - 220, WindowHeight - 110), true); {
-        ImGui::Spacing();
-        ImGui::Text("Movement");
-        ImGui::Checkbox("SuperGlide", &Features::Misc::SuperGlide);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Hold spacebar whilst climbing over a wall/object to gain extra speed.");
-        if (Features::Misc::SuperGlide) {
-          const char *SuperGlideFPSIndex[] = {"75", "144", "240"};
-          ImGui::ComboBox("SuperGlide FPS", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Set this to your in-game FPS to make SuperGlide more accurate!");
-        }
-        ImGui::Checkbox("BHop", &Features::Misc::BHop);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Bouncy!\nActivates Whilst Holding A Selected Keybind & Space.");
-        if (Features::Misc::BHop) {
-          int BHopBind = static_cast<int>(Features::Misc::BHopBind);
-          ImGui::ComboBox("Bind##BHop", &BHopBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Bind For BHop.\nHold The Selected Key To Toggle BHop, You Will Still Need To Hold Space.");
-          Features::Misc::BHopBind = static_cast<InputKeyType>(BHopBind);
-          ImGui::MainSliderInt("BHop Delay", &Features::Misc::BHopDelay, 1, 200);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Delay Between Inputting Space.");
-        }
-
-        ImGui::EndChildFrame();
+      ImGui::Checkbox("Superglide", &Features::Misc::SuperGlide);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Hold spacebar when climbing over an object to gain speed");
+      if (Features::Misc::SuperGlide) {
+        const char *SuperGlideFPSIndex[] = { "75", "144", "240" };
+        ImGui::ComboBox("Superglide framerate", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
       }
+
+      ImGui::Checkbox("Bunnyhop", &Features::Misc::BHop);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Activates when holding a selected keybind and [ SPACE ]");
+      if (Features::Misc::BHop) {
+        int BhopBind = static_cast<int>(Features::Misc::BHopBind);
+        ImGui::ComboBox("Bind##Bunnyhop", &BhopBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+        Features::Misc::BHopBind = static_cast<InputKeyType>(BhopBind);
+        ImGui::MainSliderInt("Bunnyhop delay", &Features::Misc::BHopDelay, 1, 200);
+      }
+
+      ImGui::EndChildFrame();
     }
 
-    if (SelectedMiscSubTab == 1) {
-      ImGui::BeginChildFrame(2, ImVec2(WindowWidth - 220, WindowHeight - 110), true); {
-        ImGui::Spacing();
-        ImGui::Text("Camera");
-        ImGui::Checkbox("Quick Turn", &Features::Misc::QuickTurn);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Quickly Turn Your Camera.\nDoes Not Have Smoothing!");
-        if (Features::Misc::QuickTurn) {
-          int QuickTurnBind = static_cast<int>(Features::Misc::QuickTurnBind);
-          ImGui::ComboBox("QuickTurn Bind", &QuickTurnBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-          Features::Misc::QuickTurnBind = static_cast<InputKeyType>(QuickTurnBind);
-          ImGui::MainSliderInt("QuickTurn Angle", &Features::Misc::QuickTurnAngle, 1, 360);
-        }
-
-        ImGui::EndChildFrame();
+    ImGui::Text("Camera");
+    ImGui::BeginChildFrame(2, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
+      ImGui::Spacing();
+      ImGui::Checkbox("Quick turn", &Features::Misc::QuickTurn);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Turn your camera quickly (no smoothing applied)");
+      if (Features::Misc::QuickTurn) {
+        int QuickTurnBind = static_cast<int>(Features::Misc::QuickTurnBind);
+        ImGui::ComboBox("Quick turn bind", &QuickTurnBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+        Features::Misc::QuickTurnBind = static_cast<InputKeyType>(QuickTurnBind);
+        ImGui::MainSliderInt("Quick turn angle", &Features::Misc::QuickTurnAngle, 1, 360);
       }
+
+      ImGui::EndChildFrame();
     }
 
-    if (SelectedMiscSubTab == 2) {
-      ImGui::Columns(2, nullptr, false);
-      ImGui::BeginChildFrame(3, ImVec2(WindowWidth - 613, WindowHeight - 110), true); {
-        ImGui::Spacing();
-        ImGui::Text("Rapid Fire");
-        ImGui::Checkbox("Enable Rapid Fire", &Features::Misc::RapidFire);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Turns Semi-Automatic + Slow Firing Weapons Automatic.");
-        if (Features::Misc::RapidFire) {
-          ImGui::MainSliderInt("Rapid Fire Delay", &Features::Misc::RapidFireDelay, 25, 200);
-          int RapidFireBind = static_cast<int>(Features::Misc::RapidFireBind);
-          ImGui::ComboBox("Rapid Fire Bind", &RapidFireBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-          Features::Misc::RapidFireBind = static_cast<InputKeyType>(RapidFireBind);
-        }
-        ImGui::EndChildFrame();
-      }
+    ImGui::NextColumn();
 
-      ImGui::NextColumn(); // Right
-
+    ImGui::Text("Exploits");
+    ImGui::BeginChildFrame(3, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
+      ImGui::Spacing();
+      ImGui::Checkbox("Rapid fire", &Features::Misc::RapidFire);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Turns semi-automatic + slow firing weapons automatic");
       if (Features::Misc::RapidFire) {
-        ImGui::BeginChildFrame(4, ImVec2(WindowWidth - 630, WindowHeight - 110), true); {
-          ImGui::Spacing();
-          ImGui::Text("Weapon Selection");
+        ImGui::MainSliderInt("Rapid fire delay", &Features::Misc::RapidFireDelay, 25, 200);        ImGui::PushItemWidth(-100);
+        ImGui::MainSliderFloat("Speed", &Features::Aimbot::Speed, 1, 100, "%.0f");
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+          ImGui::SetTooltip("Speed of the Aim-Assist\nHigher = Faster");
 
-          ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
-          ImGui::Checkbox("P2020##Misc", &Features::Misc::RapidP2020);
-          ImGui::SameLine();
-          ImGui::Checkbox("R-301 Carbine##Misc", &Features::Misc::RapidR301);
-          ImGui::SameLine();
-          ImGui::Checkbox("G7 Scout##Misc", &Features::Misc::RapidG7);
+        int RapidFireBind = static_cast<int>(Features::Misc::RapidFireBind);
+        ImGui::ComboBox("Rapid fire bind", &RapidFireBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+        Features::Misc::RapidFireBind = static_cast<InputKeyType>(RapidFireBind);
 
-          ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
-          ImGui::Checkbox("VK-47 Flatline##Misc", &Features::Misc::RapidFlatline);
-          ImGui::SameLine();
-          ImGui::Checkbox("Prowler Burst SMG##Misc", &Features::Misc::RapidProwler);
-          ImGui::SameLine();
-          ImGui::Checkbox("Hemlock Burst AR##Misc", &Features::Misc::RapidHemlock);
+        ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
+        ImGui::Checkbox("P2020##Misc", &Features::Misc::RapidP2020);
+        ImGui::SameLine();
+        ImGui::Checkbox("R-301 Carbine##Misc", &Features::Misc::RapidR301);
+        ImGui::SameLine();
+        ImGui::Checkbox("G7 Scout##Misc", &Features::Misc::RapidG7);
 
-          ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
-          ImGui::Checkbox("Nemesis Burst AR##Misc", &Features::Misc::RapidNemesis);
+        ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
+        ImGui::Checkbox("VK-47 Flatline##Misc", &Features::Misc::RapidFlatline);
+        ImGui::SameLine();
+        ImGui::Checkbox("Prowler Burst SMG##Misc", &Features::Misc::RapidProwler);
+        ImGui::SameLine();
+        ImGui::Checkbox("Hemlock Burst AR##Misc", &Features::Misc::RapidHemlock);
 
-          ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
-          ImGui::Checkbox("Mozambique##Misc", &Features::Misc::RapidMozambique);
+        ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
+        ImGui::Checkbox("Nemesis Burst AR##Misc", &Features::Misc::RapidNemesis);
 
-          ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
-          ImGui::Checkbox("Wingman##Misc", &Features::Misc::RapidWingman);
-          ImGui::SameLine();
-          ImGui::Checkbox("EVA-8 Auto##Misc", &Features::Misc::RapidEVA8);
-          ImGui::EndChildFrame();
-        }
+        ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
+        ImGui::Checkbox("Mozambique##Misc", &Features::Misc::RapidMozambique);
+
+        ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
+        ImGui::Checkbox("Wingman##Misc", &Features::Misc::RapidWingman);
+        ImGui::SameLine();
+        ImGui::Checkbox("EVA-8 Auto##Misc", &Features::Misc::RapidEVA8);
       }
-      ImGui::NextColumn(); // Fixes SubTab Bar
+      ImGui::EndChildFrame();
     }
 
-    if (SelectedMiscSubTab == 3) {
-      ImGui::BeginChildFrame(5, ImVec2(WindowWidth - 220, WindowHeight - 110), true); {
-        ImGui::Spacing();
-        ImGui::Text("Skin Changer");
-        ImGui::Checkbox("Enable Skin Changer", &Features::Misc::SkinChanger);
+    ImGui::Text("Skins");
+    ImGui::BeginChildFrame(5, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
+      ImGui::Spacing();
+      ImGui::Checkbox("Skin changer", &Features::Misc::SkinChanger);
+      if (Features::Misc::SkinChanger) {
+        ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
+        ImGui::MainSliderInt("P2020", &Features::Misc::SkinP2020, 0, 10);
+        ImGui::MainSliderInt("RE-45 Auto", &Features::Misc::SkinRE45, 0, 16);
+        ImGui::MainSliderInt("Alternator SMG", &Features::Misc::SkinALTERNATOR, 0, 16);
+        ImGui::MainSliderInt("R-99 SMG", &Features::Misc::SkinR99, 0, 16);
+        ImGui::MainSliderInt("R-301 Carbine", &Features::Misc::SkinR301, 0, 18);
+        ImGui::MainSliderInt("M600 Spitfire", &Features::Misc::SkinSPITFIRE, 0, 16);
+        ImGui::MainSliderInt("G7 Scout", &Features::Misc::SkinG7, 0, 21);
 
-        if (Features::Misc::SkinChanger) {
-          ImGui::Text("Skin IDs");
+        ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
+        ImGui::MainSliderInt("VK-47 Flatline", &Features::Misc::SkinFLATLINE, 0, 20);
+        ImGui::MainSliderInt("Hemlock Burst AR", &Features::Misc::SkinHEMLOCK, 0, 18);
+        ImGui::MainSliderInt("Prowler Burst SMG", &Features::Misc::SkinPROWLER, 0, 11);
+        ImGui::MainSliderInt("30-30 Repeater", &Features::Misc::SkinREPEATER, 0, 11);
+        ImGui::MainSliderInt("Rampage LMG", &Features::Misc::SkinRAMPAGE, 0, 11);
+        ImGui::MainSliderInt("C.A.R SMG", &Features::Misc::SkinCAR, 0, 11);
 
-          ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
-          ImGui::MainSliderInt("P2020", &Features::Misc::SkinP2020, 0, 10);
-          ImGui::MainSliderInt("RE-45 Auto", &Features::Misc::SkinRE45, 0, 16);
-          ImGui::MainSliderInt("Alternator SMG", &Features::Misc::SkinALTERNATOR, 0, 16);
-          ImGui::MainSliderInt("R-99 SMG", &Features::Misc::SkinR99, 0, 16);
-          ImGui::MainSliderInt("R-301 Carbine", &Features::Misc::SkinR301, 0, 18);
-          ImGui::MainSliderInt("M600 Spitfire", &Features::Misc::SkinSPITFIRE, 0, 16);
-          ImGui::MainSliderInt("G7 Scout", &Features::Misc::SkinG7, 0, 21);
+        ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
+        ImGui::MainSliderInt("Havoc Rifle", &Features::Misc::SkinHAVOC, 0, 14);
+        ImGui::MainSliderInt("Devotion LMG", &Features::Misc::SkinDEVOTION, 0, 11);
+        ImGui::MainSliderInt("L-Star EMG", &Features::Misc::SkinLSTAR, 0, 11);
+        ImGui::MainSliderInt("Triple-Take", &Features::Misc::SkinTRIPLETAKE, 0, 11);
+        ImGui::MainSliderInt("Volt", &Features::Misc::SkinVOLT, 0, 14);
+        ImGui::MainSliderInt("Nemesis Burst AR", &Features::Misc::SkinNEMESIS, 0, 9);
 
-          ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
-          ImGui::MainSliderInt("VK-47 Flatline", &Features::Misc::SkinFLATLINE, 0, 20);
-          ImGui::MainSliderInt("Hemlock Burst AR", &Features::Misc::SkinHEMLOCK, 0, 18);
-          ImGui::MainSliderInt("Prowler Burst SMG", &Features::Misc::SkinPROWLER, 0, 11);
-          ImGui::MainSliderInt("30-30 Repeater", &Features::Misc::SkinREPEATER, 0, 11);
-          ImGui::MainSliderInt("Rampage LMG", &Features::Misc::SkinRAMPAGE, 0, 11);
-          ImGui::MainSliderInt("C.A.R SMG", &Features::Misc::SkinCAR, 0, 11);
+        ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
+        ImGui::MainSliderInt("Mozambique", &Features::Misc::SkinMOZAMBIQUE, 0, 11);
+        ImGui::MainSliderInt("Peacekeeper", &Features::Misc::SkinPEACEKEEPER, 0, 16);
+        ImGui::MainSliderInt("Mastiff", &Features::Misc::SkinMASTIFF, 0, 11);
 
-          ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
-          ImGui::MainSliderInt("Havoc Rifle", &Features::Misc::SkinHAVOC, 0, 14);
-          ImGui::MainSliderInt("Devotion LMG", &Features::Misc::SkinDEVOTION, 0, 11);
-          ImGui::MainSliderInt("L-Star EMG", &Features::Misc::SkinLSTAR, 0, 11);
-          ImGui::MainSliderInt("Triple-Take", &Features::Misc::SkinTRIPLETAKE, 0, 11);
-          ImGui::MainSliderInt("Volt", &Features::Misc::SkinVOLT, 0, 14);
-          ImGui::MainSliderInt("Nemesis Burst AR", &Features::Misc::SkinNEMESIS, 0, 9);
+        ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
+        ImGui::MainSliderInt("Longbow DMR", &Features::Misc::SkinLONGBOW, 0, 11);
+        ImGui::MainSliderInt("Charge Rifle", &Features::Misc::SkinCHARGE_RIFLE, 0, 11);
+        ImGui::MainSliderInt("Sentinel", &Features::Misc::SkinSENTINEL, 0, 10);
 
-          ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
-          ImGui::MainSliderInt("Mozambique", &Features::Misc::SkinMOZAMBIQUE, 0, 11);
-          ImGui::MainSliderInt("Peacekeeper", &Features::Misc::SkinPEACEKEEPER, 0, 16);
-          ImGui::MainSliderInt("Mastiff", &Features::Misc::SkinMASTIFF, 0, 11);
+        ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
+        ImGui::MainSliderInt("Wingman", &Features::Misc::SkinWINGMAN, 0, 11);
+        ImGui::MainSliderInt("EVA-8 Auto", &Features::Misc::SkinEVA8, 0, 11);
+        ImGui::MainSliderInt("Bocek Compound Bow", &Features::Misc::SkinBOCEK, 0, 11);
+        ImGui::MainSliderInt("Kraber .50-CAL Sniper", &Features::Misc::SkinKRABER, 0, 11);
 
-          ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
-          ImGui::MainSliderInt("Longbow DMR", &Features::Misc::SkinLONGBOW, 0, 11);
-          ImGui::MainSliderInt("Charge Rifle", &Features::Misc::SkinCHARGE_RIFLE, 0, 11);
-          ImGui::MainSliderInt("Sentinel", &Features::Misc::SkinSENTINEL, 0, 10);
-
-          ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
-          ImGui::MainSliderInt("Wingman", &Features::Misc::SkinWINGMAN, 0, 11);
-          ImGui::MainSliderInt("EVA-8 Auto", &Features::Misc::SkinEVA8, 0, 11);
-          ImGui::MainSliderInt("Bocek Compound Bow", &Features::Misc::SkinBOCEK, 0, 11);
-          ImGui::MainSliderInt("Kraber .50-CAL Sniper", &Features::Misc::SkinKRABER, 0, 11);
-
-          DoubleSpacing();
-        }
-
-        ImGui::EndChildFrame();
+        DoubleSpacing();
       }
+
+      ImGui::EndChildFrame();
     }
 
-    ImGui::EndChild();
     ImGui::EndChild();
   }
 
   void RenderSettings() {
-    ImVec2 TabSize;
-    TabSize = ImGui::GetWindowSize();
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
@@ -2309,11 +2239,6 @@ struct Menu {
     if (SelectedSettingsSubTab == 0) {
       ImGui::BeginChildFrame(1, ImVec2(WindowWidth - 220, WindowHeight - 110), true); {
         ImGui::Spacing();
-        /*ImGui::Text("Main Settings");
-        ImGui::Checkbox("Gamemode Check", &Features::Settings::GamemodeCheck);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Depending On What Gamemode You Are Playing, You Will Need To Toggle This On Or Off.\nOn: Trios, Duos, Ranked, Gun Run Or Firing Range\nOff: Control, Team Deathmatch");*/
-        //No Longer Needed
 
         ImGui::Text("Overlay Settings");
         ImGui::Checkbox("Enable Overlay", &Features::Settings::OverlayEnabled);
@@ -2329,283 +2254,5 @@ struct Menu {
 
     ImGui::EndChild();
     ImGui::EndChild();
-  }
-
-  // ImGui Functions
-  const void SetStyle() // Testing
-  {
-    // Style
-    float Alpha = 1.0f;
-    float DisabledAlpha = 1.0f;
-    float TabMinWidthForCloseButton = 0.0f;
-    float ColumnsMinSpacing = 6.0f;
-    ImVec2 WindowPadding = ImVec2(8.00f, 8.00f);
-    ImVec2 FramePadding = ImVec2(5.00f, 2.00f);
-    ImVec2 CellPadding = ImVec2(6.00f, 6.00f);
-    ImVec2 ItemSpacing = ImVec2(6.00f, 6.00f);
-    ImVec2 ItemInnerSpacing = ImVec2(6.00f, 6.00f);
-    ImVec2 TouchExtraPadding = ImVec2(0.00f, 0.00f);
-    ImVec2 SelectableTextAlign = ImVec2(0.0f, 0.0f);
-    ImVec2 ButtonTextAlign = ImVec2(0.5f, 0.5f);
-    ImVec2 WindowTitleAlign = ImVec2(0.5f, 0.5f);
-    ImVec2 WindowMinSize = ImVec2(20.0f, 20.0f);
-    int IndentSpacing = 25;
-    int ScrollbarSize = 0;
-    int GrabMinSize = 10;
-    int WindowBorderSize = 1;
-    int ChildBorderSize = 1;
-    int PopupBorderSize = 1;
-    int FrameBorderSize = 1;
-    int TabBorderSize = 1;
-    int WindowRounding = 7;
-    int ChildRounding = 4;
-    int FrameRounding = 4;
-    int PopupRounding = 4;
-    int ScrollbarRounding = 9;
-    int GrabRounding = 3;
-    int LogSliderDeadzone = 4;
-    int TabRounding = 4;
-
-    WindowPadding = ImVec2(12.0f, 12.0f);
-    WindowRounding = 11.5f;
-    WindowBorderSize = 0.0f;
-    WindowMinSize = ImVec2(20.0f, 20.0f);
-    WindowTitleAlign = ImVec2(0.5f, 0.5f);
-    ChildRounding = 11.0f;
-    ChildBorderSize = 1.0f;
-    PopupRounding = 0.0f;
-    PopupBorderSize = 1.0f;
-    FramePadding = ImVec2(12.0f, 3.0f);
-    FrameRounding = 11.89999961853027f;
-    FrameBorderSize = 1.0f;
-    ItemSpacing = ImVec2(4.300000223734863f, 5.5f);
-    ItemInnerSpacing = ImVec2(7.099999904632568f, 1.799999952316284f);
-    CellPadding = ImVec2(12.10000038146973f, 9.199999809265137f);
-    IndentSpacing = 0.0f;
-    ColumnsMinSpacing = 4.900000095367432f;
-    ScrollbarSize = 11.60000038146973f;
-    ScrollbarRounding = 0.0f;
-    GrabMinSize = 3.700000047683716f;
-    GrabRounding = 20.0f;
-    TabRounding = 0.0f;
-    TabBorderSize = 0.0f;
-    TabMinWidthForCloseButton = 0.0f;
-
-    // Colors
-    ImVec4 Text = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    ImVec4 TextDisabled = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    ImVec4 WindowBg = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-    ImVec4 ChildBg = ImVec4(0.19f, 0.19f, 0.19f, 0.20);
-    ImVec4 PopupBg = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-    ImVec4 Border = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 BorderShadow = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
-    ImVec4 FrameBg = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-    ImVec4 FrameBgHovered = ImVec4(0.19f, 0.19f, 0.19f, 0.20);
-    ImVec4 FrameBgActive = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-    ImVec4 TitleBg = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 TitleBgActive = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
-    ImVec4 TitleBgCollapsed = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 MenuBarBg = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    ImVec4 ScrollbarBg = ImVec4(0.05f, 0.05f, 0.05f, 0.00f);
-    ImVec4 ScrollbarGrab = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
-    ImVec4 ScrollbarGrabHovered = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
-    ImVec4 ScrollbarGrabActive = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-    ImVec4 CheckMark = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    ImVec4 SliderGrab = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
-    ImVec4 SliderGrabActive = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-    ImVec4 Button = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    ImVec4 ButtonHovered = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
-    ImVec4 ButtonActive = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    ImVec4 Header = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    ImVec4 HeaderHovered = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
-    ImVec4 HeaderActive = ImVec4(0.20f, 0.22f, 0.23f, 0.33f);
-    ImVec4 Separator = ImVec4(0.03f, 0.66f, 0.90f, 1.00f);
-    ImVec4 SeparatorHovered = ImVec4(0.03f, 0.66f, 0.90f, 1.00f);
-    ImVec4 SeparatorActive = ImVec4(0.03f, 0.66f, 0.90f, 1.00f);
-    ImVec4 ResizeGrip = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    ImVec4 ResizeGripHovered = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
-    ImVec4 ResizeGripActive = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
-    ImVec4 Tab = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    ImVec4 TabHovered = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    ImVec4 TabActive = ImVec4(0.20f, 0.20f, 0.20f, 0.36f);
-    ImVec4 TabUnfocused = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    ImVec4 TabUnfocusedActive = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    ImVec4 PlotLines = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 PlotLinesHovered = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 PlotHistogram = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 PlotHistogramHovered = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 TableHeaderBg = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    ImVec4 TableBorderStrong = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    ImVec4 TableBorderLight = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    ImVec4 TableRowBg = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    ImVec4 TableRowBgAlt = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-    ImVec4 TextSelectedBg = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    ImVec4 DragDropTarget = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    ImVec4 NavHighlight = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ImVec4 NavWindowingHighlight = ImVec4(1.00f, 0.00f, 0.00f, 0.70f);
-    ImVec4 NavWindowingDimBg = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
-    ImVec4 ModalWindowDimBg = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
-
-    Text = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    TextDisabled = ImVec4(0.27f, 0.31f, 0.45f, 1.0f);
-    WindowBg = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    ChildBg = ImVec4(0.09f, 0.10f, 0.11f, 1.0f);
-    PopupBg = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    Border = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    BorderShadow = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    FrameBg = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    FrameBgHovered = ImVec4(0.09f, 0.10f, 0.11f, 1.0f);
-    FrameBgActive = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    TitleBg = ImVec4(0.04f, 0.05f, 0.07f, 1.0f);
-    TitleBgActive = ImVec4(0.047f, 0.05f, 0.07f, 1.0f);
-    TitleBgCollapsed = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    MenuBarBg = ImVec4(0.09f, 0.10f, 0.12f, 1.0f);
-    ScrollbarBg = ImVec4(0.04f, 0.05f, 0.07f, 0.0f);
-    ScrollbarGrab = ImVec4(0.11f, 0.13f, 0.14f, 0.0f);
-    ScrollbarGrabHovered = ImVec4(0.15f, 0.16f, 0.19f, 0.0f);
-    ScrollbarGrabActive = ImVec4(0.11f, 0.13f, 0.14f, 0.0f);
-    CheckMark = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    SliderGrab = ImVec4(0.97f, 1.0f, 0.49f, 1.0f);
-    SliderGrabActive = ImVec4(1.0f, 0.79f, 0.49f, 1.0f);
-    Button = ImVec4(0.11f, 0.13f, 0.14f, 1.0f);
-    ButtonHovered = ImVec4(0.18f, 0.18f, 0.19f, 1.0f);
-    ButtonActive = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
-    Header = ImVec4(0.14f, 0.16f, 0.20f, 1.0f);
-    HeaderHovered = ImVec4(0.10f, 0.10f, 0.10f, 1.0f);
-    HeaderActive = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    Separator = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    SeparatorHovered = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    SeparatorActive = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    ResizeGrip = ImVec4(0.14f, 0.14f, 0.14f, 1.0f);
-    ResizeGripHovered = ImVec4(0.97f, 1.0f, 0.49f, 1.0f);
-    ResizeGripActive = ImVec4(0.99f, 1.0f, 0.99f, 1.0f);
-    Tab = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    TabHovered = ImVec4(0.11f, 0.13f, 0.14f, 1.0f);
-    TabActive = ImVec4(0.11f, 0.13f, 0.14f, 1.0f);
-    TabUnfocused = ImVec4(0.07f, 0.08f, 0.10f, 1.0f);
-    TabUnfocusedActive = ImVec4(0.12f, 0.27f, 0.57f, 1.0f);
-    PlotLines = ImVec4(0.52f, 0.60f, 0.70f, 1.0f);
-    PlotLinesHovered = ImVec4(0.03f, 0.98f, 0.98f, 1.0f);
-    PlotHistogram = ImVec4(0.88f, 0.79f, 0.56f, 1.0f);
-    PlotHistogramHovered = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);
-    TableHeaderBg = ImVec4(0.04f, 0.05f, 0.07f, 1.0f);
-    TableBorderStrong = ImVec4(0.04f, 0.05f, 0.07f, 1.0f);
-    TableBorderLight = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    TableRowBg = ImVec4(0.11f, 0.13f, 0.14f, 1.0f);
-    TableRowBgAlt = ImVec4(0.09f, 0.10f, 0.12f, 1.0f);
-    TextSelectedBg = ImVec4(0.93f, 0.93f, 0.93f, 1.0f);
-    DragDropTarget = ImVec4(0.49f, 0.51f, 1.0f, 1.0f);
-    NavHighlight = ImVec4(0.26f, 0.28f, 1.0f, 1.0f);
-    NavWindowingHighlight = ImVec4(0.49f, 0.51f, 1.0f, 1.0f);
-    NavWindowingDimBg = ImVec4(0.19f, 0.17f, 0.54f, 0.50f);
-    ModalWindowDimBg = ImVec4(0.19f, 0.17f, 0.54f, 0.50f);
-
-    ImGuiStyle &style = ImGui::GetStyle();
-    style.SliderThickness = 0.2f;
-    style.SliderContrast = 0.5f;
-    style.SliderValuePos = ImVec2(0.5f, 0.5f);
-    style.WindowPadding = ImVec2(0.000000f, 0.000000f);
-    style.FramePadding = ImVec2(0.000000f, 3.000000f);
-    style.ItemSpacing = ImVec2(8.000000f, 4.000000f);
-    style.ItemInnerSpacing = ImVec2(4.000000f, 4.000000f);
-    style.IndentSpacing = 21.000000f;
-    style.ScrollbarSize = 0.000000f;
-    style.GrabMinSize = 5.000000f;
-    style.WindowBorderSize = 5.000000f;
-    style.ChildBorderSize = 5.000000f;
-    style.PopupBorderSize = 5.000000f;
-    style.FrameBorderSize = 5.000000f;
-    style.WindowRounding = 11.000000f;
-    style.ChildRounding = 11.000000f;
-    style.FrameRounding = 11.000000f;
-    style.PopupRounding = 0.000000f;
-    style.ScrollbarRounding = 0.000000f;
-    style.WindowTitleAlign = ImVec2(0.000000f, 0.500000f);
-    style.ButtonTextAlign = ImVec2(0.500000f, 0.500000f);
-    style.SelectableTextAlign = ImVec2(0.500000f, 0.500000f);
-
-    style.Alpha = Alpha;
-    style.DisabledAlpha = DisabledAlpha;
-    style.WindowMinSize = WindowMinSize;
-    style.WindowTitleAlign = WindowTitleAlign;
-    style.WindowPadding = WindowPadding;
-    style.FramePadding = FramePadding;
-    style.CellPadding = CellPadding;
-    style.ItemSpacing = ItemSpacing;
-    style.ItemInnerSpacing = ItemInnerSpacing;
-    style.TouchExtraPadding = TouchExtraPadding;
-    style.IndentSpacing = IndentSpacing;
-    style.ScrollbarSize = ScrollbarSize;
-    style.GrabMinSize = GrabMinSize;
-    style.WindowBorderSize = WindowBorderSize;
-    style.ChildBorderSize = ChildBorderSize;
-    style.PopupBorderSize = PopupBorderSize;
-    style.FrameBorderSize = FrameBorderSize;
-    style.TabBorderSize = TabBorderSize;
-    style.WindowRounding = WindowRounding;
-    style.ChildRounding = ChildRounding;
-    style.FrameRounding = FrameRounding;
-    style.PopupRounding = PopupRounding;
-    style.ScrollbarRounding = ScrollbarRounding;
-    style.GrabRounding = GrabRounding;
-    style.LogSliderDeadzone = LogSliderDeadzone;
-    style.TabRounding = TabRounding;
-    style.TabMinWidthForCloseButton = TabMinWidthForCloseButton;
-    style.ButtonTextAlign = ButtonTextAlign;
-    // style.AntiAliasedLines = false;
-
-    style.Colors[ImGuiCol_Text] = Text;
-    style.Colors[ImGuiCol_TextDisabled] = TextDisabled;
-    style.Colors[ImGuiCol_WindowBg] = WindowBg;
-    style.Colors[ImGuiCol_ChildBg] = ChildBg;
-    style.Colors[ImGuiCol_PopupBg] = PopupBg;
-    style.Colors[ImGuiCol_Border] = Border;
-    style.Colors[ImGuiCol_BorderShadow] = BorderShadow;
-    style.Colors[ImGuiCol_FrameBg] = FrameBg;
-    style.Colors[ImGuiCol_FrameBgHovered] = FrameBgHovered;
-    style.Colors[ImGuiCol_FrameBgActive] = FrameBgActive;
-    style.Colors[ImGuiCol_TitleBg] = TitleBg;
-    style.Colors[ImGuiCol_TitleBgActive] = TitleBgActive;
-    style.Colors[ImGuiCol_TitleBgCollapsed] = TitleBgCollapsed;
-    style.Colors[ImGuiCol_MenuBarBg] = MenuBarBg;
-    style.Colors[ImGuiCol_ScrollbarBg] = ScrollbarBg;
-    style.Colors[ImGuiCol_ScrollbarGrab] = ScrollbarGrab;
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ScrollbarGrabHovered;
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ScrollbarGrabActive;
-    style.Colors[ImGuiCol_CheckMark] = CheckMark;
-    style.Colors[ImGuiCol_SliderGrab] = SliderGrab;
-    style.Colors[ImGuiCol_SliderGrabActive] = SliderGrabActive;
-    style.Colors[ImGuiCol_Button] = Button;
-    style.Colors[ImGuiCol_ButtonHovered] = ButtonHovered;
-    style.Colors[ImGuiCol_ButtonActive] = ButtonActive;
-    style.Colors[ImGuiCol_Header] = Header;
-    style.Colors[ImGuiCol_HeaderHovered] = HeaderHovered;
-    style.Colors[ImGuiCol_HeaderActive] = HeaderActive;
-    style.Colors[ImGuiCol_Separator] = Separator;
-    style.Colors[ImGuiCol_SeparatorHovered] = SeparatorHovered;
-    style.Colors[ImGuiCol_SeparatorActive] = SeparatorActive;
-    style.Colors[ImGuiCol_ResizeGrip] = ResizeGrip;
-    style.Colors[ImGuiCol_ResizeGripHovered] = ResizeGripHovered;
-    style.Colors[ImGuiCol_ResizeGripActive] = ResizeGripActive;
-    style.Colors[ImGuiCol_Tab] = Tab;
-    style.Colors[ImGuiCol_TabHovered] = TabHovered;
-    style.Colors[ImGuiCol_TabActive] = TabActive;
-    style.Colors[ImGuiCol_TabUnfocused] = TabUnfocused;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = TabUnfocusedActive;
-    style.Colors[ImGuiCol_PlotLines] = PlotLines;
-    style.Colors[ImGuiCol_PlotLinesHovered] = PlotLinesHovered;
-    style.Colors[ImGuiCol_PlotHistogram] = PlotHistogram;
-    style.Colors[ImGuiCol_PlotHistogramHovered] = PlotHistogramHovered;
-    style.Colors[ImGuiCol_TableHeaderBg] = TableHeaderBg;
-    style.Colors[ImGuiCol_TableBorderStrong] = TableBorderStrong;
-    style.Colors[ImGuiCol_TableBorderLight] = TableBorderLight;
-    style.Colors[ImGuiCol_TableRowBg] = TableRowBg;
-    style.Colors[ImGuiCol_TableRowBgAlt] = TableRowBgAlt;
-    style.Colors[ImGuiCol_TextSelectedBg] = TextSelectedBg;
-    style.Colors[ImGuiCol_DragDropTarget] = DragDropTarget;
-    style.Colors[ImGuiCol_NavHighlight] = NavHighlight;
-    style.Colors[ImGuiCol_NavWindowingHighlight] = NavWindowingHighlight;
-    style.Colors[ImGuiCol_NavWindowingDimBg] = NavWindowingDimBg;
-    style.Colors[ImGuiCol_ModalWindowDimBg] = ModalWindowDimBg;
   }
 };

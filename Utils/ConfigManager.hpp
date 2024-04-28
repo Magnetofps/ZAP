@@ -1,24 +1,15 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <unistd.h>
-#include <atomic>
 #include <vector>
 #include <chrono>
 #include <thread>
-#include <GLFW/glfw3.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/XInput2.h>
 
-#include "../Utils/Memory.hpp"
-#include "../Utils/XDisplay.hpp"
-#include "../Utils/Conversion.hpp"
 #include "../Utils/Config.hpp"
 #include "../Utils/Features.hpp"
 #include "../Utils/HitboxType.hpp"
-#include "../Utils/InputManager.hpp"
 #include "../Utils/InputTypes.hpp"
+#include "../Utils/termcolor.hpp"
 
 #include "Features/Legitbot.hpp"
 #include "Features/Ragebot.hpp"
@@ -29,10 +20,9 @@
 #include "Features/Misc.hpp"
 #include "Features/Glow.hpp"
 
-// UI //
 #include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
+
+namespace tc = termcolor;
 
 #define WriteSection(key) \
 	conf << "[" #key "]"  \
@@ -89,7 +79,7 @@ struct ConfigManager {
 
     ImGui::BeginListBox("##Configs", ImVec2(600, 300)); {
       int n = 0;
-      for (auto config: configFiles) {
+      for (const auto& config: configFiles) {
         const bool is_selected = (selectedConfig == n);
         if (ImGui::Selectable(config.c_str(), is_selected)) {
           selectedConfig = n;
@@ -2059,28 +2049,28 @@ struct ConfigManager {
   }
 
   void SaveConfig() {
-    if (!Legit->Save())
+    if (!Legitbot::Save())
       std::cout << "something went wrong trying to save Legitbot settings" << std::endl;
-    if (!Rage->Save())
+    if (!Ragebot::Save())
       std::cout << "something went wrong trying to save Ragebot settings" << std::endl;
-    if (!Trigger->Save())
+    if (!Triggerbot::Save())
       std::cout << "something went wrong trying to save Triggerbot settings" << std::endl;
-    if (!Flick->Save())
+    if (!Flickbot::Save())
       std::cout << "something went wrong trying to save Flickbot settings" << std::endl;
-    if (!GlowESP->Save())
+    if (!Glow::Save())
       std::cout << "something went wrong trying to save Glow settings" << std::endl;
-    if (!ESP->Save())
+    if (!Sense::Save())
       std::cout << "something went wrong trying to save Sense/ESP settings" << std::endl;
-    if (!MiscTab->Save())
+    if (!Misc::Save())
       std::cout << "something went wrong trying to save Misc settings" << std::endl;
-    if (!MapRadar->Save())
+    if (!Radar::Save())
       std::cout << "something went wrong trying to save Radar settings" << std::endl;
     if (!SaveOtherSettings())
       std::cout << "something went wrong trying to save Other settings" << std::endl;
     UpdateConfig();
   }
 
-  bool SaveOtherSettings() {
+  static bool SaveOtherSettings() {
     try {
       Config::Settings::ESPEnabled = Features::Settings::ESPEnabled;
       Config::Settings::OverlayEnabled = Features::Settings::OverlayEnabled;
@@ -2095,9 +2085,9 @@ struct ConfigManager {
     std::string ConfigName1 = "Configs/" + std::string(configName) + ".ini";
     bool success = ReadConfig();
     if (success)
-      std::cout << "successfully read config" << std::endl;
+      std::cout << " ⚡ >> Loaded config " << configName << std::endl;
     else
-      std::cout << "can't read config for some reason so new config file has been created" << std::endl;
+      std::cout << tc::red << " ! " << tc::reset << " >> Failed to load config " << configName << ", created new one instead" << std::endl;
 
     Features::Aimbot::AimbotEnabled = Config::Aimbot::AimbotEnabled;
     Features::Aimbot::BindMethod = Config::Aimbot::BindMethod;

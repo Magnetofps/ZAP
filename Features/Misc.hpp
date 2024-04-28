@@ -59,7 +59,7 @@ struct Misc {
     this->Players = GamePlayers;
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Misc::SuperGlide = Features::Misc::SuperGlide;
       Config::Misc::SuperGlideFPS = Features::Misc::SuperGlideFPS;

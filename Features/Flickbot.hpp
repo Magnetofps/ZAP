@@ -52,7 +52,7 @@ struct Flickbot {
     this->Players = GamePlayers;
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Flickbot::Flickbot = Features::Flickbot::Flickbot;
       Config::Flickbot::FlickbotMethod = Features::Flickbot::FlickbotMethod;
