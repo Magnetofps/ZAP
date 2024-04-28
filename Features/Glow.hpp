@@ -172,7 +172,7 @@ struct Glow {
     this->Myself = Myself;
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Glow::NewGlow = Features::Glow::NewGlow;
       Config::Glow::GlowMaxDistance = Features::Glow::GlowMaxDistance;

@@ -10,7 +10,7 @@
 
 namespace Features {
   namespace Home {
-    bool IsMenuOpened = true;
+    inline bool IsMenuOpened = true;
   };
 
   namespace Settings {
@@ -1372,6 +1372,7 @@ namespace Features {
     bool HipfireShotguns = false;
     int Delay = 100;
     float Range = 200;
+    float RangeHipfire = 70;
 
     //Weapon Toggles
 

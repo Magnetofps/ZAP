@@ -3,8 +3,8 @@
 #include <chrono>
 #include <thread>
 #include <string>
-#include <stdio.h>
-#include <time.h>
+#include <cstdio>
+#include <ctime>
 #include <random>
 #include <GLFW/glfw3.h>
 #include <GL/gl.h>
@@ -16,17 +16,15 @@
 // Internals
 #include "Font.hpp"
 #include "../Utils/InputManager.hpp"
-#include "Utils/Themes.hpp"
-#include "Utils/Config.hpp"
 #include "../Utils/Features.hpp"
 
 class Overlay {
 private:
-  GLFWwindow *OverlayWindow;
-  int ScreenWidth;
-  int ScreenHeight;
-  int ScreenPosX;
-  int ScreenPosY;
+  GLFWwindow *OverlayWindow = nullptr;
+  int ScreenWidth = 0;
+  int ScreenHeight = 0;
+  int ScreenPosX = 0;
+  int ScreenPosY = 0;
 
   void GrabScreenSize() {
     GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
@@ -36,7 +34,7 @@ private:
     ScreenHeight = vidMode->height;
   }
 
-  std::string RandomString(std::string::size_type length) {
+  static std::string RandomString(std::string::size_type length) {
     static auto &chrs = "0123456789" "abcdefghijklmnopqrstuvwxyz" "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     thread_local static std::mt19937 rg{std::random_device{}()};
@@ -52,20 +50,20 @@ private:
     return s;
   }
 
-  int RandomInt(int min, int max) {
-    srand(time(NULL)); //seeding for the first time only!
-    return min + rand() % ((max + 1) - min);
+  static int RandomInt(const int min, const int max) {
+    srand(time(nullptr)); //seeding for the first time only! NOLINT(*-msc51-cpp)
+    return min + rand() % ((max + 1) - min); // NOLINT(*-msc50-cpp)
   }
 
-  static void GLFWErrorCallback(int error, const char *description) { fprintf(stderr, "GLFW Error %d: %s\n", error, description); }
+  static void GLFWErrorCallback(const int error, const char *description) { fprintf(stderr, "GLFW Error %d: %s\n", error, description); }
 
-  long long CurrentEpochMilliseconds() {
-    auto currentTime = std::chrono::system_clock::now();
-    auto duration = currentTime.time_since_epoch();
+  static long long CurrentEpochMilliseconds() {
+    const auto currentTime = std::chrono::system_clock::now();
+    const auto duration = currentTime.time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
   }
 
-  ImWchar *GetFontGlyphRanges() noexcept {
+  static ImWchar *GetFontGlyphRanges() noexcept {
     static ImVector<ImWchar> ranges;
     if (ranges.empty()) {
       ImFontGlyphRangesBuilder builder;
@@ -127,8 +125,7 @@ public:
     glfwWindowHint(GLFW_REFRESH_RATE, 75);
 
     // Don't want a completely randomized window class / title so it can be found with regex to fix hyprland blur
-    std::string fortnite_title = "fortnite_battlepass_" + RandomString(RandomInt(10, 20));
-    OverlayWindow = glfwCreateWindow(ScreenWidth, ScreenHeight, fortnite_title.c_str(), NULL, NULL);
+    OverlayWindow = glfwCreateWindow(ScreenWidth, ScreenHeight, RandomString(RandomInt(10, 20)).c_str(), nullptr, nullptr);
 
     glfwSetWindowPos(OverlayWindow, ScreenPosX, ScreenPosY);
     CaptureInput(true);
@@ -148,7 +145,7 @@ public:
     return true;
   }
 
-  void InitializeUI() {
+  void InitializeUI() const {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -161,91 +158,13 @@ public:
     cfg.PixelSnapH = false;
     cfg.SizePixels = 13.0f; // 13.0f
     cfg.GlyphOffset = {0.0f, 0.0f};
-    ImGuiIO &io = ImGui::GetIO();
+    const ImGuiIO &io = ImGui::GetIO();
     (void) io;
     io.Fonts->AddFontFromMemoryCompressedTTF(_compressedFontData, _compressedFontSize, cfg.SizePixels, &cfg, GetFontGlyphRanges());
-    // io.Fonts->AddFontFromFileTTF("../Assets/Fonts/NanumGothic-Bold.ttf", cfg.SizePixels, &cfg, GetFontGlyphRanges());
 
     ImGui::StyleColorsDark();
     ImGuiStyle &style = ImGui::GetStyle();
-    /*style.WindowPadding                     = ImVec2(8.00f, 8.00f);
-    style.FramePadding                      = ImVec2(5.00f, 2.00f);
-    style.CellPadding                       = ImVec2(6.00f, 6.00f);
-    style.ItemSpacing                       = ImVec2(6.00f, 6.00f);
-    style.ItemInnerSpacing                  = ImVec2(6.00f, 6.00f);
-    style.TouchExtraPadding                 = ImVec2(0.00f, 0.00f);
-    style.IndentSpacing                     = 25;
-    style.ScrollbarSize                     = 12;
-    style.GrabMinSize                       = 10;
-    style.WindowBorderSize                  = 1;
-    style.ChildBorderSize                   = 1;
-    style.PopupBorderSize                   = 1;
-    style.FrameBorderSize                   = 1;
-    style.TabBorderSize                     = 1;
-    style.WindowRounding                    = 7;
-    style.ChildRounding                     = 4;
-    style.FrameRounding                     = 3;
-    style.PopupRounding                     = 4;
-    style.ScrollbarRounding                 = 9;
-    style.GrabRounding                      = 3;
-    style.LogSliderDeadzone                 = 4;
-    style.TabRounding                       = 4;
 
-    style.Colors[ImGuiCol_Text]                   = Text;
-    style.Colors[ImGuiCol_TextDisabled]           = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    style.Colors[ImGuiCol_WindowBg]               = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-    style.Colors[ImGuiCol_ChildBg]                = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_PopupBg]                = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
-    style.Colors[ImGuiCol_Border]                 = ImVec4(0.19f, 0.19f, 0.19f, 0.29f);
-    style.Colors[ImGuiCol_BorderShadow]           = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
-    style.Colors[ImGuiCol_FrameBg]                = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    style.Colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
-    style.Colors[ImGuiCol_FrameBgActive]          = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    style.Colors[ImGuiCol_TitleBg]                = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_TitleBgActive]          = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
-    style.Colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_MenuBarBg]              = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    style.Colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.05f, 0.05f, 0.05f, 0.00f);
-    style.Colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-    style.Colors[ImGuiCol_CheckMark]              = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    style.Colors[ImGuiCol_SliderGrab]             = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
-    style.Colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-    style.Colors[ImGuiCol_Button]                 = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    style.Colors[ImGuiCol_ButtonHovered]          = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
-    style.Colors[ImGuiCol_ButtonActive]           = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    style.Colors[ImGuiCol_Header]                 = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    style.Colors[ImGuiCol_HeaderHovered]          = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
-    style.Colors[ImGuiCol_HeaderActive]           = ImVec4(0.20f, 0.22f, 0.23f, 0.33f);
-    style.Colors[ImGuiCol_Separator]              = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    style.Colors[ImGuiCol_SeparatorHovered]       = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
-    style.Colors[ImGuiCol_SeparatorActive]        = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
-    style.Colors[ImGuiCol_ResizeGrip]             = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    style.Colors[ImGuiCol_ResizeGripHovered]      = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
-    style.Colors[ImGuiCol_ResizeGripActive]       = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
-    style.Colors[ImGuiCol_Tab]                    = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    style.Colors[ImGuiCol_TabHovered]             = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    style.Colors[ImGuiCol_TabActive]              = ImVec4(0.20f, 0.20f, 0.20f, 0.36f);
-    style.Colors[ImGuiCol_TabUnfocused]           = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    style.Colors[ImGuiCol_TabUnfocusedActive]     = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    style.Colors[ImGuiCol_PlotLines]              = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogram]          = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogramHovered]   = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_TableHeaderBg]          = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    style.Colors[ImGuiCol_TableBorderStrong]      = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    style.Colors[ImGuiCol_TableBorderLight]       = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    style.Colors[ImGuiCol_TableRowBg]             = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_TableRowBgAlt]          = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-    style.Colors[ImGuiCol_TextSelectedBg]         = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    style.Colors[ImGuiCol_DragDropTarget]         = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    style.Colors[ImGuiCol_NavHighlight]           = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(1.00f, 0.00f, 0.00f, 0.70f);
-    style.Colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
-    style.Colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);*/
-
-    ImGuiStyle &Style = ImGui::GetStyle();
     style.SliderThickness = 0.2f;
     style.SliderContrast = 0.5f;
     style.SliderValuePos = ImVec2(1.0f, 2.2f);
@@ -312,34 +231,19 @@ public:
     ImGui_ImplOpenGL3_Init("#version 330 core");
   }
 
-  bool AlignedButton(const char *label, float alignment = 0.5f) {
-    ImGuiStyle &style = ImGui::GetStyle();
+  static bool AlignedButton(const char *label, const float alignment = 0.5f) {
+    const ImGuiStyle &style = ImGui::GetStyle();
 
-    float size = ImGui::CalcTextSize(label).x + style.FramePadding.x * 2.0f;
-    float avail = ImGui::GetContentRegionAvail().x;
+    const float size = ImGui::CalcTextSize(label).x + style.FramePadding.x * 2.0f;
+    const float avail = ImGui::GetContentRegionAvail().x;
 
-    float off = (avail - size) * alignment;
-    if (off > 0.0f)
+    if (const float off = (avail - size) * alignment; off > 0.0f)
       ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
 
     return ImGui::Button(label);
   }
 
-  bool Save() {
-    try {
-      /*Config::Home::AsciiArt = AsciiArt;
-      Config::Home::AsciiArtSpeed = AsciiArtSpeed;
-      Config::Home::TeamGamemode = TeamGamemode;
-      Config::Home::Style = ThemeStyle;
-      Config::Home::Color = ThemeColor;
-      //Config::Home::MenuX = MenuX;
-      //Config::Home::MenuY = MenuY;
-      Config::Home::ErrorLogging = ErrorLogging;*/
-      return true;
-    } catch (...) { return false; }
-  }
-
-  void DestroyOverlay() {
+  void DestroyOverlay() const {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -349,11 +253,11 @@ public:
     glfwTerminate();
   }
 
-  void CaptureInput(bool capture) { glfwSetWindowAttrib(OverlayWindow, GLFW_MOUSE_PASSTHROUGH, capture ? GLFW_FALSE : GLFW_TRUE); }
+  void CaptureInput(const bool capture) const { glfwSetWindowAttrib(OverlayWindow, GLFW_MOUSE_PASSTHROUGH, capture ? GLFW_FALSE : GLFW_TRUE); }
 
-  void FocusOverlay() { glfwFocusWindow(OverlayWindow); }
+  void FocusOverlay() const { glfwFocusWindow(OverlayWindow); }
 
-  void Start(bool (*Update)(), void (*RenderUI)()) {
+  void Start(void (*Update)(), void (*RenderUI)()) {
     while (!glfwWindowShouldClose(OverlayWindow)) {
       StartTime = CurrentEpochMilliseconds();
       glfwPollEvents();
@@ -394,26 +298,5 @@ public:
   void GetScreenResolution(int &Width, int &Height) const {
     Width = ScreenWidth;
     Height = ScreenHeight;
-  }
-
-  const std::string currentDateTime(int Option) // 1 for Date And Time, 2 For Date Only, 3 for Time Only
-  {
-    time_t now = time(0);
-    struct tm tstruct;
-    char buf[80];
-    tstruct = *localtime(&now);
-
-    if (Option == 1) // Date and Time
-    {
-      strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
-    } else if (Option == 2) // Date Only
-    {
-      strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
-    } else if (Option == 3) // Time Only
-    {
-      strftime(buf, sizeof(buf), "%X", &tstruct);
-    }
-
-    return buf;
   }
 };

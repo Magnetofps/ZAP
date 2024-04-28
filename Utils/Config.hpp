@@ -1380,6 +1380,7 @@ namespace Config {
     bool HipfireShotguns = false;
     int Delay = 100;
     float Range = 200;
+    float RangeHipfire = 70;
 
     // Weapon Toggles
 

@@ -73,7 +73,7 @@ struct Radar {
     }
   }
 
-  bool Save() {
+  static bool Save() {
     try {
       Config::Radar::MiniMap = Features::Radar::MiniMap;
       Config::Radar::MiniMapRange = Features::Radar::MiniMapRange;

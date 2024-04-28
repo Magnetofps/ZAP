@@ -404,7 +404,7 @@ struct Sense {
 
       const ImGuiStyle &style = ImGui::GetStyle();
       if (Features::Watermark::Name) {
-        ImGui::TextColored(ImVec4(1, 0.75, 0, 1), "ZAP 1.0.6b");
+        ImGui::TextColored(ImVec4(1, 0.75, 0, 1), ZAP_VERSION.c_str());
 
         if (Features::Watermark::Spectators || Features::Watermark::ProcessingSpeed) {
           ImGui::SameLine();

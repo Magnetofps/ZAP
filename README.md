@@ -17,12 +17,19 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 <details>
 <summary><b>:memo: Changelog</b></summary>
 
+    v1.0.7 - 28th April 2024
+        - More general code cleanup
+        - Changed game version check to scan all existing Steam libraries
+        - Split trigger bot range in independent ADS/hip fire options
+        - Removed sub-tabs in "MISC" tab, instead moved it into separate containers
+        - Menu style changes
+
     v1.0.6b - 22nd April 2024
-        Forked from zap-client by Gerosity
-        Reformatted codebase
-        Redesigned console output
-        General code cleanup (got rid of some if-else chains)
-        Removed "cool" looking delays in run.sh and initialization (was annoying)
+        - Forked from zap-client by Gerosity
+        - Reformatted stuff
+        - Redesigned console output
+        - General code cleanup (got rid of some if-else chains)
+        - Removed "cool" looking delays in run.sh and initialization (was annoying)
 
     view changelog for prior versions at Gerosity/zap-client
 </details>
@@ -30,6 +37,9 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 ## :card_file_box: Installation
 <details>
 <summary><b>View installation guide</b></summary>
+
+It's recommended you use GNOME or Cinnamon as your desktop environment, though others might work.
+KDE Plasma is known not to allow the overlay to be drawn above the game.
 
 **1. Install dependencies**
 
