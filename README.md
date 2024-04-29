@@ -17,6 +17,12 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 <details>
 <summary><b>:memo: Changelog</b></summary>
 
+    v1.0.7b - 29th April 2024
+        - More general code cleanup
+        - Now spawns on primary monitor, at maximum refresh rate for that monitor
+        - Now caps to the primary monitors refresh rate by default
+        - Fixed trigger bot hip fire range not saving in config
+
     v1.0.7 - 28th April 2024
         - More general code cleanup
         - Changed game version check to scan all existing Steam libraries
@@ -55,7 +61,7 @@ KDE Plasma is known not to allow the overlay to be drawn above the game.
     make
     sudo make install
 
-**3. Navigate to directory for cheat files (I use /Documents/development/ for example)**
+**3. Navigate to directory for cheat files (I use `/Documents/development/` for example)**
 
     cd ~/Documents/
 
@@ -74,7 +80,8 @@ KDE Plasma is known not to allow the overlay to be drawn above the game.
     ./run.sh
 
 **6. Press insert to toggle the menu (you can only interact with the menu and the game when the menu is active)**
-**Note: You will need to tab between the cheat overlay and Apex**
+**Note: You will need to tab between the cheat overlay and Apex**  
+**If the overlay is not vertically aligned correctly (watermark is not all the way in the top-left corner, ESP misaligned), you can hold SUPER + Left-Mouse-Button and then drag it upwards on most desktop environments.**
 </details>
 
 ### Other repositories
@@ -86,10 +93,10 @@ https://www.youtube.com/watch?v=VBnAyOhTSIs
 https://www.youtube.com/watch?v=vCsmewJlgk0
 
 ### Credits
-    https://github.com/Gerosity/zap-client - parent of hir0xygen's fork
-    https://github.com/Nexilist/xap-client - for the base, massive credits to them
-    https://github.com/arturzxc/grinder - alternate aimbot mode, most of the misc features
-    https://github.com/Braziliana/T_TApe - custom config system
-    https://www.unknowncheats.me/forum/apex-legends/ - A TON of help, offsets, many additional features & more
-    wafflesgaming - aimbot help, Extra ESP Features such as 2D Corners
-    0xAgartha & ghostrazzor - run.sh script (Randomises zapclient binary & Hides PID before execution)
+    https://github.com/Gerosity/zap-client              - parent of hir0xygen's fork
+    https://github.com/Nexilist/xap-client              - for the base, massive credits to them
+    https://github.com/arturzxc/grinder                 - alternate aimbot mode, most of the misc features
+    https://github.com/Braziliana/T_TApe                - custom config system
+    https://www.unknowncheats.me/forum/apex-legends/    - A TON of help, offsets, many additional features & more
+    wafflesgaming                                       - aimbot help, Extra ESP Features such as 2D Corners
+    0xAgartha & ghostrazzor                             - run.sh script (hide PID & random binary title)
