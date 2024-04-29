@@ -1436,6 +1436,7 @@ struct ConfigManager {
       WritePair(Triggerbot, HipfireShotguns);
       WritePair(Triggerbot, Delay);
       WritePair(Triggerbot, Range);
+      WritePair(Triggerbot, RangeHipfire);
 
       // Weapon Toggles
       // Light
@@ -5184,6 +5185,7 @@ struct ConfigManager {
     ReadBool(Triggerbot, HipfireShotguns);
     ReadInt(Triggerbot, Delay);
     ReadFloat(Triggerbot, Range);
+    ReadFloat(Triggerbot, RangeHipfire);
     // Weapon Toggles
     // Light
     ReadBool(Triggerbot, P2020);

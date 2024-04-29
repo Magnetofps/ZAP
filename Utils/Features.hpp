@@ -17,7 +17,7 @@ namespace Features {
     bool ESPEnabled = true;
     bool OverlayEnabled = true;
     bool FPSCap = false;
-    int CappedFPS = 60;
+    int CappedFPS = 144;
   };
 
   namespace AimbotHitboxes {

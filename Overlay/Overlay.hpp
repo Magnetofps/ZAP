@@ -21,6 +21,7 @@
 class Overlay {
 private:
   GLFWwindow *OverlayWindow = nullptr;
+  const GLFWvidmode *vidMode = nullptr;
   int ScreenWidth = 0;
   int ScreenHeight = 0;
   int ScreenPosX = 0;
@@ -28,7 +29,7 @@ private:
 
   void GrabScreenSize() {
     GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode *vidMode = glfwGetVideoMode(primaryMonitor);
+    vidMode = glfwGetVideoMode(primaryMonitor);
     glfwGetMonitorPos(primaryMonitor, &ScreenPosX, &ScreenPosY);
     ScreenWidth = vidMode->width;
     ScreenHeight = vidMode->height;
@@ -108,13 +109,7 @@ public:
 
     GrabScreenSize();
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
     glfwDefaultWindowHints();
-
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -122,20 +117,14 @@ public:
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
     glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-    glfwWindowHint(GLFW_REFRESH_RATE, 75);
+    glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE); // why was refresh rate previously forced to 75Hz? GLFW kindly allows us to say I DONT CARE!!!
 
-    // Don't want a completely randomized window class / title so it can be found with regex to fix hyprland blur
     OverlayWindow = glfwCreateWindow(ScreenWidth, ScreenHeight, RandomString(RandomInt(10, 20)).c_str(), nullptr, nullptr);
 
-    glfwSetWindowPos(OverlayWindow, ScreenPosX, ScreenPosY);
     CaptureInput(true);
     glfwMakeContextCurrent(OverlayWindow);
 
-    // Centering //
-    GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode *vidMode = glfwGetVideoMode(primaryMonitor);
-    glfwSetWindowPos(OverlayWindow, (vidMode->width - ScreenWidth) / 2, (vidMode->height - ScreenHeight) / 2);
-    // End of Centering //
+    glfwSetWindowPos(OverlayWindow, ScreenPosX, ScreenPosY);
 
     InitializeUI();
 
@@ -284,7 +273,7 @@ public:
       glfwSwapBuffers(OverlayWindow);
 
       ProcessingTime = static_cast<int>(CurrentEpochMilliseconds() - StartTime);
-      SleepTime = 6; // 16.67 > 60hz | 6.97 > 144hz
+      SleepTime = 1000 / vidMode->refreshRate; // 165 = ~6ms, 144 = ~7ms, 60 = ~16ms
       if (!Features::Settings::FPSCap) { TimeLeftToSleep = std::max(0, SleepTime - ProcessingTime); }
 
       if (Features::Settings::FPSCap) { TimeLeftToSleep = 1000 / Features::Settings::CappedFPS; }

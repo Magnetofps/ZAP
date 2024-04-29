@@ -2246,7 +2246,7 @@ struct Menu {
         if (Features::Settings::OverlayEnabled) { ImGui::Checkbox("Enable ESP", &Features::Settings::ESPEnabled); }
 
         ImGui::Checkbox("FPS Cap", &Features::Settings::FPSCap);
-        if (Features::Settings::FPSCap) { ImGui::MainSliderInt("Max FPS", &Features::Settings::CappedFPS, 30, 999); }
+        if (Features::Settings::FPSCap) { ImGui::MainSliderInt("Max FPS", &Features::Settings::CappedFPS, 30, 480); }
 
         ImGui::EndChildFrame();
       }
