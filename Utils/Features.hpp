@@ -1800,5 +1800,6 @@ namespace Features {
     bool Name = true;
     bool ProcessingSpeed = true;
     bool Spectators = true;
+    bool GameFPS = true;
   };
 }; //End of namespace Features

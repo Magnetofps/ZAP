@@ -13,6 +13,7 @@ constexpr long OFF_NAME_INDEX = 0x38; //nameIndex
 constexpr long OFF_NAME_LIST = 0xC5FF080; //[Miscellaneous]->NameList
 constexpr long OFF_GAMEMODE = 0x021ba960; //mp_gamemode
 constexpr long OFF_SQUAD_ID = 0x0334; //m_squadID
+constexpr long OFF_GLOBAL_VARS = 0x16f8ff0; // [Miscellaneous]->GlobalVars
 
 // HUD
 constexpr long OFF_VIEWRENDER = 0x73f1978; //[Miscellaneous]->ViewRenderer

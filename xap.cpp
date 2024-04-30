@@ -261,10 +261,12 @@ void RenderUI() {
 void UpdateCore() {
   try {
     Map->Read();
-    if (!Map->IsPlayable) { return; }
+    if (!Map->IsPlayable)
+      return;
 
     Myself->Read();
-    if (!Myself->IsValid()) { return; }
+    if (!Myself->IsValid())
+      return;
 
     Players->clear();
     if (Map->IsFiringRange) {
@@ -424,7 +426,7 @@ int main(int argc, char *argv[]) {
 
   if (Memory::GetPID() == 0) {
     std::cout << " ⚡ >> Waiting for Apex" << std::endl;
-    while (Memory::GetPID() == 0) { std::this_thread::sleep_for(std::chrono::seconds(1)); }
+    while (Memory::GetPID() == 0) { std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
   }
 
   std::cout << " ⚡ >> Apex is running" << std::endl;

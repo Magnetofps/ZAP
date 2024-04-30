@@ -2008,5 +2008,6 @@ namespace Config {
     bool Name = true;
     bool ProcessingSpeed = true;
     bool Spectators = true;
+    bool GameFPS = true;
   };
 };

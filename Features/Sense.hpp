@@ -44,12 +44,15 @@ struct Sense {
   std::vector<Player *> *Players;
   std::chrono::milliseconds LastSpectatorUpdateTime;
   int TotalSpectators = 0;
-  int PlayersNear = 0;
   std::vector<std::string> Spectators;
 
   std::chrono::milliseconds processingLastUpdate;
   std::vector<double> processingTimes;
   double processingTime;
+
+  std::chrono::milliseconds FpsUpdate;
+  int FpsLastFrame;
+  int Fps;
 
   Level *Map;
 
@@ -403,10 +406,11 @@ struct Sense {
       ImGui::Begin("Watermark", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
       const ImGuiStyle &style = ImGui::GetStyle();
+
       if (Features::Watermark::Name) {
         ImGui::TextColored(ImVec4(1, 0.75, 0, 1), ZAP_VERSION.c_str());
 
-        if (Features::Watermark::Spectators || Features::Watermark::ProcessingSpeed) {
+        if (Features::Watermark::Spectators || Features::Watermark::ProcessingSpeed || Features::Watermark::GameFPS) {
           ImGui::SameLine();
           ImGui::Text(" - ");
           ImGui::SameLine();
@@ -414,8 +418,7 @@ struct Sense {
       }
 
       if (Features::Watermark::Spectators) {
-        std::chrono::milliseconds Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-        if (Now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
+        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
           int TempTotalSpectators = 0;
           std::vector<std::string> TempSpectators;
 
@@ -430,13 +433,13 @@ struct Sense {
 
           TotalSpectators = TempTotalSpectators;
           Spectators = TempSpectators;
-          LastSpectatorUpdateTime = Now;
+          LastSpectatorUpdateTime = now;
         }
         ImGui::Text("spectators: ");
         ImGui::SameLine();
         ImGui::TextColored(TotalSpectators > 0 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1), "%d", TotalSpectators);
 
-        if (Features::Watermark::ProcessingSpeed) {
+        if (Features::Watermark::ProcessingSpeed || Features::Watermark::GameFPS) {
           ImGui::SameLine();
           ImGui::Text(" - ");
           ImGui::SameLine();
@@ -450,16 +453,40 @@ struct Sense {
           processingLastUpdate = now;
         }
 
-        if (processingTimes.size() >= 10) {
+        if (processingTimes.size() >= 10)
           processingTimes.erase(processingTimes.begin());
-        }
+
         processingTimes.push_back(OverlayWindow.ProcessingTime);
 
-        ImVec4 ProcessingTimeColor;
-        ProcessingTimeColor = processingTime > 20 ? ProcessingTimeColor = ImVec4(1, 0.343, 0.475, 1) : ProcessingTimeColor = ImVec4(0.4, 1, 0.343, 1);
+        const ImVec4 ProcessingTimeColor = processingTime > 20 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1);
         ImGui::Text("performance: ");
         ImGui::SameLine();
         ImGui::TextColored(ProcessingTimeColor, "%.2fms", processingTime);
+
+        if (Features::Watermark::GameFPS) {
+          ImGui::SameLine();
+          ImGui::Text(" - ");
+          ImGui::SameLine();
+        }
+      }
+
+      if (Features::Watermark::GameFPS) {
+        int FrameNumber = 0;
+        FrameNumber = Memory::Read<int>(OFF_REGION + OFF_GLOBAL_VARS + 0x0008);
+
+        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= FpsUpdate + std::chrono::milliseconds(300)) {
+          const int FramesSince = FrameNumber - FpsLastFrame;
+          const auto Duration = now - FpsUpdate;
+          Fps = FramesSince * 1000 / Duration.count();
+
+          FpsLastFrame = FrameNumber;
+          FpsUpdate = now;
+        }
+
+        const ImVec4 FpsColor = Fps < 60 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1);
+        ImGui::Text("fps: ");
+        ImGui::SameLine();
+        ImGui::TextColored(FpsColor, "%i", Fps);
       }
 
       ImGui::End();

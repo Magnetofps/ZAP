@@ -17,14 +17,15 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 <details>
 <summary><b>:memo: Changelog</b></summary>
 
+    v1.0.7c - 30th April 2024
+        - Added game framerate to watermark
+
     v1.0.7b - 29th April 2024
-        - More general code cleanup
         - Now spawns on primary monitor, at maximum refresh rate for that monitor
         - Now caps to the primary monitors refresh rate by default
         - Fixed trigger bot hip fire range not saving in config
 
     v1.0.7 - 28th April 2024
-        - More general code cleanup
         - Changed game version check to scan all existing Steam libraries
         - Split trigger bot range in independent ADS/hip fire options
         - Removed sub-tabs in "MISC" tab, instead moved it into separate containers
@@ -32,9 +33,7 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 
     v1.0.6b - 22nd April 2024
         - Forked from zap-client by Gerosity
-        - Reformatted stuff
         - Redesigned console output
-        - General code cleanup (got rid of some if-else chains)
         - Removed "cool" looking delays in run.sh and initialization (was annoying)
 
     view changelog for prior versions at Gerosity/zap-client

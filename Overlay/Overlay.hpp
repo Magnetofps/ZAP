@@ -257,15 +257,15 @@ public:
       glLoadIdentity();
       glOrtho(0, ScreenWidth, ScreenHeight, 0, -1, 1);
 
-      // Update
-      if (Update != nullptr) { Update(); }
+      if (Update != nullptr)
+        Update();
 
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      // Render
-      if (RenderUI != nullptr) { RenderUI(); }
+      if (RenderUI != nullptr)
+        RenderUI();
 
       // Render ImGui and swap buffers
       ImGui::Render();
@@ -274,9 +274,11 @@ public:
 
       ProcessingTime = static_cast<int>(CurrentEpochMilliseconds() - StartTime);
       SleepTime = 1000 / vidMode->refreshRate; // 165 = ~6ms, 144 = ~7ms, 60 = ~16ms
-      if (!Features::Settings::FPSCap) { TimeLeftToSleep = std::max(0, SleepTime - ProcessingTime); }
+      if (!Features::Settings::FPSCap)
+        TimeLeftToSleep = std::max(0, SleepTime - ProcessingTime);
 
-      if (Features::Settings::FPSCap) { TimeLeftToSleep = 1000 / Features::Settings::CappedFPS; }
+      if (Features::Settings::FPSCap)
+        TimeLeftToSleep = 1000 / Features::Settings::CappedFPS;
 
       std::this_thread::sleep_for(std::chrono::milliseconds(TimeLeftToSleep));
     }

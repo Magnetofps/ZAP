@@ -2037,6 +2037,7 @@ struct Menu {
           ImGui::Checkbox("Display Name", &Features::Watermark::Name);
           ImGui::Checkbox("Display Processing Speed", &Features::Watermark::ProcessingSpeed);
           ImGui::Checkbox("Display Spectators Number", &Features::Watermark::Spectators);
+          ImGui::Checkbox("Display Game FPS", &Features::Watermark::GameFPS);
         }
 
         ImGui::Text("Warning Text");
