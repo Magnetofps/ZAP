@@ -1,45 +1,33 @@
 // Externals
 #pragma once
-#include <chrono>
 #include <string>
-#include <thread>
-#include <GLFW/glfw3.h>
-#include <GL/gl.h>
 #include "../imgui/imgui.h"
 #include "../imgui/imconfig.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
 #include "../imgui/imgui_internal.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 // Internals
-#include "Font.hpp"
-#include "../Utils/InputManager.hpp"
-#include "../Utils/Themes.hpp"
-#include "../Utils/Config.hpp"
 #include "../Utils/Features.hpp"
 #include "AdvancedGUI.hpp"
 #include "Overlay.hpp"
 #include "../Core/LocalPlayer.hpp"
 
 struct Menu {
-  bool ShowMenu = true;
-  ImVec4 DetailColor = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-  ImVec4 ButtonColor = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-  ImVec4 CheckboxColor = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+  ImVec4 DetailColor = ImVec4(1.00f, 0.65f, 0.00f, 1.00f);
   ImVec4 TextColor = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-  ImVec4 SelectedColor = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 
   ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar;
   ImGuiColorEditFlags ColorEditFlags = ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs;
 
-  int WindowWidth = 1000; // 1000 // 950 // 1000
-  int WindowHeight = 495; // 600 // 450 // 648
+  float WindowWidth = 1000.0f; // 1000 // 950 // 1000
+  float WindowHeight = 495.0f; // 600 // 450 // 648
+  float NavbarWidth = WindowWidth / 6;
+  float NavbarHeight = WindowHeight;
+  float MainWidth = WindowWidth - NavbarWidth;
+  float MainHeight = WindowHeight;
 
   enum MenuTabs {
     Legitbot,
-    Ragebot,
-    Flickbot,
     Triggerbot,
     Glow,
     ESP,
@@ -48,16 +36,11 @@ struct Menu {
     Config
   };
 
-  int SelectedLegitbotSubTab = 0; // 6
-  int SelectedRagebotSubTab = 0; // 1
-  int SelectedFlickbotSubTab = 0; // 2
+  int SelectedLegitbotSubTab = 0; // 4
   int SelectedTriggerbotSubTab = 0; // 2
   int SelectedGlowSubTab = 0; // 2
-  int SelectedESPSubTabLeft = 0; // 3
-  int SelectedESPSubTabRight = 0; // 4
-  int SelectedMiscSubTab = 0; // 4
-  int SelectedSettingsSubTab = 0; // 2
-  int SelectedConfigSubTab = 0; // 1
+  int SelectedESPSubTabLeft = 0; // 2
+  int SelectedESPSubTabRight = 0; // 3
 
   MenuTabs CurrentTab = MenuTabs::Legitbot;
 
@@ -69,59 +52,12 @@ struct Menu {
     this->Advanced = Advanced;
   }
 
-  // Padding between controls
-  static void Space(const bool NoSeparator = false) {
-    ImGui::Spacing();
-    if (!NoSeparator) {
-      ImGui::Spacing();
-      ImGui::Separator();
-    }
-    ImGui::Spacing();
-    ImGui::Spacing();
-  }
-
-  // Two Spacings In One! Who Would've Thought!
   static void DoubleSpacing() {
     ImGui::Spacing();
     ImGui::Spacing();
   }
 
-  // Ok, Three Spacings In One Is Pushing It.
-  static void TripleSpacing() {
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Spacing();
-  }
-
-  // Help Marker
-  static void DrawHelpMarker(const char *desc) {
-    ImGui::SameLine(ImGui::GetWindowWidth() - 50);
-    ImGui::TextDisabled("[?]");
-    if (ImGui::IsItemHovered()) {
-      ImGui::BeginTooltip();
-      ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-      ImGui::TextUnformatted(desc);
-      ImGui::PopTextWrapPos();
-      ImGui::EndTooltip();
-    }
-  }
-
-  // Help Marker
-  static void Helper(const char *desc) {
-    ImGui::SameLine(0.f, 5.f);
-    ImGui::Text("(?)");
-    if (ImGui::IsItemHovered()) {
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-      ImGui::BeginTooltip();
-      ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-      ImGui::Text(desc);
-      ImGui::PopTextWrapPos();
-      ImGui::EndTooltip();
-      ImGui::PopStyleVar();
-    }
-  }
-
-  static void ComboBox(const char *label, const char *desc, int *current_item, const char *items_separated_by_zeros, int height_in_items) {
+  static void ComboBox(const char *label, const char *desc, int *current_item, const char *items_separated_by_zeros, const int height_in_items) {
     ImGui::Spacing();
     ImGui::SameLine(15);
     ImGui::TextColored(ImColor(255, 255, 255, 255), label);
@@ -134,59 +70,45 @@ struct Menu {
   }
 
   void RenderLegitbot() {
-    ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
     ImGui::Spacing();
     ImGui::SameLine();
-    if (ImGui::SubTab("  AIMBOT", 0 == SelectedLegitbotSubTab, ImVec2(111, 25)))
+    if (ImGui::SubTab("AIMBOT", 0 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 0;
     ImGui::SameLine();
     if (ImGui::SubTab("ADVANCED##AIMBOT", 1 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 1;
     ImGui::SameLine();
-    if (ImGui::SubTab(" WEAPONS##AIMBOT", 2 == SelectedLegitbotSubTab, ImVec2(111, 25)))
+    if (ImGui::SubTab("WEAPONS##AIMBOT", 2 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 2;
     ImGui::SameLine();
-    if (ImGui::SubTab(" VISUALS##AIMBOT", 3 == SelectedLegitbotSubTab, ImVec2(111, 25)))
+    if (ImGui::SubTab("RCS", 3 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 3;
     ImGui::SameLine();
-    if (ImGui::SubTab(" RCS", 4 == SelectedLegitbotSubTab, ImVec2(111, 25)))
+    if (ImGui::SubTab("WEAPONS##RCS", 4 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 4;
-    ImGui::SameLine();
-    if (ImGui::SubTab("ADVANCED##RCS", 5 == SelectedLegitbotSubTab, ImVec2(111, 25)))
-      SelectedLegitbotSubTab = 5;
-    ImGui::SameLine();
-    if (ImGui::SubTab(" WEAPONS##RCS", 6 == SelectedLegitbotSubTab, ImVec2(111, 25)))
-      SelectedLegitbotSubTab = 6;
     ImGui::EndGroup();
 
-    ImGui::SetCursorPos({15, 35});
+    ImGui::BeginChild("workzone", ImVec2(WindowWidth - 220, WindowHeight - 90), false, ImGuiWindowFlags_NoScrollbar);
 
-    ImGui::BeginChild("workzone", ImVec2(WindowWidth - 186, WindowHeight - 90), false, ImGuiWindowFlags_NoScrollbar);
-
-    ImGui::Separator();
     DoubleSpacing();
 
+    // Aimbot
     if (SelectedLegitbotSubTab == 0) {
-      ImGui::BeginChildFrame(1, ImVec2(WindowWidth - 220, 135), true); {
+      ImGui::BeginChildFrame(1, ImVec2(0, 135), true); {
         ImGui::Spacing();
-        ImGui::Text("Aimbot");
         ImGui::Checkbox("Enabled", &Features::Aimbot::AimbotEnabled);
         if (Features::Aimbot::AimbotEnabled) {
-          const char *AimbotModeIndex[] = {"Cubic Bezier [xap-client]", "Grinder", "[New] Cubic Bezier [Testing]"};
-          ImGui::ComboBox("Aimbot Method", &Features::Aimbot::AimbotMode, AimbotModeIndex, IM_ARRAYSIZE(AimbotModeIndex));
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("What Aimbot Method You Would Like.\nYou may find Grinder To Be More Legit/Smooth.");
-          const char *InputMethodIndex[] = {"Mouse", "Memory (Controller Supported)"};
-          ImGui::ComboBox("Input Method", &Features::Aimbot::InputMethod, InputMethodIndex, IM_ARRAYSIZE(InputMethodIndex));
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("What Input Method The Aimbot Will Use.\nYou Can Use Controller Method With KBM, But I Recommend Mouse.\nNote: Controller Input Method Requires Low Processing Speed To Work Well (Below 10-15ms).");
+          const char *AimbotModeIndex[] = {"Beta V1", "Grinder", "Beta V2"};
+          ImGui::ComboBox("Aimbot method", &Features::Aimbot::AimbotMode, AimbotModeIndex, IM_ARRAYSIZE(AimbotModeIndex));
+          const char *InputMethodIndex[] = {"Mouse movement", "Write memory"};
+          ImGui::ComboBox("Input method", &Features::Aimbot::InputMethod, InputMethodIndex, IM_ARRAYSIZE(InputMethodIndex));
         }
         ImGui::EndChildFrame();
       }
 
-      if (Features::Aimbot::AimbotEnabled && Features::Aimbot::AimbotMode == 0 or Features::Aimbot::AimbotMode == 2 && !Features::Aimbot::AdvancedAim) {
+      if (Features::Aimbot::AimbotEnabled && !Features::Aimbot::AdvancedAim) {
         ImGui::Columns(2, nullptr, false);
         ImGui::BeginChildFrame(2, ImVec2(WindowWidth - 613, 93), true); {
           ImGui::Spacing();
@@ -225,12 +147,10 @@ struct Menu {
             ImGui::Checkbox("Team Check##Aimbot", &Features::Aimbot::TeamCheck);
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
               ImGui::SetTooltip("Disable this if doing 1v1s in the firing range.\nMay not work with Grinder Aim Method.");
-            if (Features::Aimbot::AimbotMode == 0 or Features::Aimbot::AimbotMode == 2) { // xap-client
-              ImGui::SameLine();
-              ImGui::Checkbox("Visibility Check", &Features::Aimbot::VisCheck);
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            ImGui::SameLine();
+            ImGui::Checkbox("Visibility Check", &Features::Aimbot::VisCheck);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
                 ImGui::SetTooltip("Aims At Only Visible Enemies.");
-            }
 
             ImGui::Text("Targeting Options");
             ImGui::Checkbox("Allow Target Switching", &Features::Aimbot::TargetSwitching);
@@ -241,75 +161,32 @@ struct Menu {
           ImGui::EndChildFrame();
         }
 
-        if (!Features::Aimbot::AdvancedAim && Features::Aimbot::AimbotMode == 0 or Features::Aimbot::AimbotMode == 2) { // Cubic Bezier [xap-client]
+        if (!Features::Aimbot::AdvancedAim) {
           ImGui::BeginChildFrame(4, ImVec2(WindowWidth - 613, 169), true); {
             ImGui::Spacing();
             const char *SmoothingMethodIndex[] = {"Static", "Random"};
             ImGui::ComboBox("Smoothing Method", &Features::Aimbot::SmoothingMethod, SmoothingMethodIndex, IM_ARRAYSIZE(SmoothingMethodIndex));
 
             if (Features::Aimbot::InputMethod == 0) // Mouse Only
-            {
               ImGui::MainSliderFloat("Speed", &Features::Aimbot::Speed, 1, 100, "%.0f");
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Speed of the Aim-Assist\nHigher = Faster");
+
+            if (Features::Aimbot::SmoothingMethod == 0) { // Static
+              ImGui::MainSliderFloat("Hipfire Smoothing", &Features::Aimbot::HipfireSmooth, 0, 0.99, "%.3f");
+              ImGui::MainSliderFloat("ADS Smoothing", &Features::Aimbot::ADSSmooth, 0, 0.99, "%.3f");
             }
 
-            if (Features::Aimbot::SmoothingMethod == 0) // Static
-            {
-              if (Features::Aimbot::AimbotMode == 0) {
-                ImGui::MainSliderFloat("Hipfire Smoothing", &Features::Aimbot::HipfireSmooth, 0, 0.99, "%.3f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
-                ImGui::MainSliderFloat("ADS Smoothing", &Features::Aimbot::ADSSmooth, 0, 0.99, "%.3f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
-              }
-              if (Features::Aimbot::AimbotMode == 2) {
-                ImGui::MainSliderFloat("Hipfire Smoothing##Test", &Features::Aimbot::MouseHipfireSmoothing, 1, 1000, "%.0f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
-                ImGui::MainSliderFloat("ADS Smoothing##Test", &Features::Aimbot::MouseADSSmoothing, 1, 1000, "%.0f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
-              }
-            }
-            if (Features::Aimbot::SmoothingMethod == 1) // Random
-            {
+            if (Features::Aimbot::SmoothingMethod == 1) { // Random
               if (Features::Aimbot::AimbotMode == 0) {
                 ImGui::MainSliderFloat("Minimum Hipfire Smoothing", &Features::Aimbot::MinHipfireSmooth, 0, 0.99, "%.3f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Minimum Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
                 ImGui::MainSliderFloat("Maximum Hipfire Smoothing", &Features::Aimbot::MaxHipfireSmooth, 0, 0.99, "%.3f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Maximum Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
                 ImGui::MainSliderFloat("Minimum ADS Smoothing", &Features::Aimbot::MinADSSmooth, 0, 0.99, "%.3f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Minimum Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
-
                 ImGui::MainSliderFloat("Maximum ADS Smoothing", &Features::Aimbot::MaxADSSmooth, 0, 0.99, "%.3f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Maximum Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
               }
               if (Features::Aimbot::AimbotMode == 2) {
                 ImGui::MainSliderFloat("Minimum Hipfire Smoothing##Test", &Features::Aimbot::MinMouseHipfireSmoothing, 1, 1000, "%.0f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Minimum Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
                 ImGui::MainSliderFloat("Maximum Hipfire Smoothing##Test", &Features::Aimbot::MaxMouseHipfireSmoothing, 1, 1000, "%.0f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Maximum Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
                 ImGui::MainSliderFloat("Minimum ADS Smoothing##Test", &Features::Aimbot::MinMouseADSSmoothing, 1, 1000, "%.0f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Minimum Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
-
                 ImGui::MainSliderFloat("Maximum ADS Smoothing##Test", &Features::Aimbot::MaxMouseADSSmoothing, 1, 1000, "%.0f");
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                  ImGui::SetTooltip("Maximum Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
               }
             }
 
@@ -466,14 +343,19 @@ struct Menu {
       if (Features::Aimbot::AimbotEnabled && Features::Aimbot::AdvancedAim) { ImGui::Text("Advanced Aim Is Enabled, Use The Advanced Tab."); }
     }
 
+    // Aimbot weapon config
     if (SelectedLegitbotSubTab == 1) { Advanced->AdvancedAimbotTab(Myself->WeaponIndex); }
 
+    // Aimbot weapon selection
     if (SelectedLegitbotSubTab == 2) {
       if (Features::Aimbot::AimbotEnabled) {
-        ImGui::Spacing();
+          ImGui::Text("Aimbot is disabled");
+      } else  {
         ImGui::Columns(3, "##aimbotSelection", false);
-        if (ImGui::BeginChildFrame(11, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
+        const ImVec2 WeaponGroupSize = {(MainWidth - 70) / 3, (MainHeight - 137) / 2};
+
+        ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
+        if (ImGui::BeginChildFrame(11, WeaponGroupSize, true)) {
           ImGui::Checkbox("P2020##Aimbot", &Features::Aimbot::P2020);
           ImGui::Checkbox("RE-45 Auto##Aimbot", &Features::Aimbot::RE45);
           ImGui::Checkbox("Alternator SMG##Aimbot", &Features::Aimbot::Alternator);
@@ -483,8 +365,9 @@ struct Menu {
           ImGui::Checkbox("G7 Scout##Aimbot", &Features::Aimbot::G7);
           ImGui::EndChildFrame();
         }
-        if (ImGui::BeginChildFrame(12, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
+
+        ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
+        if (ImGui::BeginChildFrame(12, WeaponGroupSize, true)) {
           ImGui::Checkbox("VK-47 Flatline##Aimbot", &Features::Aimbot::Flatline);
           ImGui::Checkbox("Prowler Burst SMG##Aimbot", &Features::Aimbot::Prowler);
           ImGui::Checkbox("Hemlock Burst AR##Aimbot", &Features::Aimbot::Hemlock);
@@ -496,8 +379,8 @@ struct Menu {
 
         ImGui::NextColumn();
 
-        if (ImGui::BeginChildFrame(13, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
+        ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
+        if (ImGui::BeginChildFrame(13, WeaponGroupSize, true)) {
           ImGui::Checkbox("Havoc Rifle##Aimbot", &Features::Aimbot::Havoc);
           ImGui::Checkbox("Devotion LMG##Aimbot", &Features::Aimbot::Devotion);
           ImGui::Checkbox("L-Star EMG##Aimbot", &Features::Aimbot::LSTAR);
@@ -506,8 +389,9 @@ struct Menu {
           ImGui::Checkbox("Nemesis Burst AR##Aimbot", &Features::Aimbot::Nemesis);
           ImGui::EndChildFrame();
         }
-        if (ImGui::BeginChildFrame(14, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
+
+        ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
+        if (ImGui::BeginChildFrame(14, WeaponGroupSize, true)) {
           ImGui::Checkbox("Mozambique##Aimbot", &Features::Aimbot::Mozambique);
           ImGui::Checkbox("Peacekeeper##Aimbot", &Features::Aimbot::Peacekeeper);
           ImGui::Checkbox("Mastiff##Aimbot", &Features::Aimbot::Mastiff);
@@ -516,16 +400,16 @@ struct Menu {
 
         ImGui::NextColumn();
 
-        if (ImGui::BeginChildFrame(15, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
+        ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
+        if (ImGui::BeginChildFrame(15, WeaponGroupSize, true)) {
           ImGui::Checkbox("Longbow DMR##Aimbot", &Features::Aimbot::Longbow);
           ImGui::Checkbox("Charge Rifle##Aimbot", &Features::Aimbot::ChargeRifle);
           ImGui::Checkbox("Sentinel##Aimbot", &Features::Aimbot::Sentinel);
           ImGui::EndChildFrame();
         }
 
-        if (ImGui::BeginChildFrame(16, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
+        ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
+        if (ImGui::BeginChildFrame(16, WeaponGroupSize, true)) {
           ImGui::Checkbox("Wingman##Aimbot", &Features::Aimbot::Wingman);
           ImGui::Checkbox("EVA-8 Auto##Aimbot", &Features::Aimbot::EVA8);
           ImGui::Checkbox("Kraber .50-CAL Sniper##Aimbot", &Features::Aimbot::Kraber);
@@ -533,102 +417,57 @@ struct Menu {
         }
         ImGui::NextColumn();
       }
-      if (!Features::Aimbot::AimbotEnabled) { ImGui::Text("Aimbot Is Disabled!"); }
     }
 
+    // Recoil control system
     if (SelectedLegitbotSubTab == 3) {
-      ImGui::BeginChildFrame(69, ImVec2(WindowWidth - 220, 130), true); {
+      ImGui::Text("Recoil control system");
+      ImGui::BeginChildFrame(17, ImVec2(0, 0), true); {
         ImGui::Spacing();
-        ImGui::Text("FOV Circle");
-        ImGui::Checkbox("Draw FOV Circle", &Features::Sense::DrawFOVCircle);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Draw A FOV Circle.\nDoes Not Draw If Aimbot Mode == Grinder.");
-        ImGui::Checkbox("Draw Filled FOV Circle", &Features::Sense::DrawFilledFOVCircle);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Draw A Filled FOV Circle.\nDoes Not Draw If Aimbot Mode == Grinder.");
-        if (Features::Sense::DrawFOVCircle or Features::Sense::DrawFilledFOVCircle) {
-          ImGui::MainSliderFloat("FOV Circle Thickness", &Features::Sense::FOVThickness, 1, 10, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Changes the FOV Circle's thickness\n Recomended: 1-2");
-          ImGui::MainSliderFloat("Game's FOV", &Features::Sense::GameFOV, 70, 120, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Your current FOV in Settings");
-          if (Features::Sense::DrawFOVCircle) { ImGui::ColorEdit4("FOV Circle", Features::Colors::FOVColor, ColorEditFlags); }
-          if (Features::Sense::DrawFilledFOVCircle) { ImGui::ColorEdit4("Filled FOV Circle", Features::Colors::FilledFOVColor, ColorEditFlags); }
-        }
-        ImGui::EndChildFrame();
-      }
-    }
-
-    if (SelectedLegitbotSubTab == 4) {
-      ImGui::BeginChildFrame(17, ImVec2(WindowWidth - 220, 93), true); {
-        ImGui::Spacing();
-        ImGui::Text("RCS - Recoil Control");
         ImGui::Checkbox("Enabled", &Features::RCS::RCSEnabled);
-        if (Features::RCS::RCSEnabled) {
+        if (Features::RCS::RCSEnabled)
+          ImGui::Checkbox("Advanced", &Features::RCS::AdvancedRCS);
+
+        if (Features::RCS::RCSEnabled && !Features::RCS::AdvancedRCS) {
           const char *RCSModeIndex[] = {"Standalone", "Combined"};
-          ImGui::ComboBox("RCS Method", &Features::RCS::RCSMode, RCSModeIndex, IM_ARRAYSIZE(RCSModeIndex));
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("What RCS Method You Would Like.\nStandalone Provideds Legit & Customizable Settings.\nCombined Works Alongside Aimbot And Provides Better Recoil Control (Aimbot Must Be Enabled & Aimbot Mode = Cubic Bezier (xap-client)!)\nIf Aimbot Input Method Is Set To Controller, Only Combined Will Work!");
+          ImGui::ComboBox("Mode", &Features::RCS::RCSMode, RCSModeIndex, IM_ARRAYSIZE(RCSModeIndex));
         }
-        ImGui::EndChildFrame();
-      }
+        if (Features::RCS::RCSMode == 0 && Features::Aimbot::InputMethod == 1) {
+          ImGui::Text("Standalone RCS is incompatible with memory aim");
+        }
 
-      if (Features::RCS::RCSEnabled && !Features::RCS::AdvancedRCS) {
-        ImGui::BeginChildFrame(18, ImVec2(WindowWidth - 220, 131), true); {
+        if (Features::RCS::RCSEnabled && !Features::RCS::AdvancedRCS && !(Features::RCS::RCSMode == 0 && Features::Aimbot::InputMethod == 1)) {
           ImGui::Spacing();
+          ImGui::Checkbox("Require ADS", &Features::RCS::OnADS);
 
-          if (Features::Aimbot::InputMethod == 1 && Features::RCS::RCSMode == 0) { ImGui::Text("Selected Aimbot Input Method Is Incompatible With Standalone RCS! Switch To Combined!"); }
-
-          if (Features::RCS::RCSMode == 1 && Features::Aimbot::AimbotMode == 1) { ImGui::Text("Selected Aimbot Mode Is Incompatible With Combined RCS! Switch To Standalone!"); }
-          if (Features::RCS::RCSMode == 1 && Features::Aimbot::AimbotMode == 2) { ImGui::Text("Selected Aimbot Mode Is Incompatible With Combined RCS! Switch To Standalone!"); } else {
-            ImGui::Text("Conditions");
-            ImGui::Checkbox("On ADS Only?", &Features::RCS::OnADS);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Toggle when the RCS will take control\nEnabled = Only when aiming.\nDisabled = Always.");
-            ImGui::Text("Intensity");
-            if (Features::RCS::RCSMode == 0) {
-              ImGui::MainSliderFloat("Pitch", &Features::RCS::PitchPower, 1, 50, "%.1f");
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Pitch Power");
-              ImGui::MainSliderFloat("Yaw", &Features::RCS::YawPower, 1, 50, "%.1f");
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Yaw Power");
-            }
-
-            if (Features::RCS::RCSMode == 1 && !Features::Aimbot::AimbotMode == 1) {
-              ImGui::MainSliderFloat("Pitch Reduction %", &Features::RCS::PitchReduction, 0, 100, "%.0f");
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Percentage Of Horizontal Recoil That Will Be Reduced.");
-              ImGui::MainSliderFloat("Yaw Reduction %", &Features::RCS::YawReduction, 0, 100, "%.0f");
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Percentage Of Yaw Recoil That Will Be Reduced.");
-            }
+          if (Features::RCS::RCSMode == 0) { // Standalone RCS
+            ImGui::MainSliderFloat("Pitch", &Features::RCS::PitchPower, 1, 50, "%.1f");
+            ImGui::MainSliderFloat("Yaw", &Features::RCS::YawPower, 1, 50, "%.1f");
           }
 
-          ImGui::EndChildFrame();
+          if (Features::RCS::RCSMode == 1 ) { // Combined RCS
+            ImGui::MainSliderFloat("Pitch Reduction %", &Features::RCS::PitchReduction, 0, 100, "%.0f");
+            ImGui::MainSliderFloat("Yaw Reduction %", &Features::RCS::YawReduction, 0, 100, "%.0f");
+          }
         }
-      }
 
-      if (Features::RCS::RCSEnabled && Features::RCS::AdvancedRCS) { ImGui::Text("Advanced RCS Enabled, Use The Advanced RCS Tab."); }
+        if (Features::RCS::RCSEnabled && Features::RCS::AdvancedRCS) {
+          Advanced->AdvancedRCSTab(Myself->WeaponIndex);
+        }
+        ImGui::EndChildFrame();
+      }
     }
 
-    if (SelectedLegitbotSubTab == 5) { Advanced->AdvancedRCSTab(Myself->WeaponIndex); }
-
-    if (SelectedLegitbotSubTab == 6) {
+    // Recoil control system weapon selection
+    if (SelectedLegitbotSubTab == 4) {
       if (!Features::RCS::RCSEnabled) {
-        ImGui::Spacing();
-        ImGui::Columns(3, "##weaponselection", false);
-        if (ImGui::BeginChildFrame(7, ImVec2({95, 20}), true)) {
-          ImGui::Text("RCS Is Disabled.");
-          ImGui::EndChildFrame();
-        }
-      }
-      if (Features::RCS::RCSEnabled) {
-        ImGui::Spacing();
+        ImGui::Text("RCS is disabled");
+      } else {
         ImGui::Columns(3, "##rcsSelection", false);
-        if (ImGui::BeginChildFrame(7, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
+        const ImVec2 WeaponGroupSize = {(MainWidth - 70) / 3, (MainHeight - 137) / 2};
+
+        ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
+        if (ImGui::BeginChildFrame(7, WeaponGroupSize, true)) {
           ImGui::Checkbox("P2020##RCS", &Features::RCS::P2020);
           ImGui::Checkbox("RE-45 Auto##RCS", &Features::RCS::RE45);
           ImGui::Checkbox("Alternator SMG##RCS", &Features::RCS::Alternator);
@@ -638,8 +477,9 @@ struct Menu {
           ImGui::Checkbox("G7 Scout##RCS", &Features::RCS::G7);
           ImGui::EndChildFrame();
         }
-        if (ImGui::BeginChildFrame(8, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
+
+        ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
+        if (ImGui::BeginChildFrame(8, WeaponGroupSize, true)) {
           ImGui::Checkbox("VK-47 Flatline##RCS", &Features::RCS::Flatline);
           ImGui::Checkbox("Prowler Burst SMG##RCS", &Features::RCS::Prowler);
           ImGui::Checkbox("Hemlock Burst AR##RCS", &Features::RCS::Hemlock);
@@ -651,8 +491,8 @@ struct Menu {
 
         ImGui::NextColumn();
 
-        if (ImGui::BeginChildFrame(9, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
+        ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
+        if (ImGui::BeginChildFrame(9, WeaponGroupSize, true)) {
           ImGui::Checkbox("Havoc Rifle##RCS", &Features::RCS::Havoc);
           ImGui::Checkbox("Devotion LMG##RCS", &Features::RCS::Devotion);
           ImGui::Checkbox("L-Star EMG##RCS", &Features::RCS::LSTAR);
@@ -661,8 +501,9 @@ struct Menu {
           ImGui::Checkbox("Nemesis Burst AR##RCS", &Features::RCS::Nemesis);
           ImGui::EndChildFrame();
         }
-        if (ImGui::BeginChildFrame(10, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
+
+        ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
+        if (ImGui::BeginChildFrame(10, WeaponGroupSize, true)) {
           ImGui::Checkbox("Mozambique##RCS", &Features::RCS::Mozambique);
           ImGui::Checkbox("Peacekeeper##RCS", &Features::RCS::Peacekeeper);
           ImGui::Checkbox("Mastiff##RCS", &Features::RCS::Mastiff);
@@ -671,389 +512,19 @@ struct Menu {
 
         ImGui::NextColumn();
 
-        if (ImGui::BeginChildFrame(11, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
+        ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
+        if (ImGui::BeginChildFrame(11, WeaponGroupSize, true)) {
           ImGui::Checkbox("Longbow DMR##RCS", &Features::RCS::Longbow);
           ImGui::Checkbox("Charge Rifle##RCS", &Features::RCS::ChargeRifle);
           ImGui::Checkbox("Sentinel##RCS", &Features::RCS::Sentinel);
           ImGui::EndChildFrame();
         }
-        if (ImGui::BeginChildFrame(12, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
+
+        ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
+        if (ImGui::BeginChildFrame(12, WeaponGroupSize, true)) {
           ImGui::Checkbox("Wingman##RCS", &Features::RCS::Wingman);
           ImGui::Checkbox("EVA-8 Auto##RCS", &Features::RCS::EVA8);
           ImGui::Checkbox("Kraber .50-CAL Sniper##RCS", &Features::RCS::Kraber);
-          ImGui::EndChildFrame();
-        }
-        ImGui::NextColumn();
-      }
-    }
-
-    ImGui::EndChild();
-    ImGui::EndChild();
-  }
-
-  void RenderRagebot() {
-    ImGui::SetCursorPos(ImVec2(0, 0));
-    ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
-    ImGui::BeginGroup();
-    ImGui::Spacing();
-    ImGui::SameLine();
-    if (ImGui::SubTab("RAGE##Rage", 0 == SelectedRagebotSubTab, ImVec2(205, 25)))
-      SelectedRagebotSubTab = 0;
-    ImGui::SameLine();
-    if (ImGui::SubTab("WEAPONS##Rage", 1 == SelectedRagebotSubTab, ImVec2(205, 25)))
-      SelectedRagebotSubTab = 1;
-    ImGui::EndGroup();
-
-    ImGui::SetCursorPos({15, 35});
-
-    ImGui::BeginChild("workzone", ImVec2(WindowWidth - 186, WindowHeight - 90), false, ImGuiWindowFlags_NoScrollbar);
-
-    ImGui::Separator();
-    DoubleSpacing();
-
-    if (SelectedRagebotSubTab == 0) {
-      ImGui::Columns(2, nullptr, false);
-      ImGui::BeginChildFrame(2, ImVec2(WindowWidth - 613, WindowHeight - 110), true); {
-        ImGui::Spacing();
-        ImGui::Text("Ragebot");
-        ImGui::Checkbox("Enabled##RageAimbot", &Features::Ragebot::RageAimbot);
-        if (Features::Ragebot::RageAimbot) {
-          const char *AimMethodIndex[] = {"Memory", "Mouse"};
-          ImGui::ComboBox("Aim Method##RageAimbot", &Features::Ragebot::AimMethod, AimMethodIndex, IM_ARRAYSIZE(AimMethodIndex));
-
-          ImGui::Text("Selected Hitbox");
-          ImGui::Checkbox("Closest To Crosshair##RageAimbot", &Features::Ragebot::ClosestHitbox);
-          if (!Features::Ragebot::ClosestHitbox) {
-            const char *HitboxTypes[] = {"Head", "Neck", "Upper Chest", "Lower Chest", "Stomach", "Hip"};
-            int HitboxTypeIndex = static_cast<int>(Features::Ragebot::Hitbox);
-            ImGui::ComboBox("Hitbox Type##RageAimbot", &HitboxTypeIndex, HitboxTypes, IM_ARRAYSIZE(HitboxTypes));
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Which bone the aimbot will aim at.");
-            Features::Ragebot::Hitbox = static_cast<HitboxType>(HitboxTypeIndex);
-          }
-          const char *BindMethodIndex[] = {"Memory", "Keybinds", "Auto"};
-          ImGui::ComboBox("Aim Bind Method##RageAimbot", &Features::Ragebot::BindMethod, BindMethodIndex, IM_ARRAYSIZE(BindMethodIndex));
-          if (Features::Ragebot::BindMethod == 0) { // OnFire and OnADS
-            ImGui::Checkbox("On Fire##RageAimbot", &Features::Ragebot::OnFire);
-            ImGui::SameLine();
-            ImGui::Checkbox("On ADS##RageAimbot", &Features::Ragebot::OnADS);
-          }
-          if (Features::Ragebot::BindMethod == 1) { // Keybinds
-            int AimBind = static_cast<int>(Features::Ragebot::AimBind);
-            ImGui::ComboBox("Aim Bind##RageAimbot", &AimBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-            Features::Ragebot::AimBind = static_cast<InputKeyType>(AimBind);
-            int ExtraBind = static_cast<int>(Features::Ragebot::ExtraBind);
-            ImGui::ComboBox("Extra Bind##Aimbot", &ExtraBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-            Features::Ragebot::ExtraBind = static_cast<InputKeyType>(ExtraBind);
-          }
-
-          ImGui::Text("Aim Conditions");
-          ImGui::Checkbox("Team Check##RageAimbot", &Features::Ragebot::TeamCheck);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Disable this if doing 1v1s in the firing range.\nMay not work with Grinder Aim Method.");
-          ImGui::SameLine();
-          ImGui::Checkbox("Visibility Check##RageAimbot", &Features::Ragebot::VisCheck);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Aims At Only Visible Enemies.");
-
-          ImGui::Text("Priority");
-          const char *PriorityIndex[] = {"Closest To Crosshair", "Closest To You"};
-          ImGui::ComboBox("Target Priority##RageAimbot", &Features::Ragebot::Priority, PriorityIndex, IM_ARRAYSIZE(PriorityIndex));
-
-          ImGui::Text("Automation");
-          ImGui::Checkbox("Auto Shoot", &Features::Ragebot::AutoShoot);
-
-          ImGui::MainSliderFloat("Hipfire Smoothing##RageAimbot", &Features::Ragebot::HipfireSmooth, 0, 0.99, "%.3f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Smoothing for the Aim-Assist whilst hipfiring.\nHigher = Smoother");
-
-          ImGui::MainSliderFloat("ADS Smoothing##RageAimbot", &Features::Ragebot::ADSSmooth, 0, 0.99, "%.3f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Smoothing for the Aim-Assist whilst ADS.\nHigher = Smoother");
-
-          ImGui::MainSliderInt("Delay##RageAimbot", &Features::Ragebot::Delay, 1, 50);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Delay time for the aimbot smoothing.");
-
-          ImGui::Text("Prediction");
-          ImGui::Checkbox("Predict Movement##RageAimbot", &Features::Ragebot::PredictMovement);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Predict target's movement");
-          ImGui::SameLine();
-          ImGui::Checkbox("Predict Bullet Drop##RageAimbot", &Features::Ragebot::PredictBulletDrop);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Predict weapon's bullet drop");
-          ImGui::MainSliderFloat("Preditcion Amount", &Features::Ragebot::PreditcionAmount, 1, 500, "%.0f");
-
-          ImGui::MainSliderFloat("FOV", &Features::Ragebot::FOV, 1, 90, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Field of View");
-          ImGui::MainSliderFloat("Zoom Scale", &Features::Ragebot::ZoomScale, 0, 5, "%.1f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Field of View For Scopes");
-
-          ImGui::MainSliderFloat("Hipfire Max Distance", &Features::Ragebot::HipfireDistance, 1, 500, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Maximum Hipfire distance for Aim-Assist to work");
-          ImGui::MainSliderFloat("Zoom Max Distance", &Features::Ragebot::ZoomDistance, 1, 500, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Maximum ADS Distance for Aim-Assist to work");
-          DoubleSpacing();
-        }
-        ImGui::EndChildFrame();
-      }
-      ImGui::NextColumn();
-      if (Features::Ragebot::RageAimbot) {
-        ImGui::BeginChildFrame(3, ImVec2(WindowWidth - 630, WindowHeight - 110), true); {
-          ImGui::Spacing();
-          ImGui::Text("RCS");
-          ImGui::Checkbox("Enabled##RageRCS", &Features::Ragebot::RageRCS);
-          if (Features::Ragebot::RageRCS) { ImGui::MainSliderFloat("Recoil Reduction##RageRCS", &Features::Ragebot::RecoilRate, 1, 100, "%.1f"); }
-
-          ImGui::EndChildFrame();
-        }
-      }
-    }
-
-    if (SelectedRagebotSubTab == 1) {
-      if (Features::Ragebot::RageAimbot) {
-        ImGui::Spacing();
-        ImGui::Columns(3, "##ragebotSelection", false);
-        if (ImGui::BeginChildFrame(11, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
-          ImGui::Checkbox("P2020##Ragebot", &Features::Ragebot::P2020);
-          ImGui::Checkbox("RE-45 Auto##Ragebot", &Features::Ragebot::RE45);
-          ImGui::Checkbox("Alternator SMG##Ragebot", &Features::Ragebot::Alternator);
-          ImGui::Checkbox("R-99 SMG##Ragebot", &Features::Ragebot::R99);
-          ImGui::Checkbox("R-301 Carbine##Ragebot", &Features::Ragebot::R301);
-          ImGui::Checkbox("M600 Spitfire##Ragebot", &Features::Ragebot::Spitfire);
-          ImGui::Checkbox("G7 Scout##Ragebot", &Features::Ragebot::G7);
-          ImGui::EndChildFrame();
-        }
-        if (ImGui::BeginChildFrame(12, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
-          ImGui::Checkbox("VK-47 Flatline##Ragebot", &Features::Ragebot::Flatline);
-          ImGui::Checkbox("Prowler Burst SMG##Ragebot", &Features::Ragebot::Prowler);
-          ImGui::Checkbox("Hemlock Burst AR##Ragebot", &Features::Ragebot::Hemlock);
-          ImGui::Checkbox("30-30 Repeater##Ragebot", &Features::Ragebot::Repeater);
-          ImGui::Checkbox("Rampage LMG##Ragebot", &Features::Ragebot::Rampage);
-          ImGui::Checkbox("C.A.R SMG##Ragebot", &Features::Ragebot::CARSMG);
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::NextColumn();
-
-        if (ImGui::BeginChildFrame(13, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
-          ImGui::Checkbox("Havoc Rifle##Ragebot", &Features::Ragebot::Havoc);
-          ImGui::Checkbox("Devotion LMG##Ragebot", &Features::Ragebot::Devotion);
-          ImGui::Checkbox("L-Star EMG##Ragebot", &Features::Ragebot::LSTAR);
-          ImGui::Checkbox("Triple-Take##Ragebot", &Features::Ragebot::TripleTake);
-          ImGui::Checkbox("Volt##Ragebot", &Features::Ragebot::Volt);
-          ImGui::Checkbox("Nemesis Burst AR##Ragebot", &Features::Ragebot::Nemesis);
-          ImGui::EndChildFrame();
-        }
-        if (ImGui::BeginChildFrame(14, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
-          ImGui::Checkbox("Mozambique##Ragebot", &Features::Ragebot::Mozambique);
-          ImGui::Checkbox("Peacekeeper##Ragebot", &Features::Ragebot::Peacekeeper);
-          ImGui::Checkbox("Mastiff##Ragebot", &Features::Ragebot::Mastiff);
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::NextColumn();
-
-        if (ImGui::BeginChildFrame(15, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
-          ImGui::Checkbox("Longbow DMR##Ragebot", &Features::Ragebot::Longbow);
-          ImGui::Checkbox("Charge Rifle##Ragebot", &Features::Ragebot::ChargeRifle);
-          ImGui::Checkbox("Sentinel##Ragebot", &Features::Ragebot::Sentinel);
-          ImGui::EndChildFrame();
-        }
-
-        if (ImGui::BeginChildFrame(16, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
-          ImGui::Checkbox("Wingman##Ragebot", &Features::Ragebot::Wingman);
-          ImGui::Checkbox("EVA-8 Auto##Ragebot", &Features::Ragebot::EVA8);
-          ImGui::Checkbox("Kraber .50-CAL Sniper##Ragebot", &Features::Ragebot::Kraber);
-          ImGui::EndChildFrame();
-        }
-        ImGui::NextColumn();
-      }
-      if (!Features::Ragebot::RageAimbot) { ImGui::Text("Ragebot Is Disabled!"); }
-    }
-
-    ImGui::EndChild();
-    ImGui::EndChild();
-  }
-
-  void RenderFlickbot() {
-    ImGui::SetCursorPos(ImVec2(0, 0));
-    ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
-    ImGui::BeginGroup();
-    ImGui::Spacing();
-    ImGui::SameLine();
-    if (ImGui::SubTab("FLICKBOT##Flickbot", 0 == SelectedFlickbotSubTab, ImVec2(205, 25)))
-      SelectedFlickbotSubTab = 0;
-    ImGui::SameLine();
-    if (ImGui::SubTab("WEAPONS##Flickbot", 1 == SelectedFlickbotSubTab, ImVec2(205, 25)))
-      SelectedFlickbotSubTab = 1;
-    ImGui::EndGroup();
-
-    ImGui::SetCursorPos({15, 35});
-
-    ImGui::BeginChild("workzone", ImVec2(WindowWidth - 186, WindowHeight - 90), false, ImGuiWindowFlags_NoScrollbar);
-
-    ImGui::Separator();
-    DoubleSpacing();
-
-    if (SelectedFlickbotSubTab == 0) {
-      ImGui::BeginChildFrame(2, ImVec2(WindowWidth - 220, WindowHeight - 110), true); {
-        ImGui::Spacing();
-        ImGui::Text("Flickbot");
-        ImGui::Checkbox("Enabled##Flickbot", &Features::Flickbot::Flickbot);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Flick Crosshair To Players.\nHIGHLY recommended to use if you are: \nSemi-rage / Rage Cheating\nClose To The Targeted Player\nUsing A Shotgun");
-        if (Features::Flickbot::Flickbot) {
-          const char *FlickbotMethodIndex[] = {"Mouse", "Memory"};
-          ImGui::ComboBox("Flickbot Method##Flickbot", &Features::Flickbot::FlickbotMethod, FlickbotMethodIndex, IM_ARRAYSIZE(FlickbotMethodIndex));
-          ImGui::Text("Selected Hitbox");
-          ImGui::Checkbox("Closest To Crosshair##Flickbot", &Features::Flickbot::ClosestHitbox);
-          if (!Features::Flickbot::ClosestHitbox) {
-            const char *HitboxTypes[] = {"Head", "Neck", "Upper Chest", "Lower Chest", "Stomach", "Hip"};
-            int HitboxTypeIndex = static_cast<int>(Features::Flickbot::Hitbox);
-            ImGui::ComboBox("Hitbox Type##Flickbot", &HitboxTypeIndex, HitboxTypes, IM_ARRAYSIZE(HitboxTypes));
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Which bone the aimbot will aim at.");
-            Features::Flickbot::Hitbox = static_cast<HitboxType>(HitboxTypeIndex);
-          }
-
-          int FlickBind = static_cast<int>(Features::Flickbot::FlickBind);
-          ImGui::ComboBox("Flick Bind##Flickbot", &FlickBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-          Features::Flickbot::FlickBind = static_cast<InputKeyType>(FlickBind);
-
-          ImGui::Text("Flickbot Configurator");
-          ImGui::Checkbox("Auto Shoot", &Features::Flickbot::AutoShoot);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Automatically Shoots When Flicking Onto Target.\nI Recommend Using Triggerbot Instead Of This.");
-          if (Features::Flickbot::AutoShoot) {
-            ImGui::MainSliderInt("Auto Shoot Delay##Flickbot", &Features::Flickbot::AutoShootDelay, 0, 500);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Delay Between Flicking To Target And Shooting.\nLow Value Recommended.");
-          }
-
-          if (Features::Flickbot::AutoShoot or Features::Triggerbot::Enabled) {
-            ImGui::Checkbox("Flickback", &Features::Flickbot::FlickBack);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("After Flicking To Target, Your Camera Will Flick Back To Your Original Position.\nHIGHLY recommend NOT using this if you are legit cheating or if you have a high FOV set.\nOnly Works If Triggerbot Or Auto Shoot Is Enabled!");
-            if (Features::Flickbot::FlickBack) {
-              ImGui::MainSliderInt("Flickback Delay##Flickbot", &Features::Flickbot::FlickBackDelay, 0, 500);
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Delay Between Flicking From Target Back To Original Camera Position.");
-            }
-          }
-
-          ImGui::MainSliderFloat("Hipfire Smoothing##Flickbot", &Features::Flickbot::HipfireSmooth, 0, 0.99, "%.3f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Smoothing for the Flickbot whilst hipfiring.\nHigher = Smoother");
-
-          ImGui::MainSliderFloat("ADS Smoothing##Flickbot", &Features::Flickbot::ADSSmooth, 0, 0.99, "%.3f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Smoothing for the Flickbot whilst ADS.\nHigher = Smoother");
-
-          ImGui::Text("Prediction");
-          ImGui::Checkbox("Predict Movement##Flickbot", &Features::Flickbot::PredictMovement);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Predict target's movement");
-          ImGui::SameLine();
-          ImGui::Checkbox("Predict Bullet Drop##Flickbot", &Features::Flickbot::PredictBulletDrop);
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Predict weapon's bullet drop");
-
-          ImGui::MainSliderFloat("FOV##Flickbot", &Features::Flickbot::FOV, 1, 90, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Field of View");
-          ImGui::MainSliderFloat("Zoom Scale##Flickbot", &Features::Flickbot::ZoomScale, 0, 5, "%.1f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Field of View For Scopes");
-
-          ImGui::MainSliderFloat("Hipfire Max Distance##Flickbot", &Features::Flickbot::HipfireDistance, 1, 500, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Maximum Hipfire distance for Flickbot to work");
-          ImGui::MainSliderFloat("Zoom Max Distance##Flickbot", &Features::Flickbot::ZoomDistance, 1, 500, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Maximum ADS Distance for Flickbot to work");
-          DoubleSpacing();
-        }
-        ImGui::EndChildFrame();
-      }
-      ImGui::NextColumn();
-    }
-
-    if (SelectedFlickbotSubTab == 1) {
-      if (!Features::Flickbot::Flickbot) { ImGui::Text("Flickbot Is Disabled!"); }
-
-      if (Features::Flickbot::Flickbot) {
-        ImGui::Spacing();
-        ImGui::Columns(3, "##FlickbotSelection", false);
-        if (ImGui::BeginChildFrame(7, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
-          ImGui::Checkbox("P2020##Flickbot", &Features::Flickbot::P2020);
-          ImGui::Checkbox("RE-45 Auto##Flickbot", &Features::Flickbot::RE45);
-          ImGui::Checkbox("Alternator SMG##Flickbot", &Features::Flickbot::Alternator);
-          ImGui::Checkbox("R-99 SMG##Flickbot", &Features::Flickbot::R99);
-          ImGui::Checkbox("R-301 Carbine##Flickbot", &Features::Flickbot::R301);
-          ImGui::Checkbox("M600 Spitfire##Flickbot", &Features::Flickbot::Spitfire);
-          ImGui::Checkbox("G7 Scout##Flickbot", &Features::Flickbot::G7);
-          ImGui::EndChildFrame();
-        }
-        if (ImGui::BeginChildFrame(8, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.990, 0.761, 1.00f), "Heavy");
-          ImGui::Checkbox("VK-47 Flatline##Flickbot", &Features::Flickbot::Flatline);
-          ImGui::Checkbox("Prowler Burst SMG##Flickbot", &Features::Flickbot::Prowler);
-          ImGui::Checkbox("Hemlock Burst AR##Flickbot", &Features::Flickbot::Hemlock);
-          ImGui::Checkbox("30-30 Repeater##Flickbot", &Features::Flickbot::Repeater);
-          ImGui::Checkbox("Rampage LMG##Flickbot", &Features::Flickbot::Rampage);
-          ImGui::Checkbox("C.A.R SMG##Flickbot", &Features::Flickbot::CARSMG);
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::NextColumn();
-
-        if (ImGui::BeginChildFrame(9, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0, 0.99, 0, 1.00f), "Energy");
-          ImGui::Checkbox("Havoc Rifle##Flickbot", &Features::Flickbot::Havoc);
-          ImGui::Checkbox("Devotion LMG##Flickbot", &Features::Flickbot::Devotion);
-          ImGui::Checkbox("L-Star EMG##Flickbot", &Features::Flickbot::LSTAR);
-          ImGui::Checkbox("Triple-Take##Flickbot", &Features::Flickbot::TripleTake);
-          ImGui::Checkbox("Volt##Flickbot", &Features::Flickbot::Volt);
-          ImGui::Checkbox("Nemesis Burst AR##Flickbot", &Features::Flickbot::Nemesis);
-          ImGui::EndChildFrame();
-        }
-        if (ImGui::BeginChildFrame(10, ImVec2({264, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0, 0, 1.00f), "Shotguns");
-          ImGui::Checkbox("Mozambique##Flickbot", &Features::Flickbot::Mozambique);
-          ImGui::Checkbox("Peacekeeper##Flickbot", &Features::Flickbot::Peacekeeper);
-          ImGui::Checkbox("Mastiff##Flickbot", &Features::Flickbot::Mastiff);
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::NextColumn();
-
-        if (ImGui::BeginChildFrame(11, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.00990, 0.337, 0.990, 1.00f), "Snipers");
-          ImGui::Checkbox("Longbow DMR##Flickbot", &Features::Flickbot::Longbow);
-          ImGui::Checkbox("Charge Rifle##Flickbot", &Features::Flickbot::ChargeRifle);
-          ImGui::Checkbox("Sentinel##Flickbot", &Features::Flickbot::Sentinel);
-          ImGui::EndChildFrame();
-        }
-        if (ImGui::BeginChildFrame(12, ImVec2({237, 188}), true)) {
-          ImGui::TextColored(ImVec4(0.99, 0.530, 0.945, 1.00f), "Legendary");
-          ImGui::Checkbox("Wingman##Flickbot", &Features::Flickbot::Wingman);
-          ImGui::Checkbox("EVA-8 Auto##Flickbot", &Features::Flickbot::EVA8);
-          ImGui::Checkbox("Kraber .50-CAL Sniper##Flickbot", &Features::Flickbot::Kraber);
           ImGui::EndChildFrame();
         }
         ImGui::NextColumn();
@@ -2051,8 +1522,8 @@ struct Menu {
           ImGui::MainSliderInt("Warning Text Position X", &Features::Sense::WarningTextX, 0, ScreenWidth);
           ImGui::MainSliderInt("Warning Text Position Y", &Features::Sense::WarningTextY, 0, ScreenHeight);
           if (ImGui::Button("Auto Set Position", ImVec2(125, 25))) {
-            int AutoWidth = ScreenWidth / 2;
-            int AutoHeight = (ScreenHeight / 2) + 80;
+            const int AutoWidth = ScreenWidth / 2;
+            const int AutoHeight = (ScreenHeight / 2) + 80;
             Features::Sense::WarningTextX = AutoWidth;
             Features::Sense::WarningTextY = AutoHeight;
           }
@@ -2073,68 +1544,23 @@ struct Menu {
 
   void RenderMisc() const {
     ImGui::SetCursorPos(ImVec2(15, 15));
-    ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
+    ImGui::BeginChild("misc", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::Spacing();
     ImGui::SameLine();
 
     ImGui::Columns(2, "Misc columns", false);
-    ImGui::Text("Movement");
-    ImGui::BeginChildFrame(1, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
+
+    ImGui::Text("Auto shoot");
+    ImGui::BeginChildFrame(1, ImVec2((WindowWidth - 230) / 2, (WindowHeight - 100) / 2), true); {
       ImGui::Spacing();
-
-      ImGui::Checkbox("Superglide", &Features::Misc::SuperGlide);
-      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-        ImGui::SetTooltip("Hold spacebar when climbing over an object to gain speed");
-      if (Features::Misc::SuperGlide) {
-        const char *SuperGlideFPSIndex[] = { "75", "144", "240" };
-        ImGui::ComboBox("Superglide framerate", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
-      }
-
-      ImGui::Checkbox("Bunnyhop", &Features::Misc::BHop);
-      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-        ImGui::SetTooltip("Activates when holding a selected keybind and [ SPACE ]");
-      if (Features::Misc::BHop) {
-        int BhopBind = static_cast<int>(Features::Misc::BHopBind);
-        ImGui::ComboBox("Bind##Bunnyhop", &BhopBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-        Features::Misc::BHopBind = static_cast<InputKeyType>(BhopBind);
-        ImGui::MainSliderInt("Bunnyhop delay", &Features::Misc::BHopDelay, 1, 200);
-      }
-
-      ImGui::EndChildFrame();
-    }
-
-    ImGui::Text("Camera");
-    ImGui::BeginChildFrame(2, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
-      ImGui::Spacing();
-      ImGui::Checkbox("Quick turn", &Features::Misc::QuickTurn);
-      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-        ImGui::SetTooltip("Turn your camera quickly (no smoothing applied)");
-      if (Features::Misc::QuickTurn) {
-        int QuickTurnBind = static_cast<int>(Features::Misc::QuickTurnBind);
-        ImGui::ComboBox("Quick turn bind", &QuickTurnBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-        Features::Misc::QuickTurnBind = static_cast<InputKeyType>(QuickTurnBind);
-        ImGui::MainSliderInt("Quick turn angle", &Features::Misc::QuickTurnAngle, 1, 360);
-      }
-
-      ImGui::EndChildFrame();
-    }
-
-    ImGui::NextColumn();
-
-    ImGui::Text("Exploits");
-    ImGui::BeginChildFrame(3, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
-      ImGui::Spacing();
-      ImGui::Checkbox("Rapid fire", &Features::Misc::RapidFire);
+      ImGui::Checkbox("Enable", &Features::Misc::RapidFire);
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
         ImGui::SetTooltip("Turns semi-automatic + slow firing weapons automatic");
       if (Features::Misc::RapidFire) {
-        ImGui::MainSliderInt("Rapid fire delay", &Features::Misc::RapidFireDelay, 25, 200);        ImGui::PushItemWidth(-100);
-        ImGui::MainSliderFloat("Speed", &Features::Aimbot::Speed, 1, 100, "%.0f");
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-          ImGui::SetTooltip("Speed of the Aim-Assist\nHigher = Faster");
+        ImGui::MainSliderInt("Delay", &Features::Misc::RapidFireDelay, 25, 200);        ImGui::PushItemWidth(-100);
 
         int RapidFireBind = static_cast<int>(Features::Misc::RapidFireBind);
-        ImGui::ComboBox("Rapid fire bind", &RapidFireBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+        ImGui::ComboBox("Bind", &RapidFireBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
         Features::Misc::RapidFireBind = static_cast<InputKeyType>(RapidFireBind);
 
         ImGui::TextColored(ImVec4(0.990, 0.768, 0.039, 1.00f), "Light");
@@ -2166,7 +1592,7 @@ struct Menu {
     }
 
     ImGui::Text("Skins");
-    ImGui::BeginChildFrame(5, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2), true); {
+    ImGui::BeginChildFrame(2, ImVec2((WindowWidth - 230) / 2, 0), true); {
       ImGui::Spacing();
       ImGui::Checkbox("Skin changer", &Features::Misc::SkinChanger);
       if (Features::Misc::SkinChanger) {
@@ -2217,43 +1643,63 @@ struct Menu {
       ImGui::EndChildFrame();
     }
 
-    ImGui::EndChild();
-  }
+    ImGui::NextColumn();
 
-  void RenderSettings() {
-    ImGui::SetCursorPos(ImVec2(0, 0));
-    ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
-    ImGui::BeginGroup();
-    ImGui::Spacing();
-    ImGui::SameLine();
-    if (ImGui::SubTab("SETTINGS", 0 == SelectedSettingsSubTab, ImVec2(205, 25)))
-      SelectedSettingsSubTab = 0;
-    ImGui::EndGroup();
+    ImGui::Text("Movement");
+    ImGui::BeginChildFrame(3, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2 - 70), true); {
+      ImGui::Spacing();
 
-    ImGui::SetCursorPos({15, 35});
+      ImGui::Checkbox("Super glide", &Features::Misc::SuperGlide);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Hold [ SPACE ] when climbing over an object to gain speed");
+      //if (Features::Misc::SuperGlide) {
+      //  const char *SuperGlideFPSIndex[] = { "75", "144", "240" };
+      //  ImGui::ComboBox("Superglide framerate", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
+      //}
 
-    ImGui::BeginChild("workzone", ImVec2(WindowWidth - 186, WindowHeight - 90), false, ImGuiWindowFlags_NoScrollbar);
-
-    ImGui::Separator();
-    DoubleSpacing();
-
-    if (SelectedSettingsSubTab == 0) {
-      ImGui::BeginChildFrame(1, ImVec2(WindowWidth - 220, WindowHeight - 110), true); {
-        ImGui::Spacing();
-
-        ImGui::Text("Overlay Settings");
-        ImGui::Checkbox("Enable Overlay", &Features::Settings::OverlayEnabled);
-
-        if (Features::Settings::OverlayEnabled) { ImGui::Checkbox("Enable ESP", &Features::Settings::ESPEnabled); }
-
-        ImGui::Checkbox("FPS Cap", &Features::Settings::FPSCap);
-        if (Features::Settings::FPSCap) { ImGui::MainSliderInt("Max FPS", &Features::Settings::CappedFPS, 30, 480); }
-
-        ImGui::EndChildFrame();
+      ImGui::Checkbox("Bunny hop", &Features::Misc::BHop);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Activates when holding a selected keybind and [ SPACE ]");
+      if (Features::Misc::BHop) {
+        int BhopBind = static_cast<int>(Features::Misc::BHopBind);
+        ImGui::ComboBox("Bind##Bunny hop", &BhopBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+        Features::Misc::BHopBind = static_cast<InputKeyType>(BhopBind);
+        ImGui::MainSliderInt("Delay", &Features::Misc::BHopDelay, 1, 200);
       }
+
+      ImGui::EndChildFrame();
     }
 
-    ImGui::EndChild();
+    ImGui::Text("Camera");
+    ImGui::BeginChildFrame(4, ImVec2((WindowWidth - 225) / 2, (WindowHeight - 115) / 2 - 90), true); {
+      ImGui::Spacing();
+      ImGui::Checkbox("Quick turn", &Features::Misc::QuickTurn);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Turn your camera quickly (no smoothing applied)");
+      if (Features::Misc::QuickTurn) {
+        int QuickTurnBind = static_cast<int>(Features::Misc::QuickTurnBind);
+        ImGui::ComboBox("Bind##Quick turn", &QuickTurnBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+        Features::Misc::QuickTurnBind = static_cast<InputKeyType>(QuickTurnBind);
+        ImGui::MainSliderInt("Angle", &Features::Misc::QuickTurnAngle, 1, 360);
+      }
+
+      ImGui::EndChildFrame();
+    }
+
+    ImGui::Text("Settings");
+    ImGui::BeginChildFrame(5, ImVec2((WindowWidth - 225) / 2, 0), true); {
+      ImGui::Spacing();
+
+      ImGui::Checkbox("Enable overlay", &Features::Settings::OverlayEnabled);
+
+      if (Features::Settings::OverlayEnabled) { ImGui::Checkbox("Enable ESP", &Features::Settings::ESPEnabled); }
+
+      ImGui::Checkbox("FPS Cap", &Features::Settings::FPSCap);
+      if (Features::Settings::FPSCap) { ImGui::MainSliderInt("Max FPS", &Features::Settings::CappedFPS, 30, 480); }
+
+      ImGui::EndChildFrame();
+    }
+
     ImGui::EndChild();
   }
 };

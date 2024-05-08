@@ -581,25 +581,9 @@ struct Sense {
       Renderer::DrawCircleFilled(Canvas, Vector2D(ScreenWidth / 2, ScreenHeight / 2), Radius, 40, ImColor(Features::Colors::FilledFOVColor[0], Features::Colors::FilledFOVColor[1], Features::Colors::FilledFOVColor[2], Features::Colors::FilledFOVColor[3]));
     }
 
-    // Draw FOV Circle (Ragebot)
-    if (Features::Sense::DrawFOVCircle && Features::Ragebot::RageAimbot && Myself->IsCombatReady()) {
-      float FOV = std::min(Features::Ragebot::FOV, Features::Ragebot::FOV * (AimAssistState->GetFOVScale() * Features::Ragebot::ZoomScale));
-      float Radius = tanf(DEG2RAD(FOV) / 2) / tanf(DEG2RAD(Features::Sense::GameFOV) / 2) * ScreenWidth;
-      Renderer::DrawCircle(Canvas, Vector2D(ScreenWidth / 2, ScreenHeight / 2), Radius, 40, ImColor(Features::Colors::FOVColor[0], Features::Colors::FOVColor[1], Features::Colors::FOVColor[2], Features::Colors::FOVColor[3]), Features::Sense::FOVThickness);
-    }
-
-    // Draw Filled FOV Circle (Ragebot)
-    if (Features::Sense::DrawFilledFOVCircle && Features::Ragebot::RageAimbot && Myself->IsCombatReady()) {
-      float FOV = std::min(Features::Ragebot::FOV, Features::Ragebot::FOV * (AimAssistState->GetFOVScale() * Features::Ragebot::ZoomScale));
-      float Radius = tanf(DEG2RAD(FOV) / 2) / tanf(DEG2RAD(Features::Sense::GameFOV) / 2) * ScreenWidth;
-      Renderer::DrawCircleFilled(Canvas, Vector2D(ScreenWidth / 2, ScreenHeight / 2), Radius, 40, ImColor(Features::Colors::FilledFOVColor[0], Features::Colors::FilledFOVColor[1], Features::Colors::FilledFOVColor[2], Features::Colors::FilledFOVColor[3]));
-    }
-
     // Draw lot of things
     if (Features::Settings::ESPEnabled) {
-      for (int i = 0; i < Players->size(); i++) {
-        Player *p = Players->at(i);
-
+      for (auto p : *Players) {
         Vector2D LocalOriginW2S, HeadPositionW2S, AboveHeadW2S;
 
         Vector3D LocalOrigin3D = p->LocalOrigin;

@@ -91,7 +91,7 @@ struct Player {
     if (BasePointer == 0)
       return;
 
-    Name = Memory::ReadString1(BasePointer + OFF_NAME);
+    Name = Memory::ReadString(BasePointer + OFF_NAME);
     Team = Memory::Read<int>(BasePointer + OFF_TEAM_NUMBER);
 
     if (!IsPlayer() && !IsDummy()) {
@@ -168,15 +168,15 @@ struct Player {
   std::string GetPlayerName() {
     uintptr_t NameIndex = Memory::Read<uintptr_t>(BasePointer + OFF_NAME_INDEX);
     uintptr_t NameOffset = Memory::Read<uintptr_t>(OFF_REGION + OFF_NAME_LIST + ((NameIndex - 1) * 24));
-    std::string PlayerName = Memory::ReadPlayerName(NameOffset, 64);
+    std::string PlayerName = Memory::ReadString(NameOffset, 64);
     return PlayerName;
   }
 
   std::string getPlayerModelName() {
     uintptr_t modelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
-    std::string modelName = Memory::ReadLegend(modelOffset, 1024);
+    std::string modelName = Memory::ReadString(modelOffset, 1024);
 
-    std::unordered_map<std::string, std::string> modelNameMap = {{"dummie", "Dummy"}, {"ash", "Ash"}, {"ballistic", "Ballistic"}, {"bangalore", "Bangalore"}, {"bloodhound", "Bloodhound"}, {"catalyst", "Catalyst"}, {"caustic", "Caustic"}, {"conduit", "Conduit"}, {"crypto", "Crypto"}, {"fuse", "Fuse"}, {"gibraltar", "Gibraltar"}, {"horizon", "Horizon"}, {"nova", "Nova"}, {"holo", "Holo"}, {"mirage", "Mirage"}, {"lifeline", "Lifeline"}, {"loba", "Loba"}, {"madmaggie", "Mad Maggie"}, {"newcastle", "Newcastle"}, {"octane", "Octane"}, {"pathfinder", "Pathfinder"}, {"rampart", "Rampart"}, {"revenant", "Revenant"}, {"seer", "Seer"}, {"stim", "Stim"}, {"valkyrie", "Valkyrie"}, {"vantage", "Vantage"}, {"wattson", "Wattson"}, {"wraith", "Wraith"},};
+    std::unordered_map<std::string, std::string> modelNameMap = {{"dummie", "Dummy"}, {"ash", "Ash"}, {"alter", "Alter"}, {"ballistic", "Ballistic"}, {"bangalore", "Bangalore"}, {"bloodhound", "Bloodhound"}, {"catalyst", "Catalyst"}, {"caustic", "Caustic"}, {"conduit", "Conduit"}, {"crypto", "Crypto"}, {"fuse", "Fuse"}, {"gibraltar", "Gibraltar"}, {"horizon", "Horizon"}, {"nova", "Nova"}, {"holo", "Holo"}, {"mirage", "Mirage"}, {"lifeline", "Lifeline"}, {"loba", "Loba"}, {"madmaggie", "Mad Maggie"}, {"newcastle", "Newcastle"}, {"octane", "Octane"}, {"pathfinder", "Pathfinder"}, {"rampart", "Rampart"}, {"revenant", "Revenant"}, {"seer", "Seer"}, {"stim", "Stim"}, {"valkyrie", "Valkyrie"}, {"vantage", "Vantage"}, {"wattson", "Wattson"}, {"wraith", "Wraith"},};
 
     std::string replacedName = modelName;
     for (auto &entry: modelNameMap) {

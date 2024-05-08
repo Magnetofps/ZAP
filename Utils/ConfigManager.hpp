@@ -12,10 +12,8 @@
 #include "../Utils/termcolor.hpp"
 
 #include "Features/Legitbot.hpp"
-#include "Features/Ragebot.hpp"
 #include "Features/Sense.hpp"
 #include "Features/Radar.hpp"
-#include "Features/Flickbot.hpp"
 #include "Features/Triggerbot.hpp"
 #include "Features/Misc.hpp"
 #include "Features/Glow.hpp"
@@ -45,18 +43,14 @@ struct ConfigManager {
   int selectedConfig = 0;
 
   Legitbot *Legit;
-  Ragebot *Rage;
-  Flickbot *Flick;
   Triggerbot *Trigger;
   Glow *GlowESP;
   Sense *ESP;
   Radar *MapRadar;
   Misc *MiscTab;
 
-  ConfigManager(Legitbot *Legit, Ragebot *Rage, Flickbot *Flick, Triggerbot *Trigger, Glow *GlowESP, Sense *ESP, Radar *MapRadar, Misc *MiscTab) {
+  ConfigManager(Legitbot *Legit, Triggerbot *Trigger, Glow *GlowESP, Sense *ESP, Radar *MapRadar, Misc *MiscTab) {
     this->Legit = Legit;
-    this->Rage = Rage;
-    this->Flick = Flick;
     this->Trigger = Trigger;
     this->GlowESP = GlowESP;
     this->ESP = ESP;
@@ -107,7 +101,6 @@ struct ConfigManager {
       WriteSection(Aimbot);
       WritePair(Aimbot, AimbotEnabled);
       WritePair(Aimbot, BindMethod);
-      WritePair(Aimbot, AimbotMode); // Cubic Beizer (xap-client) or Grinder (Possibly linear?)
       WritePair(Aimbot, InputMethod); // MoveMouse or Controller (Write To ViewAngles)
 
       WritePair(Aimbot, ClosestHitbox);
@@ -1099,154 +1092,6 @@ struct ConfigManager {
       WritePair(AimbotHitboxes, ThrowingKnifeHitbox);
       WriteSectionEnd();
 
-      WriteSection(Ragebot);
-      WritePair(Ragebot, RagebotEnabled);
-      WritePair(Ragebot, RageAimbot);
-      WritePair(Ragebot, AimMethod);
-      WritePair(Ragebot, ClosestHitbox);
-      WritePair(Ragebot, Hitbox);
-      WritePair(Ragebot, BindMethod);
-      WritePair(Ragebot, OnFire);
-      WritePair(Ragebot, OnADS);
-      WritePair(Ragebot, AimBind);
-      WritePair(Ragebot, ExtraBind);
-      WritePair(Ragebot, VisCheck);
-      WritePair(Ragebot, TeamCheck);
-      WritePair(Ragebot, Priority);
-      WritePair(Ragebot, AutoShoot);
-      WritePair(Ragebot, PredictMovement);
-      WritePair(Ragebot, PredictBulletDrop);
-      WritePair(Ragebot, PreditcionAmount);
-      WritePair(Ragebot, FinalDistance);
-      WritePair(Ragebot, Speed);
-      WritePair(Ragebot, Smooth);
-      WritePair(Ragebot, HipfireSmooth);
-      WritePair(Ragebot, ADSSmooth);
-      WritePair(Ragebot, SmoothDistance);
-      WritePair(Ragebot, Delay);
-      WritePair(Ragebot, FOV);
-      WritePair(Ragebot, ZoomScale);
-      WritePair(Ragebot, MinDistance);
-      WritePair(Ragebot, HipfireDistance);
-      WritePair(Ragebot, ZoomDistance);
-      // Weapon Toggles
-      // Light
-      WritePair(Ragebot, P2020);
-      WritePair(Ragebot, RE45);
-      WritePair(Ragebot, Alternator);
-      WritePair(Ragebot, R99);
-      WritePair(Ragebot, R301);
-      WritePair(Ragebot, Spitfire);
-      WritePair(Ragebot, G7);
-      // Heavy
-      WritePair(Ragebot, Flatline);
-      WritePair(Ragebot, Hemlock);
-      WritePair(Ragebot, Repeater);
-      WritePair(Ragebot, Rampage);
-      WritePair(Ragebot, CARSMG);
-      // Energy
-      WritePair(Ragebot, Havoc);
-      WritePair(Ragebot, Devotion);
-      WritePair(Ragebot, LSTAR);
-      WritePair(Ragebot, TripleTake);
-      WritePair(Ragebot, Volt);
-      WritePair(Ragebot, Nemesis);
-      // Shotgun
-      WritePair(Ragebot, Mozambique);
-      WritePair(Ragebot, EVA8);
-      WritePair(Ragebot, Peacekeeper);
-      WritePair(Ragebot, Mastiff);
-      // Snipers
-      WritePair(Ragebot, Longbow);
-      WritePair(Ragebot, ChargeRifle);
-      WritePair(Ragebot, Sentinel);
-      // Legendary
-      WritePair(Ragebot, Wingman);
-      WritePair(Ragebot, Prowler);
-      WritePair(Ragebot, Bocek);
-      WritePair(Ragebot, Kraber);
-      WritePair(Ragebot, Knife);
-
-      WritePair(Ragebot, RageRCS);
-      WritePair(Ragebot, RecoilRate);
-
-      WriteSectionEnd();
-
-      WriteSection(Flickbot);
-      WritePair(Flickbot, Flickbot);
-      WritePair(Flickbot, FlickbotMethod); // 0 = Mouse, 1 = Memory
-      WritePair(Flickbot, FlickBind);
-      WritePair(Flickbot, ClosestHitbox);
-      WritePair(Flickbot, Hitbox);
-      WritePair(Flickbot, Priority);
-      WritePair(Flickbot, AutoShoot);
-      WritePair(Flickbot, AutoShootDelay);
-      WritePair(Flickbot, FlickBack);
-      WritePair(Flickbot, FlickBackDelay);
-      WritePair(Flickbot, FlickBackSmoothing);
-      WritePair(Flickbot, PredictMovement);
-      WritePair(Flickbot, PredictBulletDrop);
-      WritePair(Flickbot, TeamCheck);
-      WritePair(Flickbot, PreditcionAmount);
-      WritePair(Flickbot, FinalDistance);
-      WritePair(Flickbot, HipfireSmooth);
-      WritePair(Flickbot, ADSSmooth);
-      WritePair(Flickbot, SmoothDistance);
-      WritePair(Flickbot, Delay);
-      WritePair(Flickbot, FOV);
-      WritePair(Flickbot, ZoomScale);
-      WritePair(Flickbot, MinDistance);
-      WritePair(Flickbot, HipfireDistance);
-      WritePair(Flickbot, ZoomDistance);
-
-      WritePair(Flickbot, Smooth);
-      WritePair(Flickbot, FlickBackSmooth);
-
-      // Weapon Toggles
-      // Light
-      WritePair(Flickbot, P2020);
-      WritePair(Flickbot, RE45);
-      WritePair(Flickbot, Alternator);
-      WritePair(Flickbot, R99);
-      WritePair(Flickbot, R301);
-      WritePair(Flickbot, Spitfire);
-      WritePair(Flickbot, G7);
-
-      // Heavy
-      WritePair(Flickbot, Flatline);
-      WritePair(Flickbot, Hemlock);
-      WritePair(Flickbot, Repeater);
-      WritePair(Flickbot, Rampage);
-      WritePair(Flickbot, CARSMG);
-
-      // Energy
-      WritePair(Flickbot, Havoc);
-      WritePair(Flickbot, Devotion);
-      WritePair(Flickbot, LSTAR);
-      WritePair(Flickbot, TripleTake);
-      WritePair(Flickbot, Volt);
-      WritePair(Flickbot, Nemesis);
-
-      // Shotgun
-      WritePair(Flickbot, Mozambique);
-      WritePair(Flickbot, EVA8);
-      WritePair(Flickbot, Peacekeeper);
-      WritePair(Flickbot, Mastiff);
-
-      // Snipers
-      WritePair(Flickbot, Longbow);
-      WritePair(Flickbot, ChargeRifle);
-      WritePair(Flickbot, Sentinel);
-
-      // Legendary
-      WritePair(Flickbot, Wingman);
-      WritePair(Flickbot, Prowler);
-      WritePair(Flickbot, Bocek);
-      WritePair(Flickbot, Kraber);
-      WritePair(Flickbot, Knife);
-
-      WriteSectionEnd();
-
       WriteSection(RCS);
       WritePair(RCS, RCSEnabled);
       WritePair(RCS, RCSMode);
@@ -2052,12 +1897,8 @@ struct ConfigManager {
   void SaveConfig() {
     if (!Legitbot::Save())
       std::cout << "something went wrong trying to save Legitbot settings" << std::endl;
-    if (!Ragebot::Save())
-      std::cout << "something went wrong trying to save Ragebot settings" << std::endl;
     if (!Triggerbot::Save())
       std::cout << "something went wrong trying to save Triggerbot settings" << std::endl;
-    if (!Flickbot::Save())
-      std::cout << "something went wrong trying to save Flickbot settings" << std::endl;
     if (!Glow::Save())
       std::cout << "something went wrong trying to save Glow settings" << std::endl;
     if (!Sense::Save())
@@ -2092,7 +1933,6 @@ struct ConfigManager {
 
     Features::Aimbot::AimbotEnabled = Config::Aimbot::AimbotEnabled;
     Features::Aimbot::BindMethod = Config::Aimbot::BindMethod;
-    Features::Aimbot::AimbotMode = Config::Aimbot::AimbotMode;
     Features::Aimbot::InputMethod = Config::Aimbot::InputMethod;
     Features::Aimbot::ClosestHitbox = Config::Aimbot::ClosestHitbox;
     Features::Aimbot::OnFire = Config::Aimbot::OnFire;
@@ -3049,137 +2889,6 @@ struct ConfigManager {
     Features::AimbotHitboxes::KraberHitbox = static_cast<HitboxType>(Config::AimbotHitboxes::KraberHitbox);
     Features::AimbotHitboxes::ThrowingKnifeHitbox = static_cast<HitboxType>(Config::AimbotHitboxes::ThrowingKnifeHitbox);
 
-    Features::Ragebot::RagebotEnabled = Config::Ragebot::RagebotEnabled;
-    Features::Ragebot::RageAimbot = Config::Ragebot::RageAimbot;
-    Features::Ragebot::AimMethod = Config::Ragebot::AimMethod;
-    Features::Ragebot::ClosestHitbox = Config::Ragebot::ClosestHitbox;
-    Features::Ragebot::Hitbox = static_cast<HitboxType>(Config::Ragebot::Hitbox);
-    Features::Ragebot::BindMethod = Config::Ragebot::BindMethod;
-    Features::Ragebot::OnFire = Config::Ragebot::OnFire;
-    Features::Ragebot::OnADS = Config::Ragebot::OnADS;
-    Features::Ragebot::AimBind = static_cast<InputKeyType>(Config::Ragebot::AimBind);
-    Features::Ragebot::ExtraBind = static_cast<InputKeyType>(Config::Ragebot::ExtraBind);
-    Features::Ragebot::VisCheck = Config::Ragebot::VisCheck;
-    Features::Ragebot::TeamCheck = Config::Ragebot::TeamCheck;
-    Features::Ragebot::Priority = Config::Ragebot::Priority;
-    Features::Ragebot::AutoShoot = Config::Ragebot::AutoShoot;
-    Features::Ragebot::PredictMovement = Config::Ragebot::PredictMovement;
-    Features::Ragebot::PredictBulletDrop = Config::Ragebot::PredictBulletDrop;
-    Features::Ragebot::PreditcionAmount = Config::Ragebot::PreditcionAmount;
-    Features::Ragebot::FinalDistance = Config::Ragebot::FinalDistance;
-    Features::Ragebot::Speed = Config::Ragebot::Speed;
-    Features::Ragebot::Smooth = Config::Ragebot::Smooth;
-    Features::Ragebot::Speed = Config::Ragebot::Speed;
-    Features::Ragebot::HipfireSmooth = Config::Ragebot::HipfireSmooth;
-    Features::Ragebot::ADSSmooth = Config::Ragebot::ADSSmooth;
-    Features::Ragebot::SmoothDistance = Config::Ragebot::SmoothDistance;
-    Features::Ragebot::Delay = Config::Ragebot::Delay;
-    Features::Ragebot::FOV = Config::Ragebot::FOV;
-    Features::Ragebot::ZoomScale = Config::Ragebot::ZoomScale;
-    Features::Ragebot::MinDistance = Config::Ragebot::MinDistance;
-    Features::Ragebot::HipfireDistance = Config::Ragebot::HipfireDistance;
-    Features::Ragebot::ZoomDistance = Config::Ragebot::ZoomDistance;
-    Features::Ragebot::RecoilRate = Config::Ragebot::RecoilRate;
-    // Weapon Toggles
-    // Light
-    Features::Ragebot::P2020 = Config::Ragebot::P2020;
-    Features::Ragebot::RE45 = Config::Ragebot::RE45;
-    Features::Ragebot::Alternator = Config::Ragebot::Alternator;
-    Features::Ragebot::R99 = Config::Ragebot::R99;
-    Features::Ragebot::R301 = Config::Ragebot::R301;
-    Features::Ragebot::Spitfire = Config::Ragebot::Spitfire;
-    Features::Ragebot::G7 = Config::Ragebot::G7;
-    // Heavy
-    Features::Ragebot::Flatline = Config::Ragebot::Flatline;
-    Features::Ragebot::Hemlock = Config::Ragebot::Hemlock;
-    Features::Ragebot::Repeater = Config::Ragebot::Repeater;
-    Features::Ragebot::Rampage = Config::Ragebot::Rampage;
-    Features::Ragebot::CARSMG = Config::Ragebot::CARSMG;
-    // Energy
-    Features::Ragebot::Havoc = Config::Ragebot::Havoc;
-    Features::Ragebot::Devotion = Config::Ragebot::Devotion;
-    Features::Ragebot::LSTAR = Config::Ragebot::LSTAR;
-    Features::Ragebot::TripleTake = Config::Ragebot::TripleTake;
-    Features::Ragebot::Volt = Config::Ragebot::Volt;
-    Features::Ragebot::Nemesis = Config::Ragebot::Nemesis;
-    // Shotgun
-    Features::Ragebot::Mozambique = Config::Ragebot::Mozambique;
-    Features::Ragebot::EVA8 = Config::Ragebot::EVA8;
-    Features::Ragebot::Peacekeeper = Config::Ragebot::Peacekeeper;
-    Features::Ragebot::Mastiff = Config::Ragebot::Mastiff;
-    // Snipers
-    Features::Ragebot::Longbow = Config::Ragebot::Longbow;
-    Features::Ragebot::ChargeRifle = Config::Ragebot::ChargeRifle;
-    Features::Ragebot::Sentinel = Config::Ragebot::Sentinel;
-    // Legendary
-    Features::Ragebot::Wingman = Config::Ragebot::Wingman;
-    Features::Ragebot::Prowler = Config::Ragebot::Prowler;
-    Features::Ragebot::Bocek = Config::Ragebot::Bocek;
-    Features::Ragebot::Kraber = Config::Ragebot::Kraber;
-    Features::Ragebot::Knife = Config::Ragebot::Knife;
-
-    Features::Flickbot::Flickbot = Config::Flickbot::Flickbot;
-    Features::Flickbot::FlickbotMethod = Config::Flickbot::FlickbotMethod;
-    Features::Flickbot::FlickBind = static_cast<InputKeyType>(Config::Flickbot::FlickBind);
-    Features::Flickbot::ClosestHitbox = Config::Flickbot::ClosestHitbox;
-    Features::Flickbot::Hitbox = static_cast<HitboxType>(Config::Flickbot::Hitbox);
-    Features::Flickbot::Priority = Config::Flickbot::Priority;
-    Features::Flickbot::AutoShoot = Config::Flickbot::AutoShoot;
-    Features::Flickbot::AutoShootDelay = Config::Flickbot::AutoShootDelay;
-    Features::Flickbot::FlickBack = Config::Flickbot::FlickBack;
-    Features::Flickbot::FlickBackDelay = Config::Flickbot::FlickBackDelay;
-    Features::Flickbot::PredictMovement = Config::Flickbot::PredictMovement;
-    Features::Flickbot::PredictBulletDrop = Config::Flickbot::PredictBulletDrop;
-    Features::Flickbot::TeamCheck = Config::Flickbot::TeamCheck;
-    Features::Flickbot::PreditcionAmount = Config::Flickbot::PreditcionAmount;
-    Features::Flickbot::FinalDistance = Config::Flickbot::FinalDistance;
-    Features::Flickbot::HipfireSmooth = Config::Flickbot::HipfireSmooth;
-    Features::Flickbot::ADSSmooth = Config::Flickbot::ADSSmooth;
-    Features::Flickbot::SmoothDistance = Config::Flickbot::SmoothDistance;
-    Features::Flickbot::Delay = Config::Flickbot::Delay;
-    Features::Flickbot::FOV = Config::Flickbot::FOV;
-    Features::Flickbot::ZoomScale = Config::Flickbot::ZoomScale;
-    Features::Flickbot::MinDistance = Config::Flickbot::MinDistance;
-    Features::Flickbot::HipfireDistance = Config::Flickbot::HipfireDistance;
-    Features::Flickbot::ZoomDistance = Config::Flickbot::ZoomDistance;
-    // Weapon Toggles
-    // Light
-    Features::Flickbot::P2020 = Config::Flickbot::P2020;
-    Features::Flickbot::RE45 = Config::Flickbot::RE45;
-    Features::Flickbot::Alternator = Config::Flickbot::Alternator;
-    Features::Flickbot::R99 = Config::Flickbot::R99;
-    Features::Flickbot::R301 = Config::Flickbot::R301;
-    Features::Flickbot::Spitfire = Config::Flickbot::Spitfire;
-    Features::Flickbot::G7 = Config::Flickbot::G7;
-    // Heavy
-    Features::Flickbot::Flatline = Config::Flickbot::Flatline;
-    Features::Flickbot::Hemlock = Config::Flickbot::Hemlock;
-    Features::Flickbot::Repeater = Config::Flickbot::Repeater;
-    Features::Flickbot::Rampage = Config::Flickbot::Rampage;
-    Features::Flickbot::CARSMG = Config::Flickbot::CARSMG;
-    // Energy
-    Features::Flickbot::Havoc = Config::Flickbot::Havoc;
-    Features::Flickbot::Devotion = Config::Flickbot::Devotion;
-    Features::Flickbot::LSTAR = Config::Flickbot::LSTAR;
-    Features::Flickbot::TripleTake = Config::Flickbot::TripleTake;
-    Features::Flickbot::Volt = Config::Flickbot::Volt;
-    Features::Flickbot::Nemesis = Config::Flickbot::Nemesis;
-    // Shotgun
-    Features::Flickbot::Mozambique = Config::Flickbot::Mozambique;
-    Features::Flickbot::EVA8 = Config::Flickbot::EVA8;
-    Features::Flickbot::Peacekeeper = Config::Flickbot::Peacekeeper;
-    Features::Flickbot::Mastiff = Config::Flickbot::Mastiff;
-    // Snipers
-    Features::Flickbot::Longbow = Config::Flickbot::Longbow;
-    Features::Flickbot::ChargeRifle = Config::Flickbot::ChargeRifle;
-    Features::Flickbot::Sentinel = Config::Flickbot::Sentinel;
-    // Legendary
-    Features::Flickbot::Wingman = Config::Flickbot::Wingman;
-    Features::Flickbot::Prowler = Config::Flickbot::Prowler;
-    Features::Flickbot::Bocek = Config::Flickbot::Bocek;
-    Features::Flickbot::Kraber = Config::Flickbot::Kraber;
-    Features::Flickbot::Knife = Config::Flickbot::Knife;
-
     Features::RCS::RCSEnabled = Config::RCS::RCSEnabled;
     Features::RCS::RCSMode = Config::RCS::RCSMode;
     Features::RCS::OnADS = Config::RCS::OnADS;
@@ -3347,6 +3056,7 @@ struct ConfigManager {
     Features::Triggerbot::OnADS = Config::Triggerbot::OnADS;
     Features::Triggerbot::HipfireShotguns = Config::Triggerbot::HipfireShotguns;
     Features::Triggerbot::Range = Config::Triggerbot::Range;
+    Features::Triggerbot::RangeHipfire = Config::Triggerbot::RangeHipfire;
     // Weapon Toggles
     // Light
     Features::Triggerbot::P2020 = Config::Triggerbot::P2020;
@@ -3874,7 +3584,6 @@ struct ConfigManager {
 
     ReadBool(Aimbot, AimbotEnabled);
     ReadInt(Aimbot, BindMethod);
-    ReadInt(Aimbot, AimbotMode); // Cubic Beizer (xap-client) or Grinder (Possibly linear?) or [New] Cubic Beizer (Testing)
     ReadInt(Aimbot, InputMethod); // MoveMouse or Controller (Write To ViewAngles)
 
     ReadBool(Aimbot, ClosestHitbox);
@@ -4865,140 +4574,6 @@ struct ConfigManager {
     ReadInt(AimbotHitboxes, BocekHitbox);
     ReadInt(AimbotHitboxes, KraberHitbox);
     ReadInt(AimbotHitboxes, ThrowingKnifeHitbox);
-
-    ReadBool(Ragebot, RagebotEnabled);
-    ReadBool(Ragebot, RageAimbot);
-    ReadInt(Ragebot, AimMethod);
-    ReadBool(Ragebot, ClosestHitbox);
-    ReadInt(Ragebot, Hitbox);
-    ReadInt(Ragebot, BindMethod);
-    ReadBool(Ragebot, OnFire);
-    ReadBool(Ragebot, OnADS);
-    ReadInt(Ragebot, AimBind);
-    ReadInt(Ragebot, ExtraBind);
-    ReadBool(Ragebot, VisCheck);
-    ReadBool(Ragebot, TeamCheck);
-    ReadInt(Ragebot, Priority);
-    ReadBool(Ragebot, AutoShoot);
-    ReadBool(Ragebot, PredictMovement);
-    ReadBool(Ragebot, PredictBulletDrop);
-    ReadFloat(Ragebot, PreditcionAmount);
-    ReadFloat(Ragebot, FinalDistance);
-    ReadFloat(Ragebot, Speed);
-    ReadFloat(Ragebot, Smooth);
-    ReadFloat(Ragebot, HipfireSmooth);
-    ReadFloat(Ragebot, ADSSmooth);
-    ReadFloat(Ragebot, SmoothDistance);
-    ReadInt(Ragebot, Delay);
-    ReadFloat(Ragebot, FOV);
-    ReadFloat(Ragebot, ZoomScale);
-    ReadFloat(Ragebot, MinDistance);
-    ReadFloat(Ragebot, HipfireDistance);
-    ReadFloat(Ragebot, ZoomDistance);
-    // Weapon Toggles
-    // Light
-    ReadBool(Ragebot, P2020);
-    ReadBool(Ragebot, RE45);
-    ReadBool(Ragebot, Alternator);
-    ReadBool(Ragebot, R99);
-    ReadBool(Ragebot, R301);
-    ReadBool(Ragebot, Spitfire);
-    ReadBool(Ragebot, G7);
-    // Heavy
-    ReadBool(Ragebot, Flatline);
-    ReadBool(Ragebot, Hemlock);
-    ReadBool(Ragebot, Repeater);
-    ReadBool(Ragebot, Rampage);
-    ReadBool(Ragebot, CARSMG);
-    // Energy
-    ReadBool(Ragebot, Havoc);
-    ReadBool(Ragebot, Devotion);
-    ReadBool(Ragebot, LSTAR);
-    ReadBool(Ragebot, TripleTake);
-    ReadBool(Ragebot, Volt);
-    ReadBool(Ragebot, Nemesis);
-    // Shotgun
-    ReadBool(Ragebot, Mozambique);
-    ReadBool(Ragebot, EVA8);
-    ReadBool(Ragebot, Peacekeeper);
-    ReadBool(Ragebot, Mastiff);
-    // Snipers
-    ReadBool(Ragebot, Longbow);
-    ReadBool(Ragebot, ChargeRifle);
-    ReadBool(Ragebot, Sentinel);
-    // Legendary
-    ReadBool(Ragebot, Wingman);
-    ReadBool(Ragebot, Prowler);
-    ReadBool(Ragebot, Bocek);
-    ReadBool(Ragebot, Kraber);
-    ReadBool(Ragebot, Knife);
-    ReadBool(Ragebot, RageRCS);
-    ReadFloat(Ragebot, RecoilRate);
-
-    ReadBool(Flickbot, Flickbot);
-    ReadInt(Flickbot, FlickbotMethod); // 0 = Mouse, 1 = Memory
-    ReadInt(Flickbot, FlickBind);
-    ReadBool(Flickbot, ClosestHitbox);
-    ReadInt(Flickbot, Hitbox);
-    ReadInt(Flickbot, Priority);
-    ReadBool(Flickbot, AutoShoot);
-    ReadInt(Flickbot, AutoShootDelay);
-    ReadBool(Flickbot, FlickBack);
-    ReadInt(Flickbot, FlickBackDelay);
-    ReadFloat(Flickbot, FlickBackSmoothing);
-    ReadBool(Flickbot, PredictMovement);
-    ReadBool(Flickbot, PredictBulletDrop);
-    ReadBool(Flickbot, TeamCheck);
-    ReadFloat(Flickbot, PreditcionAmount);
-    ReadFloat(Flickbot, FinalDistance);
-    ReadFloat(Flickbot, HipfireSmooth);
-    ReadFloat(Flickbot, ADSSmooth);
-    ReadFloat(Flickbot, SmoothDistance);
-    ReadInt(Flickbot, Delay);
-    ReadFloat(Flickbot, FOV);
-    ReadFloat(Flickbot, ZoomScale);
-    ReadFloat(Flickbot, MinDistance);
-    ReadFloat(Flickbot, HipfireDistance);
-    ReadFloat(Flickbot, ZoomDistance);
-    ReadFloat(Flickbot, Smooth);
-    ReadFloat(Flickbot, FlickBackSmooth);
-    // Weapon Toggles
-    // Light
-    ReadBool(Flickbot, P2020);
-    ReadBool(Flickbot, RE45);
-    ReadBool(Flickbot, Alternator);
-    ReadBool(Flickbot, R99);
-    ReadBool(Flickbot, R301);
-    ReadBool(Flickbot, Spitfire);
-    ReadBool(Flickbot, G7);
-    // Heavy
-    ReadBool(Flickbot, Flatline);
-    ReadBool(Flickbot, Hemlock);
-    ReadBool(Flickbot, Repeater);
-    ReadBool(Flickbot, Rampage);
-    ReadBool(Flickbot, CARSMG);
-    // Energy
-    ReadBool(Flickbot, Havoc);
-    ReadBool(Flickbot, Devotion);
-    ReadBool(Flickbot, LSTAR);
-    ReadBool(Flickbot, TripleTake);
-    ReadBool(Flickbot, Volt);
-    ReadBool(Flickbot, Nemesis);
-    // Shotgun
-    ReadBool(Flickbot, Mozambique);
-    ReadBool(Flickbot, EVA8);
-    ReadBool(Flickbot, Peacekeeper);
-    ReadBool(Flickbot, Mastiff);
-    // Snipers
-    ReadBool(Flickbot, Longbow);
-    ReadBool(Flickbot, ChargeRifle);
-    ReadBool(Flickbot, Sentinel);
-    // Legendary
-    ReadBool(Flickbot, Wingman);
-    ReadBool(Flickbot, Prowler);
-    ReadBool(Flickbot, Bocek);
-    ReadBool(Flickbot, Kraber);
-    ReadBool(Flickbot, Knife);
 
     ReadBool(RCS, RCSEnabled);
     ReadInt(RCS, RCSMode);

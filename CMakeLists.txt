@@ -17,6 +17,7 @@ add_library(imgui STATIC
   imgui/imgui_impl_glfw.cpp
   imgui/imgui_draw.cpp
   imgui/imgui_tables.cpp
+        Overlay/IconsFontAwesome5.h
 )
 
 # Set the include directories for ImGui
@@ -32,7 +33,8 @@ link_directories(/usr/local/lib)
 
 # Add the executable target
 add_executable(zapclient xap.cpp
-        Utils/termcolor.hpp)
+        Utils/termcolor.hpp
+        Overlay/AdvancedGUI.hpp)
 
 # Link the executable against the ImGui library, GLFW/OpenGL libraries and X11 libraries
 target_link_libraries(zapclient

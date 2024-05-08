@@ -15,11 +15,13 @@
 
 // Internals
 #include "Font.hpp"
+#include "IconsFontAwesome5.h"
+#include "Fontawesome.hpp"
 #include "../Utils/InputManager.hpp"
 #include "../Utils/Features.hpp"
 
+
 class Overlay {
-private:
   GLFWwindow *OverlayWindow = nullptr;
   const GLFWvidmode *vidMode = nullptr;
   int ScreenWidth = 0;
@@ -90,16 +92,26 @@ private:
     return ranges.Data;
   }
 
+  static ImVec4 HEXTOIV4(const std::string& hex) {
+    if (hex.length() != 8) {
+      std::cerr << "Invalid hexadecimal color code: " << hex << std::endl;
+      return {0.0f, 0.0f, 0.0f, 1.0f}; // Default to black with full opacity
+    }
+
+    const unsigned int colorValue = std::stoul(hex, nullptr, 16);
+    return {(colorValue >> 24 & 0xFF) / 255.0f, (colorValue >> 16 & 0xFF) / 255.0f, (colorValue >> 8 & 0xFF) / 255.0f, (colorValue & 0xFF) / 255.0f
+    };
+  }
+
+
 public:
-  int ProcessingTime;
-  long long StartTime;
-  int SleepTime;
-  int TimeLeftToSleep;
+  int ProcessingTime{};
+  long long StartTime{};
+  int SleepTime{};
+  int TimeLeftToSleep{};
 
   int AsciiArt = 5;
   int AsciiArtSpeed = 100;
-  int ThemeStyle;
-  int ThemeColor;
   bool TeamGamemode = true;
   bool ErrorLogging = false;
 
@@ -139,82 +151,91 @@ public:
     ImGui::CreateContext();
 
     ImFontConfig cfg;
-    /*cfg.OversampleH = cfg.OversampleV = 1;
-    cfg.PixelSnapH = true;
-    cfg.SizePixels = 13.0f;
-    cfg.GlyphOffset = {1.0f, -1.0f};*/
     cfg.OversampleH = cfg.OversampleV = 1;
     cfg.PixelSnapH = false;
     cfg.SizePixels = 13.0f; // 13.0f
     cfg.GlyphOffset = {0.0f, 0.0f};
     const ImGuiIO &io = ImGui::GetIO();
     (void) io;
-    io.Fonts->AddFontFromMemoryCompressedTTF(_compressedFontData, _compressedFontSize, cfg.SizePixels, &cfg, GetFontGlyphRanges());
+    io.Fonts->AddFontFromMemoryCompressedTTF(compressedFontData, compressedFontSize, cfg.SizePixels, &cfg, GetFontGlyphRanges());
+
+    static constexpr ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
+    ImFontConfig icons_config;
+    icons_config.MergeMode = true;
+    icons_config.PixelSnapH = true;
+    icons_config.GlyphMinAdvanceX = 32.0f;
+    io.Fonts->AddFontFromMemoryCompressedTTF(fontAwesome900_compressed_data, fontAwesome900_compressed_size, 32.0f, &icons_config, icons_ranges);
 
     ImGui::StyleColorsDark();
     ImGuiStyle &style = ImGui::GetStyle();
 
-    style.SliderThickness = 0.2f;
-    style.SliderContrast = 0.5f;
-    style.SliderValuePos = ImVec2(1.0f, 2.2f);
-    style.WindowPadding = ImVec2(8.00f, 8.00f);
+    style.Colors[ImGuiCol_Text] = HEXTOIV4("f0f0f0ff");           // all text
+    style.Colors[ImGuiCol_WindowBg] = HEXTOIV4("0d0d0dff");          // entire background
+    style.Colors[ImGuiCol_MenuBarBg] = HEXTOIV4("ffffffff");
+    style.Colors[ImGuiCol_Border] = HEXTOIV4("ffffffff");
+    style.Colors[ImGuiCol_BorderShadow] = HEXTOIV4("ffffffff");
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.10f);             // frame background
+    style.Colors[ImGuiCol_FrameBgHovered] = HEXTOIV4("ffffffff");  // frame bg hovered
+    style.Colors[ImGuiCol_FrameBgActive] = HEXTOIV4("ffffffff");   // frame background active??
+    style.Colors[ImGuiCol_CheckMark] = HEXTOIV4("ffffffff");       // checkbox checkmark
+    style.Colors[ImGuiCol_Button] = HEXTOIV4("57606fff");          // button
+    style.Colors[ImGuiCol_ButtonHovered] = HEXTOIV4("57606f80");   // button hovered
+    style.Colors[ImGuiCol_ButtonActive] = HEXTOIV4("57606fff");    // button clicked
+
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.67f, 0.67f, 0.67f, 0.7f);
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.48f, 0.48f, 0.48f, 0.7f);
+
+    // BG: 2f3542ff
+    // buttons: 57606fff
+    // accent: ffa502ff
+    // border: 747d8cff
+
+    style.WindowPadding = ImVec2(4.00f, 4.00f);
     style.FramePadding = ImVec2(5.00f, 2.00f);
     style.CellPadding = ImVec2(6.00f, 6.00f);
-    style.ItemSpacing = ImVec2(6.00f, 6.00f);
+    style.ItemSpacing = ImVec2(4.00f, 4.00f);
     style.ItemInnerSpacing = ImVec2(6.00f, 6.00f);
-    style.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-    style.IndentSpacing = 25;
-    style.ScrollbarSize = 12;
-    style.GrabMinSize = 10;
-    style.WindowBorderSize = 1;
-    style.ChildBorderSize = 1;
-    style.PopupBorderSize = 1;
-    style.FrameBorderSize = 1;
-    style.TabBorderSize = 1;
     style.WindowRounding = 7;
     style.ChildRounding = 4;
-    style.FrameRounding = 3;
-    style.PopupRounding = 4;
-    style.ScrollbarRounding = 9;
-    style.GrabRounding = 3;
-    style.LogSliderDeadzone = 4;
-    style.TabRounding = 4;
+    style.FrameRounding = 7;
+    /*
 
-    style.Colors[ImGuiCol_Text] = ImVec4(0.900000f, 0.900000f, 0.900000f, 1.000000f);
-    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.600000f, 0.600000f, 0.600000f, 1.000000f);
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.058824f, 0.058824f, 0.058824f, 1.000000f);
-    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.000000f, 0.000000f, 0.000000f, 0.000000f);
-    style.Colors[ImGuiCol_PopupBg] = ImVec4(57 / 255.f, 57 / 255.f, 57 / 255.f, 1);
-    style.Colors[ImGuiCol_Border] = ImVec4(0.500000f, 0.500000f, 0.500000f, 0.500000f);
-    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.000000f, 0.000000f, 0.000000f, 0.000000f);
-    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.430000f, 0.430000f, 0.430000f, 0.390000f);
-    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.470000f, 0.470000f, 0.690000f, 0.400000f);
-    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.420000f, 0.410000f, 0.640000f, 0.690000f);
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.270000f, 0.270000f, 0.540000f, 0.830000f);
-    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.320000f, 0.320000f, 0.630000f, 0.870000f);
+    style.Colors[ImGuiCol_Text] = HEXTOIV4("f0f0f0ff");
+    style.Colors[ImGuiCol_TextDisabled] = HEXTOIV4("969696ff");
+    style.Colors[ImGuiCol_WindowBg] = HEXTOIV4("141414ff");
+    style.Colors[ImGuiCol_ChildBg] = HEXTOIV4("00000000");
+    style.Colors[ImGuiCol_PopupBg] = HEXTOIV4("383838ff");
+    style.Colors[ImGuiCol_Border] = HEXTOIV4("80808080");
+    style.Colors[ImGuiCol_BorderShadow] = HEXTOIV4("00000000");
+    style.Colors[ImGuiCol_FrameBg] = HEXTOIV4("141414ff");
+    style.Colors[ImGuiCol_FrameBgHovered] = HEXTOIV4("7878b066");
+    style.Colors[ImGuiCol_FrameBgActive] = HEXTOIV4("6b69a3b0");
+    style.Colors[ImGuiCol_TitleBg] = HEXTOIV4("45458ad4");
+    style.Colors[ImGuiCol_TitleBgActive] = HEXTOIV4("5252a1de");
     style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.400000f, 0.400000f, 0.800000f, 0.200000f);
     style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.400000f, 0.400000f, 0.550000f, 0.800000f);
     style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.200000f, 0.250000f, 0.300000f, 0.000000f);
     style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.400000f, 0.400000f, 0.400000f, 0.300000f);
     style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.400000f, 0.400000f, 0.400000f, 0.400000f);
     style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.400000f, 0.400000f, 0.400000f, 0.600000f);
-    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.900000f, 0.900000f, 0.900000f, 0.500000f);
-    style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.000000f, 1.000000f, 1.000000f, 0.300000f);
+    style.Colors[ImGuiCol_CheckMark] = HEXTOIV4("ffbf00ff");
+    style.Colors[ImGuiCol_SliderGrab] = HEXTOIV4("ffffff4d");
     style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.410000f, 0.390000f, 0.800000f, 0.600000f);
-    style.Colors[ImGuiCol_Button] = ImVec4(0.350000f, 0.400000f, 0.610000f, 0.620000f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.400000f, 0.480000f, 0.710000f, 0.790000f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.460000f, 0.540000f, 0.800000f, 1.000000f);
+    style.Colors[ImGuiCol_Button] = HEXTOIV4("454545ff");
+    style.Colors[ImGuiCol_ButtonHovered] = HEXTOIV4("454545ff");
+    style.Colors[ImGuiCol_ButtonActive] = HEXTOIV4("454545ff");
     style.Colors[ImGuiCol_Header] = ImVec4(45 / 255.f, 45 / 255.f, 45 / 255.f, 1);
     style.Colors[ImGuiCol_HeaderHovered] = ImVec4(50 / 255.f, 50 / 255.f, 50 / 255.f, 1);
     style.Colors[ImGuiCol_HeaderActive] = ImVec4(45 / 255.f, 45 / 255.f, 45 / 255.f, 1);
-    style.Colors[ImGuiCol_Separator] = ImVec4(0.500000f, 0.500000f, 0.500000f, 0.600000f);
-    style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.600000f, 0.600000f, 0.700000f, 1.000000f);
-    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.700000f, 0.700000f, 0.900000f, 1.000000f);
+    style.Colors[ImGuiCol_Separator] = HEXTOIV4("ffbf00ff");
+    style.Colors[ImGuiCol_SeparatorHovered] = HEXTOIV4("00000000");
+    style.Colors[ImGuiCol_SeparatorActive] = HEXTOIV4("ffbf00ff");
     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.000000f, 1.000000f, 1.000000f, 0.160000f);
     style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.780000f, 0.820000f, 1.000000f, 0.600000f);
     style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.780000f, 0.820000f, 1.000000f, 0.900000f);
     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.000000f, 0.000000f, 1.000000f, 0.350000f);
     style.Colors[ImGuiCol_DragDropTarget] = ImVec4(1.000000f, 1.000000f, 0.000000f, 0.900000f);
+    */
 
     ImGui_ImplGlfw_InitForOpenGL(OverlayWindow, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");

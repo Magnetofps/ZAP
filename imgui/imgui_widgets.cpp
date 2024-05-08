@@ -150,54 +150,51 @@ static ImVec2           InputTextCalcTextSizeW(ImGuiContext* ctx, const ImWchar*
 
 int accent_color[4] = { 140, 131, 214, 255 };
 ImColor get_accent_color( float a = 1.f ) {
-
     return ImVec4( accent_color[0], accent_color[1], accent_color[2], a );
 }
 
-bool ImGui::SubTab(const char* label, bool selected, const ImVec2& size_arg)
+bool ImGui::SubTab(const char* label, const bool selected, const ImVec2& size_arg)
 {
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		if (window->SkipItems)
-			return false;
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
 
-		ImGuiContext& g = *GImGui;
-		const ImGuiStyle& style = g.Style;
-		const ImGuiID id = window->GetID(label);
-		const ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
+    const ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const ImVec2 label_size = CalcTextSize(label, nullptr, true);
 
-		ImVec2 pos = window->DC.CursorPos;
-		ImVec2 size = ImGui::CalcItemSize(size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+    const ImVec2 pos = window->DC.CursorPos;
+    const ImVec2 size = CalcItemSize(size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
 
-		const ImRect bb(pos, pos + size);
-		ImGui::ItemSize(size, style.FramePadding.y);
-		if (!ImGui::ItemAdd(bb, id))
-			return false;
+	const ImRect bb(pos, pos + size);
+	ItemSize(size, style.FramePadding.y);
+	if (!ItemAdd(bb, id))
+		return false;
 
-		float t = selected ? 1.0f : 0.0f;
-		float ANIM_SPEED = 0.50f; // Bigger = Slower
-		if (g.LastActiveId == g.CurrentWindow->GetID(label)) {
-			float t_anim = ImSaturate(g.LastActiveIdTimer / ANIM_SPEED);
-			t = selected ? (t_anim) : (1.0f - t_anim);
-		}
+	bool hovered, held;
+    const bool pressed = ButtonBehavior(bb, id, &hovered, &held, NULL);
 
-		bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, NULL);
+	if (hovered || held)
+		SetMouseCursor(7);
 
-		if (hovered || held)
-			ImGui::SetMouseCursor(7);
+    const ImVec4 colorText = selected ? ImVec4(1.00f, 0.65f, 0.00f, 1.00f) : ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
+    const ImVec4 color = selected ? ImVec4(1.00f, 0.65f, 0.00f, 1.00f) : ImVec4(0.55f, 0.55f, 0.55f, 0.50f);
+    constexpr ImVec4 empty = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 
-		/*ImVec4 col = ImLerp(ImVec4{ 140 / 255.f, 140 / 255.f, 140 / 255.f, 1.0f }, ImVec4{ 9 / 255.f, 169 / 255.f, 232 / 255.f, 1.0f }, t);
-		ImVec4 col2 = ImLerp(ImVec4{ 140 / 255.f, 140 / 255.f, 140 / 255.f, 0 / 255.f }, ImVec4{ 9 / 255.f, 169 / 255.f, 232 / 255.f, 1.0f }, t);*/
-        ImVec4 col = ImLerp(ImVec4{ 140 / 255.f, 140 / 255.f, 140 / 255.f, 1.0f }, ImVec4{ 255 / 255.f, 0, 0, 1.0f }, t);
-		ImVec4 col2 = ImLerp(ImVec4{ 140 / 255.f, 140 / 255.f, 140 / 255.f, 0 / 255.f }, ImVec4{ 255 / 255.f, 0, 0, 1.0f }, t);
+	PushStyleColor(ImGuiCol_Text, colorText);
+	RenderText(ImVec2(bb.Min.x + (size_arg.x / 2 - label_size.x / 2), bb.Min.y + (size_arg.y / 2 - label_size.y / 2)), label);
+	PopStyleColor();
 
-		ImGui::PushStyleColor(ImGuiCol_Text, col);
-		ImGui::RenderText(ImVec2(bb.Min.x + (size_arg.x / 2 - label_size.x / 2), bb.Min.y + (size_arg.y / 2 - label_size.y / 2)), label);
-		ImGui::PopStyleColor();
 
-		window->DrawList->AddLine(bb.Min + ImVec2(40, size_arg.y), bb.Max - ImVec2(40, 0), ImGui::GetColorU32(col2));
+    const ImVec2 Minimum = bb.Min + ImVec2(-5, 24);
+    const ImVec2 Maximum = bb.Max;
+    const ImVec2 Middle = ImVec2((Minimum.x + Maximum.x) * 0.5f, (Minimum.y + Maximum.y) * 0.5f);
 
-		return pressed;
+    window->DrawList->AddRectFilledMultiColor(Minimum, ImVec2(Middle.x, Maximum.y), GetColorU32(empty), GetColorU32(color), GetColorU32(color), GetColorU32(empty));
+    window->DrawList->AddRectFilledMultiColor(ImVec2(Middle.x, Minimum.y), Maximum, GetColorU32(color), GetColorU32(empty), GetColorU32(empty), GetColorU32(color));
+
+	return pressed;
 }
 
 void ImGui::TextEx(const char* text, const char* text_end, ImGuiTextFlags flags)

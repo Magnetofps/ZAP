@@ -54,10 +54,9 @@ struct Radar {
       return;
 
     if (InputManager::isKeyDownOrPress(Features::Radar::BigMapBind)) {
-      int localPlayerTeamID = Myself->Team;
-      if (localPlayerTeamID != 1) {
+      if (const int localPlayerTeamID = Myself->Team; localPlayerTeamID != 1) {
         float curTime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE);
-        double continueTime = 0.2;
+        constexpr double continueTime = 0.2;
         float endTime = curTime + continueTime;
         while (curTime < endTime) {
           Memory::Write<int>(Myself->BasePointer + OFF_TEAM_NUMBER, 1);
@@ -93,7 +92,7 @@ struct Radar {
     } catch (...) { return false; }
   }
 
-  void RenderDrawings(ImDrawList *Canvas, LocalPlayer *Myself, Overlay OverlayWindow) {
+  void RenderDrawings(LocalPlayer *Myself, const Overlay &OverlayWindow) {
     int ScreenWidth;
     int ScreenHeight;
     OverlayWindow.GetScreenResolution(ScreenWidth, ScreenHeight);
@@ -101,17 +100,16 @@ struct Radar {
       return;
 
     if (Features::Radar::MiniMap) {
-      ImVec2 Center = ImGui::GetMainViewport()->GetCenter();
+      const ImVec2 Center = ImGui::GetMainViewport()->GetCenter();
       ImGui::SetNextWindowPos(ImVec2(0.0f, Center.y), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
 
-      ImGui::Begin(("Radar"), (bool *) true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
+      ImGui::Begin("Radar", (bool *) true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-      for (auto i = 0; i < Players->size(); i++) {
-        Player *p = Players->at(i);
+      for (const auto p : *Players) {
         if (!p->IsHostile || !p->IsValid() || Myself->BasePointer == p->BasePointer)
           continue;
 
-        float radardistance = (int) ((Myself->LocalOrigin, p->Distance2DToLocalPlayer) / 39.62);
+        const float radardistance = static_cast<int>((Myself->LocalOrigin, p->Distance2DToLocalPlayer) / 39.62);
 
         MiniMapRadar(p->LocalOrigin, Myself->LocalOrigin, p->ViewAngles.y, radardistance, p->Team, p->ViewYaw);
       }
@@ -120,7 +118,7 @@ struct Radar {
   }
 
   // DRAW RADAR POINT mini Map
-  void DrawRadarPointMiniMap(Vector3D EnemyPos, Vector3D LocalPos, float targetY, float enemyDist, int TeamID, int xAxis, int yAxis, int width, int height, ImColor color, float targetyaw) {
+  void DrawRadarPointMiniMap(const Vector3D EnemyPos, const Vector3D LocalPos, const float targetY, const float enemyDist, const int TeamID, const int xAxis, const int yAxis, const int width, const int height, const float targetyaw) {
     bool out = false;
     Vector3D siz;
     siz.x = width;
@@ -130,32 +128,31 @@ struct Radar {
     pos.y = yAxis;
     bool ck = false;
 
-    Vector3D single = Renderer::RotatePoint(EnemyPos, LocalPos, pos.x, pos.y, siz.x, siz.y, targetY, 0.3f, &ck);
-    if (enemyDist >= 0.f && enemyDist < Features::Radar::MiniMapRange) { for (int i = 1; i <= 30; i++) { Renderer::TeamMiniMap(single.x, single.y, Features::Radar::MiniMapDotSize, TeamID, targetyaw, Features::Radar::MiniMapDotSize, Features::Radar::MiniMapBlackBGSize, ImColor(Features::Radar::CircleColor[0], Features::Radar::CircleColor[1], Features::Radar::CircleColor[2], Features::Radar::CircleColor[3])); } }
+    const Vector3D single = Renderer::RotatePoint(EnemyPos, LocalPos, pos.x, pos.y, siz.x, siz.y, targetY, 0.3f, &ck);
+    if (enemyDist >= 0.f && enemyDist < Features::Radar::MiniMapRange) {
+      for (int i = 1; i <= 30; i++) {
+        Renderer::TeamMiniMap(single.x, single.y, Features::Radar::MiniMapDotSize, TeamID, targetyaw, Features::Radar::MiniMapDotSize, Features::Radar::MiniMapBlackBGSize, ImColor(Features::Radar::CircleColor[0], Features::Radar::CircleColor[1], Features::Radar::CircleColor[2], Features::Radar::CircleColor[3]));
+      }
+    }
   }
 
   // MINI MAP RADAR IMPLEMENTATION
-  void MiniMapRadar(Vector3D EnemyPos, Vector3D LocalPos, float targetY, float eneamyDist, int TeamId, float targetyaw) {
-    /*ImGuiStyle* style = &ImGui::GetStyle();
-    style->WindowRounding = 0.2f;
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.13529413f, 0.14705884f, 0.15490198f, 0.82f));*/
-    ImGuiWindowFlags TargetFlags;
-    TargetFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoResize | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar;
+  void MiniMapRadar(const Vector3D EnemyPos, const Vector3D LocalPos, const float targetY, const float enemyDist, const int TeamId, const float targetyaw) {
+    constexpr ImGuiWindowFlags TargetFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar;
     if (Features::Radar::MiniMap) {
       // 1920*1080: 215 x 215
       // 2560*1440: 335 x 335
-      ImGui::SetNextWindowSize({Features::Radar::MiniMapScaleX, Features::Radar::MiniMapScaleY});
-      ImGui::Begin(("##Radar"), 0, TargetFlags); {
-        ImDrawList *Draw = ImGui::GetWindowDrawList();
-        ImVec2 DrawPos = ImGui::GetCursorScreenPos();
-        ImVec2 DrawSize = ImGui::GetContentRegionAvail();
-        ImVec2 midRadar = ImVec2(DrawPos.x + (DrawSize.x / 2), DrawPos.y + (DrawSize.y / 2));
+      ImGui::SetNextWindowSize({static_cast<float>(Features::Radar::MiniMapScaleX), static_cast<float>(Features::Radar::MiniMapScaleY)});
+      ImGui::Begin(("##Radar"), nullptr, TargetFlags); {
+        const ImVec2 DrawPos = ImGui::GetCursorScreenPos();
+        const ImVec2 DrawSize = ImGui::GetContentRegionAvail();
+        const ImVec2 midRadar = ImVec2(DrawPos.x + (DrawSize.x / 2), DrawPos.y + (DrawSize.y / 2));
         if (Features::Radar::MiniMapGuides) {
-          ImVec2 startHorizontal(midRadar.x - DrawSize.x / 2.f, midRadar.y);
-          ImVec2 endHorizontal(midRadar.x + DrawSize.x / 2.f, midRadar.y);
-          ImVec2 startVertical(midRadar.x, midRadar.y - DrawSize.y / 2.f);
-          ImVec2 endVertical(midRadar.x, midRadar.y + DrawSize.y / 2.f);
-          float extension = -500000.f;
+          const ImVec2 startHorizontal(midRadar.x - DrawSize.x / 2.f, midRadar.y);
+          const ImVec2 endHorizontal(midRadar.x + DrawSize.x / 2.f, midRadar.y);
+          const ImVec2 startVertical(midRadar.x, midRadar.y - DrawSize.y / 2.f);
+          const ImVec2 endVertical(midRadar.x, midRadar.y + DrawSize.y / 2.f);
+          constexpr float extension = -500000.f;
 
           ImGui::GetWindowDrawList()->AddLine(startHorizontal, ImVec2(startHorizontal.x - extension, endHorizontal.y), IM_COL32(255, 255, 255, 255));
           ImGui::GetWindowDrawList()->AddLine(endHorizontal, ImVec2(endHorizontal.x + extension, endHorizontal.y), IM_COL32(255, 255, 255, 255));
@@ -164,7 +161,7 @@ struct Radar {
           ImGui::GetWindowDrawList()->AddLine(endVertical, ImVec2(endVertical.x, endVertical.y + extension), IM_COL32(255, 255, 255, 255));
         }
 
-        DrawRadarPointMiniMap(EnemyPos, LocalPos, targetY, eneamyDist, TeamId, DrawPos.x, DrawPos.y, DrawSize.x, DrawSize.y, {255, 255, 255, 255}, targetyaw);
+        DrawRadarPointMiniMap(EnemyPos, LocalPos, targetY, enemyDist, TeamId, DrawPos.x, DrawPos.y, DrawSize.x, DrawSize.y, targetyaw);
       }
       ImGui::End();
     }

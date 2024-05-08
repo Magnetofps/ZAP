@@ -45,7 +45,6 @@ struct Legitbot {
     try {
       Config::Aimbot::AimbotEnabled = Features::Aimbot::AimbotEnabled;
       Config::Aimbot::BindMethod = Features::Aimbot::BindMethod;
-      Config::Aimbot::AimbotMode = Features::Aimbot::AimbotMode;
       Config::Aimbot::InputMethod = Features::Aimbot::InputMethod;
       Config::Aimbot::ClosestHitbox = Features::Aimbot::ClosestHitbox;
       Config::Aimbot::OnFire = Features::Aimbot::OnFire;
@@ -1314,108 +1313,81 @@ struct Legitbot {
         return; // Dont aimbot whilst menu is open
 
       UpdateAimList();
-      if (Features::Aimbot::AdvancedAim) { UpdateAimbotSettings(); }
+      if (Features::Aimbot::AdvancedAim)
+        UpdateAimbotSettings();
 
-      if (Features::Aimbot::AimbotMode == 0 or Features::Aimbot::AimbotMode == 2) { // Cubic Beizer (xap-client) & [New] Cubic Bezier (Testing)
-        if (!Myself->IsCombatReady()) {
-          CurrentTarget = nullptr;
-          return;
-        }
+      if (!Myself->IsCombatReady()) {
+        CurrentTarget = nullptr;
+        return;
+      }
 
-        if (Features::Aimbot::AimList.find(Myself->WeaponIndex) == Features::Aimbot::AimList.end()) {
-          ReleaseTarget();
-          return;
-        }
+      if (!Features::Aimbot::AimList.contains(Myself->WeaponIndex)) {
+        ReleaseTarget();
+        return;
+      }
 
-        if (Myself->IsHoldingGrenade) {
-          ReleaseTarget();
-          return;
-        }
+      if (Myself->IsHoldingGrenade) {
+        ReleaseTarget();
+        return;
+      }
 
-        if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
-          if (Features::Aimbot::OnFire && Features::Aimbot::OnADS) {
-            if (!Myself->IsInAttack) {
-              if (!Myself->IsZooming) {
-                ReleaseTarget();
-                return;
-              }
-            }
-            if (!Myself->IsZooming) {
-              if (!Myself->IsInAttack) {
-                ReleaseTarget();
-                return;
-              }
-            }
-          }
-
-          if (Features::Aimbot::OnFire && !Features::Aimbot::OnADS) {
-            if (!Myself->IsInAttack) {
-              ReleaseTarget();
-              return;
-            }
-          }
-
-          if (Features::Aimbot::OnFire && !Features::Aimbot::OnFire) {
+      if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
+        if (Features::Aimbot::OnFire && Features::Aimbot::OnADS) {
+          if (!Myself->IsInAttack) {
             if (!Myself->IsZooming) {
               ReleaseTarget();
               return;
             }
           }
-        } else if (Features::Aimbot::BindMethod == 1) { // Keybinds
-          if (!isKeybindDown()) {
+          if (!Myself->IsZooming) {
+            if (!Myself->IsInAttack) {
+              ReleaseTarget();
+              return;
+            }
+          }
+        }
+
+        if (Features::Aimbot::OnFire && !Features::Aimbot::OnADS) {
+          if (!Myself->IsInAttack) {
             ReleaseTarget();
             return;
           }
         }
 
-        if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
-          if (TargetSelected && !Features::Aimbot::TargetSwitching) { return; }
-
-          Target = FindBestTarget();
-          if (!IsValidTarget(Target)) {
+        if (Features::Aimbot::OnFire && !Features::Aimbot::OnFire) {
+          if (!Myself->IsZooming) {
             ReleaseTarget();
             return;
           }
-
-          CurrentTarget = Target;
-          CurrentTarget->IsLockedOn = true;
-          TargetSelected = true;
         }
-
-        if (TargetSelected && CurrentTarget) {
-          if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
-            StartAiming();
-            LastAimTime = now + std::chrono::milliseconds(static_cast<int>(Utils::RandomRange(1, 10)));
-          }
+      } else if (Features::Aimbot::BindMethod == 1) { // Keybinds
+        if (!isKeybindDown()) {
+          ReleaseTarget();
           return;
         }
       }
-    }
 
-    // Grinder Aimbot Mode
-    if (Features::Aimbot::InputMethod == 1) { // Memory / Controller - Does not work
-      return;
-    }
+      if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
+        if (TargetSelected && !Features::Aimbot::TargetSwitching) { return; }
 
-    if (!active()) {
-      releaseTarget();
-      return;
+        Target = FindBestTarget();
+        if (!IsValidTarget(Target)) {
+          ReleaseTarget();
+          return;
+        }
+
+        CurrentTarget = Target;
+        CurrentTarget->IsLockedOn = true;
+        TargetSelected = true;
+      }
+
+      if (TargetSelected && CurrentTarget) {
+        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
+          StartAiming();
+          LastAimTime = now + std::chrono::milliseconds(static_cast<int>(Utils::RandomRange(1, 10)));
+        }
+      }
     }
-    if (!Features::Aimbot::AimList.contains(Myself->WeaponIndex))
-      return;
-    if (Myself->IsHoldingGrenade)
-      return;
-    if (CurrentTarget == nullptr)
-      assignTarget();
-    if (CurrentTarget == nullptr)
-      return;
-    if (!CurrentTarget->IsVisible)
-      return;
-    if (CurrentTarget->Distance2DToLocalPlayer < Conversion::ToGameUnits(Features::Aimbot::AdvancedMinDistance1))
-      return;
-    if (CurrentTarget->Distance2DToLocalPlayer > Conversion::ToGameUnits(Features::Aimbot::AdvancedMaxDistance1))
-      return;
-    moveMouse();
   }
 
   void UpdateRCS() const {
@@ -1477,89 +1449,41 @@ struct Legitbot {
   }
 
   void StartAiming() const {
-    if (Features::Aimbot::InputMethod == 0) { // MoveMouse
-      if (Features::Aimbot::AimbotMode == 0) { // Cubic Beizer
-        // Get Target Angle
-        QAngle DesiredAngles = QAngle(0, 0);
-        if (!GetAngle(CurrentTarget, DesiredAngles))
-          return;
+    if (Features::Aimbot::InputMethod == 0) { // Mouse movement
+      // Get Target Angle
+      QAngle DesiredAngles = QAngle(0, 0);
+      if (!GetAngle(CurrentTarget, DesiredAngles))
+        return;
 
-        if (Features::RCS::RCSEnabled && Features::RCS::RCSMode == 1) {
-          auto PunchAngles = Memory::Read<QAngle>(Myself->BasePointer + OFF_PUNCH_ANGLES);
-          if (Features::RCS::AdvancedRCS) {
-            PunchAngles.x *= (Features::RCS::AdvancedPitchReduction / 100.f);
-            PunchAngles.y *= (Features::RCS::AdvancedYawReduction / 100.f);
-          } else if (!Features::RCS::AdvancedRCS) {
-            PunchAngles.x *= (Features::RCS::PitchReduction / 100.f);
-            PunchAngles.y *= (Features::RCS::YawReduction / 100.f);
-          }
-
-          DesiredAngles -= PunchAngles;
+      if (Features::RCS::RCSEnabled && Features::RCS::RCSMode == 1) {
+        auto PunchAngles = Memory::Read<QAngle>(Myself->BasePointer + OFF_PUNCH_ANGLES);
+        if (Features::RCS::AdvancedRCS) {
+          PunchAngles.x *= (Features::RCS::AdvancedPitchReduction / 100.f);
+          PunchAngles.y *= (Features::RCS::AdvancedYawReduction / 100.f);
+        } else if (!Features::RCS::AdvancedRCS) {
+          PunchAngles.x *= (Features::RCS::PitchReduction / 100.f);
+          PunchAngles.y *= (Features::RCS::YawReduction / 100.f);
         }
 
-        if (DesiredAngles == QAngle(0, 0))
-          return;
-        DesiredAngles.NormalizeAngles();
-
-        // Smoothing
-        SmoothAngle(CurrentTarget, DesiredAngles);
-
-        const Vector2D aimbotDelta = Vector2D(CalculatePitchIncrement(DesiredAngles), CalculateYawIncrement(DesiredAngles)).Multiply(Features::Aimbot::AdvancedAim ? Features::Aimbot::AdvancedSpeed : Features::Aimbot::Speed);
-        const int totalYawIncrementInt = RoundHalfEven(AL1AF0(aimbotDelta.x));
-        const int totalPitchIncrementInt = RoundHalfEven(AL1AF0(aimbotDelta.y * -1));
-
-        // Move Mouse
-        if (totalPitchIncrementInt == 0 && totalYawIncrementInt == 0)
-          return;
-        X11Display->MoveMouse(totalYawIncrementInt, totalPitchIncrementInt);
+        DesiredAngles -= PunchAngles;
       }
 
-      if (Features::Aimbot::AimbotMode == 2) { // [New] Cubic Beizer (Testing)
-        // Get Target Angle
-        QAngle DesiredAngles = QAngle(0, 0);
-        if (!GetAngle(CurrentTarget, DesiredAngles))
-          return;
+      if (DesiredAngles == QAngle(0, 0))
+        return;
 
-        // Calculate Increment
-        const Vector2D DesiredAnglesIncrement = Vector2D(CalculatePitchIncrement(DesiredAngles), CalculateYawIncrement(DesiredAngles));
+      DesiredAngles.NormalizeAngles();
 
-        // Calculate Smooth
-        const float Extra = Features::Aimbot::MouseExtraSmoothing / CurrentTarget->DistanceToLocalPlayer;
-        float Smooth = 0;
-        if (Features::Aimbot::AdvancedAim)
-          return; // Will setup advanced aim in the future
+      // Smoothing
+      SmoothAngle(CurrentTarget, DesiredAngles);
 
-        // static vs random smoothing is such a stupid stupid stupid concept to begin with
-        if (Features::Aimbot::SmoothingMethod == 0) { // Static
-          if (Myself->IsZooming) { Smooth = Features::Aimbot::MouseADSSmoothing; } else { Smooth = Features::Aimbot::MouseHipfireSmoothing; }
-        } else if (Features::Aimbot::SmoothingMethod == 1) { // Random
-          if (Myself->IsZooming) {
-            Smooth = RandomSmoothing(Features::Aimbot::MinMouseADSSmoothing, Features::Aimbot::MaxMouseADSSmoothing);
-          } else {
-            Smooth = RandomSmoothing(Features::Aimbot::MinMouseHipfireSmoothing, Features::Aimbot::MaxMouseHipfireSmoothing);
-          }
-        }
+      const Vector2D aimbotDelta = Vector2D(CalculatePitchIncrement(DesiredAngles), CalculateYawIncrement(DesiredAngles)).Multiply(Features::Aimbot::AdvancedAim ? Features::Aimbot::AdvancedSpeed : Features::Aimbot::Speed);
+      const int totalYawIncrementInt = RoundHalfEven(AL1AF0(aimbotDelta.x));
+      const int totalPitchIncrementInt = RoundHalfEven(AL1AF0(aimbotDelta.y * -1));
 
-        const float TotalSmooth = Smooth + Extra;
-
-        // Aimbot calcs
-        const Vector2D aimbotDelta = DesiredAnglesIncrement.Divide(TotalSmooth).Multiply(Features::Aimbot::Speed);
-        const double aimYawIncrement = aimbotDelta.y * -1;
-        const double aimPitchIncrement = aimbotDelta.x;
-
-        // Combine
-        const double totalPitchIncrement = aimPitchIncrement;
-        const double totalYawIncrement = aimYawIncrement;
-
-        // Turn into integers
-        const int totalPitchIncrementInt = RoundHalfEven(AL1AF0(totalPitchIncrement));
-        const int totalYawIncrementInt = RoundHalfEven(AL1AF0(totalYawIncrement));
-
-        // Move Mouse
-        if (totalPitchIncrementInt == 0 && totalYawIncrementInt == 0)
-          return;
-        X11Display->MoveMouse(totalPitchIncrementInt, totalYawIncrementInt);
-      }
+      // Move Mouse
+      if (totalPitchIncrementInt == 0 && totalYawIncrementInt == 0)
+        return;
+      X11Display->MoveMouse(totalYawIncrementInt, totalPitchIncrementInt);
     } else if (Features::Aimbot::InputMethod == 1) { // Write ViewAngles / Controller
       // Get Target Angle
       QAngle DesiredAngles = QAngle(0, 0);
@@ -1659,43 +1583,22 @@ struct Legitbot {
   }
 
   static bool IsValidTarget(Player *target) {
-    if (Features::Aimbot::TeamCheck) {
-      if (Features::Aimbot::VisCheck) {
-        if (target == nullptr || !target->IsCombatReady() || !target->IsVisible || !target->IsHostile || target->
-            Distance2DToLocalPlayer < Conversion::ToGameUnits(Features::Aimbot::AdvancedMinDistance1) || target->
-            Distance2DToLocalPlayer > Conversion::ToGameUnits(Features::Aimbot::AdvancedMaxDistance1))
-          // Ignore the advanced part, works for advanced + simple aimbot
-          return false;
-        return true;
-      }
-      if (!Features::Aimbot::VisCheck) {
-        if (target == nullptr || !target->IsCombatReady() || !target->IsHostile || target->Distance2DToLocalPlayer <
-            Conversion::ToGameUnits(Features::Aimbot::AdvancedMinDistance1) || target->Distance2DToLocalPlayer >
-            Conversion::ToGameUnits(Features::Aimbot::AdvancedMaxDistance1))
-          // Ignore the advanced part, works for advanced + simple aimbot
-          return false;
-        return true;
-      }
-    }
-    if (!Features::Aimbot::TeamCheck) {
-      if (Features::Aimbot::VisCheck) {
-        if (target == nullptr || !target->IsCombatReady() || !target->IsVisible || target->Distance2DToLocalPlayer <
-            Conversion::ToGameUnits(Features::Aimbot::AdvancedMinDistance1) || target->Distance2DToLocalPlayer >
-            Conversion::ToGameUnits(Features::Aimbot::AdvancedMaxDistance1))
-          // Ignore the advanced part, works for advanced + simple aimbot
-          return false;
-        return true;
-      }
-      if (!Features::Aimbot::VisCheck) {
-        if (target == nullptr || !target->IsCombatReady() || target->Distance2DToLocalPlayer <
-            Conversion::ToGameUnits(Features::Aimbot::AdvancedMinDistance1) || target->Distance2DToLocalPlayer >
-            Conversion::ToGameUnits(Features::Aimbot::AdvancedMaxDistance1))
-          // Ignore the advanced part, works for advanced + simple aimbot
-          return false;
-        return true;
-      }
-    }
-    return false;
+    if (target == nullptr)
+      return false;
+
+    if (!target->IsCombatReady())
+      return false;
+
+    if (Features::Aimbot::VisCheck && !target->IsVisible)
+      return false;
+
+    if (target->Distance2DToLocalPlayer < Conversion::ToGameUnits(Features::Aimbot::AdvancedMinDistance1))
+      return false;
+
+    if (target->Distance2DToLocalPlayer > Conversion::ToGameUnits(Features::Aimbot::AdvancedMaxDistance1))
+      return false;
+
+    return true;
   }
 
   [[nodiscard]] double CalculateDistanceFromCrosshair(const Vector3D TargetPosition) const {
@@ -1772,109 +1675,6 @@ struct Legitbot {
       }
     }
     return NearestTarget;
-  }
-
-  // Grinder Aimbot
-  void moveMouse() const {
-    // calculate smoothing
-    const float EXTRA_SMOOTH = Features::Aimbot::AdvancedAim ? Features::Aimbot::AdvancedExtraSmooth1 / CurrentTarget->DistanceToLocalPlayer : Features::Aimbot::ExtraSmoothing / CurrentTarget->DistanceToLocalPlayer;
-
-    float TOTAL_SMOOTH;
-    if (Features::Aimbot::AdvancedAim) {
-      TOTAL_SMOOTH = (Myself->IsZooming ? Features::Aimbot::AdvancedADSSmooth1 : Features::Aimbot::AdvancedHipfireSmooth1) + EXTRA_SMOOTH;
-    } else {
-      if (Myself->IsZooming) { // ADS
-        TOTAL_SMOOTH = (Features::Aimbot::SmoothingMethod == 0 ? Features::Aimbot::ADSSmooth1 : RandomSmoothing(Features::Aimbot::MinADSSmooth1, Features::Aimbot::MaxHipfireSmooth1)) + EXTRA_SMOOTH;
-      } else { // Hipfire
-        TOTAL_SMOOTH = (Features::Aimbot::SmoothingMethod == 0 ? Features::Aimbot::HipfireSmooth1 : (RandomSmoothing(Features::Aimbot::MinHipfireSmooth1, Features::Aimbot::MaxHipfireSmooth1))) + EXTRA_SMOOTH;
-      }
-    }
-
-    // Aimbot calcs
-    const FloatVector2D aimbotDelta = CurrentTarget->aimbotDesiredAnglesIncrement.multiply(100).divide(TOTAL_SMOOTH);
-
-    const double aimYawIncrement = aimbotDelta.y * -1;
-    const double aimPitchIncrement = aimbotDelta.x;
-    // combine
-    const double totalPitchIncrement = aimPitchIncrement;
-    const double totalYawIncrement = aimYawIncrement;
-    // turn into integers
-    int totalPitchIncrementInt = RoundHalfEven(AL1AF0(totalPitchIncrement));
-    int totalYawIncrementInt = RoundHalfEven(AL1AF0(totalYawIncrement));
-    // deadzone - are we close enough yet?
-    if (Features::Aimbot::AdvancedAim) {
-      if (fabs(CurrentTarget->aimbotDesiredAnglesIncrement.x) < Features::Aimbot::AdvancedDeadzone)
-        totalPitchIncrementInt = 0;
-      if (fabs(CurrentTarget->aimbotDesiredAnglesIncrement.y) < Features::Aimbot::AdvancedDeadzone)
-        totalYawIncrementInt = 0;
-    } else if (!Features::Aimbot::AdvancedAim) {
-      if (fabs(CurrentTarget->aimbotDesiredAnglesIncrement.x) < Features::Aimbot::Deadzone)
-        totalPitchIncrementInt = 0;
-      if (fabs(CurrentTarget->aimbotDesiredAnglesIncrement.y) < Features::Aimbot::Deadzone)
-        totalYawIncrementInt = 0;
-    }
-
-    if (totalPitchIncrementInt == 0 && totalYawIncrementInt == 0)
-      return;
-    // move mouse
-    X11Display->MoveMouse(totalPitchIncrementInt, totalYawIncrementInt);
-  }
-
-  [[nodiscard]] bool active() const {
-    const bool aimbotIsOn = Features::Aimbot::AimbotEnabled;
-    const bool combatReady = Myself->IsCombatReady();
-    const bool weaponDiscarded = Myself->weaponDiscarded;
-
-    const bool activatedByAimBind = InputManager::isKeyDownOrPress(Features::AimbotBinds::AimBind);
-    const bool activatedByExtraBind = InputManager::isKeyDownOrPress(Features::AimbotBinds::ExtraBind);
-    const bool activatedByAttackingAndIsAttacking = Features::Aimbot::OnFire && Myself->IsInAttack;
-    const bool activatedByADSAndIsADSing = Features::Aimbot::OnADS && Myself->IsZooming;
-    if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
-      const bool active = aimbotIsOn && combatReady && !weaponDiscarded && (activatedByAttackingAndIsAttacking || activatedByADSAndIsADSing);
-      return active;
-    }
-    if (Features::Aimbot::BindMethod == 1) { // Keybinds
-      const bool active = aimbotIsOn && combatReady && !weaponDiscarded && (activatedByAimBind || activatedByExtraBind);
-      return active;
-    }
-    return false;
-  }
-
-  void assignTarget() {
-    for (const auto p : *Players) {
-      if (!p->IsCombatReady())
-        continue;
-      if (!p->IsHostile && Features::Aimbot::TeamCheck)
-        continue;
-      if (!p->IsVisible)
-        continue;
-      if (p->IsAimedAt)
-        continue;
-      if (fabs(p->aimbotDesiredAnglesIncrement.x) > Features::Aimbot::FOV1)
-        continue;
-      if (fabs(p->aimbotDesiredAnglesIncrement.y) > Features::Aimbot::FOV1)
-        continue;
-      if (CurrentTarget == nullptr || p->aimbotScore > CurrentTarget->aimbotScore) {
-        CurrentTarget = p;
-        CurrentTarget->IsLockedOn = true;
-      }
-    }
-  }
-
-  void releaseTarget() {
-    if (CurrentTarget != nullptr && CurrentTarget->IsValid())
-      CurrentTarget->IsLockedOn = false;
-    CurrentTarget = nullptr;
-  }
-
-  void resetLockFlag() const {
-    for (const auto p : *Players) {
-      if (!p->IsCombatReady())
-        continue;
-      p->IsLockedOn = false;
-    }
-    if (CurrentTarget != nullptr)
-      CurrentTarget->IsLockedOn = true;
   }
 
   // Math

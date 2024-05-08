@@ -19,10 +19,8 @@
 #include "Core/Camera.hpp"
 
 #include "Features/Legitbot.hpp"
-#include "Features/Ragebot.hpp"
 #include "Features/Sense.hpp"
 #include "Features/Radar.hpp"
-#include "Features/Flickbot.hpp"
 #include "Features/Triggerbot.hpp"
 #include "Features/Misc.hpp"
 #include "Features/Glow.hpp"
@@ -58,14 +56,12 @@ Sense *ESP = new Sense(Map, Players, GameCamera, Myself, X11Display);
 Radar *MapRadar = new Radar(X11Display, Players, GameCamera, Map, Myself);
 Glow *GlowESP = new Glow(Map, Players, GameCamera, Myself);
 Legitbot *Legit = new Legitbot(X11Display, Map, Myself, Players);
-Ragebot *Rage = new Ragebot(X11Display, Map, Myself, Players);
 Triggerbot *Trigger = new Triggerbot(X11Display, Map, Myself, Players);
-Flickbot *Flick = new Flickbot(X11Display, Map, Myself, Players);
 Misc *MiscTab = new Misc(X11Display, Map, Myself, Players);
 Overlay *Home = new Overlay;
 AdvancedGUI *Advanced = new AdvancedGUI;
 Menu *GUI = new Menu(Myself, Advanced);
-ConfigManager *Configs = new ConfigManager(Legit, Rage, Flick, Trigger, GlowESP, ESP, MapRadar, MiscTab);
+ConfigManager *Configs = new ConfigManager(Legit, Trigger, GlowESP, ESP, MapRadar, MiscTab);
 
 // Booleans and Variables
 bool IsMenuOpened = true;
@@ -91,7 +87,11 @@ void HandleKeyEvent(Display *display, XEvent *Event) {
 void X11EventListener() {
   Display *display = XOpenDisplay(nullptr);
   Window root = DefaultRootWindow(display);
-  try { XGrabKey(display, XKeysymToKeycode(display, XK_Insert), AnyModifier, root, False, GrabModeAsync, GrabModeAsync); } catch (XErrorEvent) { std::cout << " ! >> Failed to grab insert key, is another application already using it?" << std::endl; }
+  try {
+    XGrabKey(display, XKeysymToKeycode(display, XK_Insert), AnyModifier, root, False, GrabModeAsync, GrabModeAsync);
+  } catch (XErrorEvent) {
+    std::cout << " ! >> Failed to grab insert key, is another application already using it?" << std::endl;
+  }
   XEvent event;
   while (!StopThread) {
     XNextEvent(display, &event);
@@ -117,14 +117,17 @@ bool InitializeOverlayWindow() {
 // Interface
 ImVec4 ProcessingTimeColor;
 
-void CreateTabButton(const char* title, const Menu::MenuTabs tab, const ImVec2 size) {
-  const ImVec4 BaseTabButton = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.00f);
+void CreateTabButton(const char *title, const Menu::MenuTabs tab, const ImVec2 size) {
+  constexpr ImVec4 BaseTabButton = ImVec4(0.20f, 0.20f, 0.20f, 0.10f);
   const ImVec4 BaseTabButtonActive = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.250f);
+  constexpr ImVec4 BaseTabButtonHovered = ImVec4(0.35f, 0.38f, 0.43f, 0.5f);
   ImGui::PushStyleColor(ImGuiCol_Button, (GUI->CurrentTab == tab) ? BaseTabButtonActive : BaseTabButton);
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (GUI->CurrentTab == tab) ? BaseTabButtonActive : BaseTabButtonHovered);
+  ImGui::SetCursorPosX(15);
   if (ImGui::Button(title, size)) {
     GUI->CurrentTab = tab;
   }
-  ImGui::PopStyleColor(1);
+  ImGui::PopStyleColor(2);
 }
 
 void RenderUI() {
@@ -133,8 +136,8 @@ void RenderUI() {
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::Begin("##Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiSliderFlags_AlwaysClamp);
   Canvas = ImGui::GetWindowDrawList();
-  // if (Map->IsPlayable)
-  MapRadar->RenderDrawings(Canvas, Myself, OverlayWindow);
+
+  MapRadar->RenderDrawings(Myself, OverlayWindow);
   ESP->RenderWatermark(Canvas, Myself, OverlayWindow);
   ESP->RenderDrawings(Canvas, Legit, Myself, OverlayWindow);
   ImGui::End();
@@ -142,68 +145,20 @@ void RenderUI() {
   if (!Features::Home::IsMenuOpened)
     return;
 
-  // Window Size
-  ImGui::SetNextWindowSizeConstraints(ImVec2(GUI->WindowWidth, GUI->WindowHeight), ImVec2(GUI->WindowWidth, GUI->WindowHeight));
-  ImGui::SetNextWindowSize(ImVec2(GUI->WindowWidth, GUI->WindowHeight), ImGuiCond_FirstUseEver);
+  ImVec2 PrevWindow;
+  ImGui::SetNextWindowSizeConstraints(ImVec2(GUI->MainWidth, GUI->MainHeight), ImVec2(GUI->WindowWidth / 6 * 5, GUI->WindowHeight));
+  ImGui::SetNextWindowSize(ImVec2(GUI->MainWidth, GUI->MainHeight), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2, io.DisplaySize.y / 2), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
 
   if (ImGui::Begin("##CheatGUI", &Features::Home::IsMenuOpened, GUI->WindowFlags)) {
-    const ImVec2 MenuSize = ImGui::GetWindowSize();
-
-    // Render Left Panel
-    ImGui::SetCursorPos(ImVec2(10, 32));
-
     ImVec4 *colors = ImGui::GetStyle().Colors;
-
-    colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    if (ImGui::BeginChild("##LeftPanel", ImVec2(GUI->WindowWidth / 6 - 5, GUI->WindowHeight - 43), true, ImGuiWindowFlags_NoScrollbar)) {
-      // Color the background of the tab button brighter if it is the active tab
-      const ImVec4 BaseTabButton = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.00f);
-      const ImVec4 BaseTabButtonActive = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.250f);
-
-      ImGuiStyle &Style = ImGui::GetStyle();
-      constexpr int ButtonHeight = 43;
-      Style.FrameBorderSize = 1;
-
-      colors[ImGuiCol_ButtonHovered] = BaseTabButtonActive;
-      colors[ImGuiCol_ButtonActive] = BaseTabButtonActive;
-      colors[ImGuiCol_Button] = BaseTabButton;
-      colors[ImGuiCol_Text] = GUI->TextColor;
-
-      CreateTabButton("LEGITBOT", Menu::Legitbot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("RAGEBOT", Menu::Ragebot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("FLICKBOT", Menu::Flickbot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("TRIGGERBOT", Menu::Triggerbot, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("GLOW", Menu::Glow, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("ESP", Menu::ESP, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("MISC", Menu::Misc, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("SETTINGS", Menu::Settings, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-      CreateTabButton("CONFIGS", Menu::Config, ImVec2(MenuSize.x / 6 - 35, ButtonHeight));
-
-      ImGui::EndChild();
-    }
-
-    std::stringstream MenuTitle;
-    MenuTitle << ZAP_VERSION << " for Apex " << GAME_VERSION;
-    const ImVec2 WindowPosition = ImGui::GetWindowPos();
-    const auto TextPosition = WindowPosition.x + GUI->WindowWidth / 2;
-    const auto TextSize = ImGui::CalcTextSize(MenuTitle.str().c_str()).x;
-    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition - TextSize / 2, WindowPosition.y + 10), ImColor(1.0, 1.0f, 1.0f, 1.0f), MenuTitle.str().c_str());
-
-    // Render Right (Main) Panel
-    ImGui::SetCursorPos(ImVec2(175, 32));
+    ImGui::SetCursorPos(ImVec2(16, 12));
     colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     if (ImGui::BeginChild("##RightPanel", ImVec2(GUI->WindowWidth - 186, GUI->WindowHeight - 43), true, ImGuiWindowFlags_NoScrollbar)) {
       colors[ImGuiCol_Border] = GUI->DetailColor;
-      // Render Tabs
       switch (GUI->CurrentTab) {
         case GUI->MenuTabs::Legitbot:
           GUI->RenderLegitbot();
-          break;
-        case GUI->MenuTabs::Ragebot:
-          GUI->RenderRagebot();
-          break;
-        case GUI->MenuTabs::Flickbot:
-          GUI->RenderFlickbot();
           break;
         case GUI->MenuTabs::Triggerbot:
           GUI->RenderTriggerbot();
@@ -216,9 +171,6 @@ void RenderUI() {
           break;
         case GUI->MenuTabs::Misc:
           GUI->RenderMisc();
-          break;
-        case GUI->MenuTabs::Settings:
-          GUI->RenderSettings();
           break;
         case GUI->MenuTabs::Config:
           ImVec2 TabSize;
@@ -240,19 +192,45 @@ void RenderUI() {
       ImGui::EndChild();
       Legit->UpdateAimList();
       Legit->UpdateRCSList();
-      Rage->UpdateRageList();
-      Flick->UpdateFlickList();
       Trigger->UpdateWeaponList();
       MiscTab->UpdateRapidFireList();
     }
 
-    // Add Vertical Separator Line
-    const ImVec2 Window = ImGui::GetWindowPos();
-    const ImVec2 Point1 = ImVec2(MenuSize.x / 6 + 6.5f + Window.x, 32 + Window.y);
-    const ImVec2 Point2 = ImVec2(MenuSize.x / 6 + 6.5f + Window.x, 32 + (MenuSize.y - 43) + Window.y);
-    ImGui::GetWindowDrawList()->AddLine(Point1, Point2, ImGui::ColorConvertFloat4ToU32(GUI->DetailColor), 1.0f);
+    PrevWindow = ImGui::GetWindowPos();
+    ImGui::End();
+  }
 
-    // End Drawlist Calls
+  ImGui::SetNextWindowSizeConstraints(ImVec2(GUI->NavbarWidth, GUI->NavbarHeight), ImVec2(GUI->WindowWidth / 6, GUI->WindowHeight));
+  ImGui::SetNextWindowSize(ImVec2(GUI->NavbarWidth, GUI->NavbarHeight), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(PrevWindow.x - GUI->NavbarWidth - 10, PrevWindow.y));
+
+  if (ImGui::Begin("##TabGUI", &Features::Home::IsMenuOpened, GUI->WindowFlags)) {
+    const ImVec2 MenuSize = ImGui::GetWindowSize();
+
+    ImGui::SetCursorPos(ImVec2(10, 32));
+
+    ImVec4 *colors = ImGui::GetStyle().Colors;
+
+    colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    constexpr int ButtonHeight = 36;
+
+    const ImVec2 WindowPosition = ImGui::GetWindowPos();
+    auto TextPosition = WindowPosition.x + GUI->WindowWidth / 6 / 2;
+    auto TextSize = ImGui::CalcTextSize(ICON_FA_BOLT).x;
+    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition - TextSize / 2, WindowPosition.y + 69), ImColor(255, 191, 0, 255), ICON_FA_BOLT);
+
+    ImGui::SetCursorPosY(132);
+    CreateTabButton("AIMBOT", Menu::Legitbot, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
+    CreateTabButton("TRIGGERBOT", Menu::Triggerbot, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
+    CreateTabButton("GLOW", Menu::Glow, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
+    CreateTabButton("ESP", Menu::ESP, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
+    CreateTabButton("MISC", Menu::Misc, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
+    CreateTabButton("CONFIGS", Menu::Config, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
+
+    TextPosition = WindowPosition.x + GUI->WindowWidth / 6 / 2;
+    TextSize = ImGui::CalcTextSize(ZAP_VERSION.c_str()).x;
+    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition - TextSize / 2, WindowPosition.y + GUI->WindowHeight - 69), ImColor(1.0f, 0.75f, 0.0f, 0.75f), ZAP_VERSION.c_str());
+
     ImGui::End();
   }
 }
@@ -270,13 +248,13 @@ void UpdateCore() {
 
     Players->clear();
     if (Map->IsFiringRange) {
-      for (auto p : *Dummies) {
+      for (auto p: *Dummies) {
         p->Read();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
       }
     } else {
-      for (auto p : *HumanPlayers) {
+      for (auto p: *HumanPlayers) {
         p->Read();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
@@ -289,12 +267,9 @@ void UpdateCore() {
     GlowESP->ViewModelGlow();
     Legit->UpdateAimbot();
     Legit->UpdateRCS();
-    Rage->Update();
     Trigger->Update();
-    Flick->Update();
     MiscTab->Update();
     MapRadar->ActivateBigMap();
-
   } catch (const std::exception &ex) {
     std::system("clear");
     std::cout << "Error: " << ex.what() << std::endl;
@@ -327,7 +302,7 @@ void MiscThreadRun() {
   }
 }
 
-std::string slurpFile(const std::string& absolutePath) {
+std::string slurpFile(const std::string &absolutePath) {
   std::string contents;
   std::ifstream file;
   file.open(absolutePath, std::ios::in);
@@ -343,13 +318,14 @@ std::string slurpFile(const std::string& absolutePath) {
 
   file.close();
   std::erase(contents, '\n');
+  std::erase(contents, '\r');
   return contents;
 }
 
 bool isOutdated() { // Scan possible Steam installation paths for libraryfolders.vdf to then scan existing library folders for the games "gameversion.txt"
   // Get currently logged in user, since getuid won't work when we're run as root
   struct passwd *pw;
-  const char* username = nullptr;
+  const char *username = nullptr;
   while ((pw = getpwent()) != nullptr) {
     if (strncmp(pw->pw_dir, "/home/", 6) == 0) {
       username = pw->pw_name;
@@ -361,19 +337,16 @@ bool isOutdated() { // Scan possible Steam installation paths for libraryfolders
   if (username == nullptr)
     return true;
 
-  const std::string steamPaths[] = {
-    "/.steam/steam/config/libraryfolders.vdf",
-    "(/.local/share/Steam/config/libraryfolders.vdf",
-    "/.var/app/com.valvesoftware.Steam/data/Steam/config/libraryfolders.vdf"
-  };
+  const std::string steamPaths[] = {"/.steam/steam/config/libraryfolders.vdf", "/.local/share/Steam/config/libraryfolders.vdf", "/.var/app/com.valvesoftware.Steam/data/Steam/config/libraryfolders.vdf"};
 
   std::vector<std::string> extractedPaths;
-  for (const auto & steamPath : steamPaths) {
+  for (const auto &steamPath: steamPaths) {
     std::stringstream fullPath;
     fullPath << "/home/" << username << steamPath;
 
     std::string libraryfolders = slurpFile(fullPath.str());
     size_t currentPos = 0;
+
     while (true) {
       const size_t pathPos = libraryfolders.find("path", currentPos);
 
@@ -413,7 +386,7 @@ int main(int argc, char *argv[]) {
   std::cout << tc::color<255, 230, 0> << "      (_   )  /__\\  (  _ \\" << std::endl;
   std::cout << tc::color<255, 190, 0> << "       / /_  /(__)\\  )___/" << std::endl;
   std::cout << tc::color<255, 165, 0> << "      (____)(__)(__)(__)  \n" << tc::reset << std::endl;
-  std::cout << tc::color<255, 100, 0> << "  ZAP " << ZAP_VERSION << " - hir0xygen's fork" << std::endl;
+  std::cout << tc::color<255, 100, 0> << "  " << ZAP_VERSION << " - hir0xygen's fork" << std::endl;
   std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Apex Legends " << GAME_VERSION << std::endl;
 
   if (isOutdated()) {
@@ -426,7 +399,9 @@ int main(int argc, char *argv[]) {
 
   if (Memory::GetPID() == 0) {
     std::cout << " ⚡ >> Waiting for Apex" << std::endl;
-    while (Memory::GetPID() == 0) { std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+    while (Memory::GetPID() == 0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
   }
 
   std::cout << " ⚡ >> Apex is running" << std::endl;

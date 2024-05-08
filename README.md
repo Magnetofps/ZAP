@@ -4,15 +4,21 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 ![](https://i.imgur.com/0bNmJQj.png)
 
 ## :page_facing_up: Features
-    Legitbot - Aimbot, RCS
-    Ragebot - Aimbot, RCS
-    Flickbot
-    Triggerbot
-    Glow - Player, Viewmodel & Item
-    ESP - Enemy & Teammate, Spectator List, Crosshair, Radar
-    Misc - Movement, Camera (Quick Turn), Rapid Fire (For Semi-Auto & Burst Weapons), Skin Changer (Basic, not to be confused with a model changer)
-    Settings - Gamemode Switcher, Disable Overlay, Disable ESP, FPS Cap
-    Configs - Custom Configs
+    Combat:
+        - Aimbot
+        - Recoil control
+        - Triggerbot
+    Visuals:
+        - Player glow
+        - Item glow
+        - ESP
+        - Crosshair
+        - Radar
+    Misc
+        - Movement
+        - Auto shoot
+        - Skin changer
+    Config system
 
 <details>
 <summary><b>:memo: Changelog</b></summary>

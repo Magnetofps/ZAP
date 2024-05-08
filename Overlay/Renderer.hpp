@@ -10,7 +10,6 @@
 #include "../Utils/Color.hpp"
 #include "../Utils/Features.hpp"
 #include "../Math/Vector2D.hpp"
-#include "../Math/Vector4D.hpp"
 #include "../Core/LocalPlayer.hpp"
 #include "../Core/Player.hpp"
 

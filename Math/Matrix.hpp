@@ -5,16 +5,16 @@ struct Matrix3x4 {
 public:
   float matrix[3][4];
 
-  Vector3D GetPosition() const { return Vector3D(matrix[0][3], matrix[1][3], matrix[2][3]); }
+  [[nodiscard]] Vector3D GetPosition() const { return {matrix[0][3], matrix[1][3], matrix[2][3]}; }
 
-  Vector3D GetPosition2() const { return Vector3D(matrix[0][3], matrix[1][3], matrix[2][3]); }
+  [[nodiscard]] Vector3D GetPosition2() const { return {matrix[0][3], matrix[1][3], matrix[2][3]}; }
 };
 
 struct ViewMatrix {
 public:
   float matrix[4][4];
 
-  Vector3D Transform(const Vector3D vector) const {
+  [[nodiscard]] Vector3D Transform(const Vector3D vector) const {
     Vector3D transformed;
 
     transformed.x = vector.y * matrix[0][1] + vector.x * matrix[0][0] + vector.z * matrix[0][2] + matrix[0][3];

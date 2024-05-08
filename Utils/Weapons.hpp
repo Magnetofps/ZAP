@@ -1,52 +1,49 @@
 #pragma once
-#include <string>
-#include <fstream>
-#include <iostream>
 
 namespace WeaponIDs {
   //Weapon Ids
   //Light
-  int WEAPON_P2020 = 107;
-  int WEAPON_RE45 = 82;
-  int WEAPON_ALTERNATOR = 81;
-  int WEAPON_R99 = 106;
-  int WEAPON_R301 = 0;
-  int WEAPON_SPITFIRE = 108;
-  int WEAPON_G7 = 91;
+  inline int WEAPON_P2020 = 111;
+  inline int WEAPON_RE45 = 85;
+  inline int WEAPON_ALTERNATOR = 84;
+  inline int WEAPON_R99 = 110;
+  inline int WEAPON_R301 = 0;
+  inline int WEAPON_SPITFIRE = 112;
+  inline int WEAPON_G7 = 95;
 
   //Heavy
-  int WEAPON_FLATLINE = 90;
-  int WEAPON_HEMLOCK = 92;
-  int WEAPON_PROWLER = 103;
-  int WEAPON_REPEATER = 113;
-  int WEAPON_RAMPAGE = 6;
-  int WEAPON_CAR = 114;
+  inline int WEAPON_FLATLINE = 94;
+  inline int WEAPON_HEMLOCK = 96;
+  inline int WEAPON_PROWLER = 107;
+  inline int WEAPON_REPEATER = 117;
+  inline int WEAPON_RAMPAGE = 6;
+  inline int WEAPON_CAR = 118;
 
   //Energy
-  int WEAPON_HAVOC = 87;
-  int WEAPON_DEVOTION = 85;
-  int WEAPON_LSTAR = 95;
-  int WEAPON_TRIPLETAKE = 109;
-  int WEAPON_VOLT = 112;
-  int WEAPON_NEMESIS = 115;
+  inline int WEAPON_HAVOC = 91;
+  inline int WEAPON_DEVOTION = 89;
+  inline int WEAPON_LSTAR = 99;
+  inline int WEAPON_TRIPLETAKE = 113;
+  inline int WEAPON_VOLT = 116;
+  inline int WEAPON_NEMESIS = 119;
 
   //Shotgun
-  int WEAPON_MOZAMBIQUE = 98;
-  int WEAPON_PEACEKEEPER = 105;
-  int WEAPON_MASTIFF = 97;
+  inline int WEAPON_MOZAMBIQUE = 102;
+  inline int WEAPON_PEACEKEEPER = 109;
+  inline int WEAPON_MASTIFF = 101;
 
   //Sniper
-  int WEAPON_LONGBOW = 86;
-  int WEAPON_CHARGE_RIFLE = 84;
-  int WEAPON_SENTINEL = 1;
+  inline int WEAPON_LONGBOW = 90;
+  inline int WEAPON_CHARGE_RIFLE = 87;
+  inline int WEAPON_SENTINEL = 1;
 
   //Legendary
-  int WEAPON_WINGMAN = 111;
-  int WEAPON_EVA8 = 89;
-  int WEAPON_BOCEK = 2;
-  int WEAPON_KRABER = 94;
-  int WEAPON_KNIFE = 169;
+  inline int WEAPON_WINGMAN = 114;
+  inline int WEAPON_EVA8 = 93;
+  inline int WEAPON_BOCEK = 2;
+  inline int WEAPON_KRABER = 98;
+  inline int WEAPON_KNIFE = 169;
 
   //Melee
-  int WEAPON_HANDS = 116;
+  inline int WEAPON_HANDS = 120;
 };

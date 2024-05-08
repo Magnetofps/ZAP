@@ -1,13 +1,8 @@
 #pragma once
-#include <iostream>
 #include <vector>
 #include <set>
 #include "../Core/Player.hpp"
 #include "../Core/LocalPlayer.hpp"
-#include "../Core/Offsets.hpp"
-#include "../Utils/Memory.hpp"
-#include "../Math/Vector2D.hpp"
-#include "../Math/Vector3D.hpp"
 #include "../Utils/XDisplay.hpp"
 #include "../Utils/Conversion.hpp"
 #include "../Utils/Config.hpp"
@@ -15,13 +10,8 @@
 #include "../Utils/Weapons.hpp"
 #include "../Core/Level.hpp"
 
-// UI //
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
-
 struct Triggerbot {
-  std::chrono::milliseconds LastClickTime;
+  std::chrono::milliseconds ScopeTime;
   std::set<int> WeaponList = {};
   int Range;
   int RangeHipfire;
@@ -192,7 +182,7 @@ struct Triggerbot {
   }
 
   void Update() {
-    if (!Map->IsPlayable)
+    if (!Map->IsPlayable) // do we even need this? don't we check in updatecore already
       return;
     if (Features::Home::IsMenuOpened)
       return;
@@ -206,18 +196,27 @@ struct Triggerbot {
     if (!Myself->IsCombatReady())
       return;
 
+    // super ghetto hotfix for now cuz it annoyed me mid game
+    const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
     if (Features::Triggerbot::BindMethod == 0) { // Memory
       if (Features::Triggerbot::OnADS && !Features::Triggerbot::HipfireShotguns) { // ADS *FORCED*
-        if (!Myself->IsZooming)
+        if (!Myself->IsZooming) {
+          ScopeTime = now;
           return;
-        trigger(Range);
+        }
+
+        if (now >= ScopeTime + std::chrono::milliseconds(200))
+          trigger(Range);
       } else if (Features::Triggerbot::OnADS && Features::Triggerbot::HipfireShotguns) { // ADS except shotguns
-        if (Myself->IsZooming) {
+        if (Myself->IsZooming && now >= ScopeTime + std::chrono::milliseconds(200)) {
           trigger(Range);
         } else {
           if (Myself->WeaponIndex == WeaponIDs::WEAPON_MOZAMBIQUE or Myself->WeaponIndex == WeaponIDs::WEAPON_EVA8 or Myself->WeaponIndex == WeaponIDs::WEAPON_PEACEKEEPER or Myself->WeaponIndex == WeaponIDs::WEAPON_MASTIFF) { // Shotgun IDs
             trigger(RangeHipfire);
           }
+          if (!Myself->IsZooming)
+            ScopeTime = now;
         }
       } else { // No ADS forced
         trigger(Myself->IsZooming ? Range : RangeHipfire);

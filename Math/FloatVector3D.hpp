@@ -5,42 +5,41 @@ struct FloatVector3D {
   FloatVector3D() : x(0), y(0), z(0) {
   }
 
-  FloatVector3D(float x_val, float y_val, float z_val) : x(x_val), y(y_val), z(z_val) {
+  FloatVector3D(const float x_val, const float y_val, const float z_val) : x(x_val), y(y_val), z(z_val) {
   }
 
-  FloatVector3D subtract(const FloatVector3D &other) const { return FloatVector3D(x - other.x, y - other.y, z - other.z); }
+  [[nodiscard]] FloatVector3D subtract(const FloatVector3D &other) const { return {x - other.x, y - other.y, z - other.z}; }
 
-  FloatVector3D add(const FloatVector3D &other) const { return FloatVector3D(x + other.x, y + other.y, z + other.z); }
+  [[nodiscard]] FloatVector3D add(const FloatVector3D &other) const { return {x + other.x, y + other.y, z + other.z}; }
 
-  float dotProduct(const FloatVector3D &other) const { return x * other.x + y * other.y + z * other.z; }
+  [[nodiscard]] float dotProduct(const FloatVector3D &other) const { return x * other.x + y * other.y + z * other.z; }
 
-  float magnitude() const { return std::sqrt(x * x + y * y + z * z); }
+  [[nodiscard]] float magnitude() const { return std::sqrt(x * x + y * y + z * z); }
 
-  float distance(const FloatVector3D &other) const {
-    FloatVector3D diff = subtract(other);
+  [[nodiscard]] float distance(const FloatVector3D &other) const {
+    const FloatVector3D diff = subtract(other);
     return diff.magnitude();
   }
 
-  bool isZeroVector() { return x == 0 && y == 0 && z == 0; }
+  [[nodiscard]] bool isZeroVector() const { return x == 0 && y == 0 && z == 0; }
 
-  FloatVector3D normalize() const {
-    float mag = magnitude();
-    if (mag != 0)
-      return FloatVector3D(x / mag, y / mag, z / mag);
-    return FloatVector3D();
+  [[nodiscard]] FloatVector3D normalize() const {
+    if (const float mag = magnitude(); mag != 0)
+      return {x / mag, y / mag, z / mag};
+    return {};
   }
 
-  FloatVector3D multiply(float scalar) const { return FloatVector3D(x * scalar, y * scalar, z * scalar); }
+  [[nodiscard]] FloatVector3D multiply(const float scalar) const { return {x * scalar, y * scalar, z * scalar}; }
 
-  std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")"; }
+  [[nodiscard]] std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")"; }
 
-  void print() { std::cout << toString() << "\n"; }
+  void print() const { std::cout << toString() << "\n"; }
 
-  FloatVector2D to2D() const { return FloatVector2D(x, y); }
+  [[nodiscard]] FloatVector2D to2D() const { return {x, y}; }
 
   bool operator==(const FloatVector3D &other) const {
     float epsilon = 1e-5;
-    return (std::abs(x - other.x) < epsilon) && (std::abs(y - other.y) < epsilon) && (std::abs(z - other.z) < epsilon);
+    return std::abs(x - other.x) < epsilon && std::abs(y - other.y) < epsilon && std::abs(z - other.z < epsilon);
   }
 
   bool operator!=(const FloatVector3D &other) const { return !(*this == other); }
