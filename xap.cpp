@@ -8,8 +8,6 @@
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <cstdlib>
 #include <pwd.h>
 
@@ -69,36 +67,16 @@ bool IsMenuOpened = true;
 // Thread
 std::atomic_bool StopThread(false);
 
-// Inputs
-void HandleKeyEvent(Display *display, XEvent *Event) {
-  if (Event->type == KeyPress) {
-    if (IsMenuOpened) {
-      IsMenuOpened = false;
-      Features::Home::IsMenuOpened = false;
-      OverlayWindow.CaptureInput(false);
-    } else {
-      IsMenuOpened = true;
-      Features::Home::IsMenuOpened = true;
-      OverlayWindow.CaptureInput(true);
-    }
-  }
-}
-
-void X11EventListener() {
-  Display *display = XOpenDisplay(nullptr);
-  Window root = DefaultRootWindow(display);
-  try {
-    XGrabKey(display, XKeysymToKeycode(display, XK_Insert), AnyModifier, root, False, GrabModeAsync, GrabModeAsync);
-  } catch (XErrorEvent) {
-    std::cout << " ! >> Failed to grab insert key, is another application already using it?" << std::endl;
-  }
-  XEvent event;
+// Menu opened?
+void MenuStateRun() {
   while (!StopThread) {
-    XNextEvent(display, &event);
-    HandleKeyEvent(display, &event);
+    if (InputManager::isKeyDown(InputKeyType::KEYBOARD_INSERT)) {
+      Features::Home::IsMenuOpened = !Features::Home::IsMenuOpened;
+      OverlayWindow.CaptureInput(Features::Home::IsMenuOpened);
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
-  XCloseDisplay(display);
 }
 
 // Overlay
@@ -412,8 +390,8 @@ int main(int argc, char *argv[]) {
   std::cout << " ⚡ >> Overlay initialized" << std::endl;
 
   // Theading //
-  std::thread X11Thread(X11EventListener);
-  X11Thread.detach();
+  std::thread MenuStateThread(MenuStateRun);
+  MenuStateThread.detach();
   std::thread InputManagerThread(InputManager::run);
   InputManagerThread.detach();
   std::thread MiscThread(MiscThreadRun);
@@ -436,7 +414,7 @@ int main(int argc, char *argv[]) {
 
   StopThread = true;
   InputManager::StopThread = true;
-  X11Thread.join();
+  MenuStateThread.join();
   InputManagerThread.join();
   MiscThread.join();
   return 0;

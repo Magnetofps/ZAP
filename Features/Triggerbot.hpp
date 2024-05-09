@@ -222,14 +222,10 @@ struct Triggerbot {
         trigger(Myself->IsZooming ? Range : RangeHipfire);
       }
     } else if (Features::Triggerbot::BindMethod == 1) { // Keybind
-      if (!IsKeybindDown())
+      if (!InputManager::isKeyDownOrPress(Features::Triggerbot::TriggerBind))
         return;
       trigger(Range);
     }
-  }
-
-  static bool IsKeybindDown() {
-    return InputManager::isKeyDownOrPress(Features::Triggerbot::TriggerBind);;
   }
 
   void UpdateTriggerbotSettings() {

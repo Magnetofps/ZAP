@@ -1,8 +1,8 @@
 #pragma once
+#include <cmath>
 #include <string>
 #include "Offsets.hpp"
 #include "LocalPlayer.hpp"
-#include "../Utils/Config.hpp"
 #include "../Utils/Features.hpp"
 #include "../Utils/Memory.hpp"
 #include "../Utils/HitboxType.hpp"
@@ -12,64 +12,58 @@
 #include "../Math/FloatVector3D.hpp"
 #include "../Math/Matrix.hpp"
 #include "../Overlay/Overlay.hpp"
-#include "GlowMode.hpp"
-
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
 
 struct Player {
   LocalPlayer *Myself;
 
   int Index;
-  long BasePointer;
+  long BasePointer{};
 
   std::string Name;
-  int Team;
+  int Team{};
 
-  int GlowEnable;
-  int GlowThroughWall;
-  int HighlightID;
+  int GlowEnable{};
+  int GlowThroughWall{};
+  int HighlightID{};
 
-  bool IsDead;
-  bool IsKnocked;
+  bool IsDead{};
+  bool IsKnocked{};
 
   Vector2D ViewAngles;
   Vector3D LocalOrigin;
   Vector3D AbsoluteVelocity;
 
-  int Health;
-  int MaxHealth;
-  int Shield;
-  int MaxShield;
+  int Health{};
+  int MaxHealth{};
+  int Shield{};
+  int MaxShield{};
 
-  int LastTimeAimedAt;
-  int LastTimeAimedAtPrevious;
-  bool IsAimedAt;
+  int LastTimeAimedAt{};
+  int LastTimeAimedAtPrevious{};
+  bool IsAimedAt{};
 
-  int LastVisibleTime;
-  int LastTimeVisiblePrevious;
-  bool IsVisible;
+  int LastVisibleTime{};
+  int LastTimeVisiblePrevious{};
+  bool IsVisible{};
 
-  bool IsLocal;
-  bool IsAlly;
-  bool IsHostile;
-  bool nonBR;
-  bool friendly;
+  bool IsLocal{};
+  bool IsAlly{};
+  bool IsHostile{};
+  bool nonBR{};
+  bool friendly{};
 
-  int WeaponIndex;
-  bool IsHoldingGrenade;
-  long WeaponEntity;
+  int WeaponIndex{};
+  bool IsHoldingGrenade{};
+  long WeaponEntity{};
 
-  float DistanceToLocalPlayer;
-  float Distance2DToLocalPlayer;
+  float DistanceToLocalPlayer{};
+  float Distance2DToLocalPlayer{};
 
-  float ViewYaw;
+  float ViewYaw{};
 
   bool IsLockedOn = false;
 
-  // For AimbotMode Grinder
-  int ducking;
+  int ducking{};
   // bool aimbotLocked;
   FloatVector3D localOrigin_prev;
   FloatVector3D localOrigin;
@@ -78,10 +72,10 @@ struct Player {
   FloatVector2D aimbotDesiredAngles;
   FloatVector2D aimbotDesiredAnglesIncrement;
   FloatVector2D aimbotDesiredAnglesSmoothed;
-  float aimbotScore;
+  float aimbotScore{};
   FloatVector2D aimbotDesiredAnglesSmoothedNoRecoil;
 
-  Player(int PlayerIndex, LocalPlayer *Me) {
+  Player(const int PlayerIndex, LocalPlayer *Me) {
     this->Index = PlayerIndex;
     this->Myself = Me;
   }
@@ -115,13 +109,8 @@ struct Player {
     IsAimedAt = LastTimeAimedAtPrevious < LastTimeAimedAt;
     LastTimeAimedAtPrevious = LastTimeAimedAt;
 
-    /*LastVisibleTime = Memory::Read<int>(BasePointer + OFF_LAST_VISIBLE_TIME);
-    IsVisible = IsAimedAt || LastTimeVisiblePrevious < LastVisibleTime;
-    LastTimeVisiblePrevious = LastVisibleTime;*/
-
-    float WorldTime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE);
-    float Time1;
-    Time1 = Memory::Read<float>(BasePointer + OFF_LAST_VISIBLE_TIME);
+    const auto WorldTime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE);
+    const auto Time1 = Memory::Read<float>(BasePointer + OFF_LAST_VISIBLE_TIME);
     IsVisible = (Time1 + 0.2) >= WorldTime || IsAimedAt;
 
     Health = Memory::Read<int>(BasePointer + OFF_HEALTH);
@@ -154,7 +143,6 @@ struct Player {
       }
     }
 
-    // For AimbotMode Grinder
     localOrigin = Memory::Read<FloatVector3D>(BasePointer + OFF_LOCAL_ORIGIN);
     absoluteVelocity = Memory::Read<FloatVector3D>(BasePointer + OFF_ABSVELOCITY);
     FloatVector3D localOrigin_diff = localOrigin.subtract(localOrigin_prev).normalize().multiply(20);
@@ -165,23 +153,23 @@ struct Player {
     Distance2DToLocalPlayer = Myself->LocalOrigin.To2D().Distance(LocalOrigin.To2D());
   }
 
-  std::string GetPlayerName() {
-    uintptr_t NameIndex = Memory::Read<uintptr_t>(BasePointer + OFF_NAME_INDEX);
-    uintptr_t NameOffset = Memory::Read<uintptr_t>(OFF_REGION + OFF_NAME_LIST + ((NameIndex - 1) * 24));
+  [[nodiscard]] std::string GetPlayerName() const {
+    const auto NameIndex = Memory::Read<uintptr_t>(BasePointer + OFF_NAME_INDEX);
+    const auto NameOffset = Memory::Read<uintptr_t>(OFF_REGION + OFF_NAME_LIST + ((NameIndex - 1) * 24));
     std::string PlayerName = Memory::ReadString(NameOffset, 64);
     return PlayerName;
   }
 
-  std::string getPlayerModelName() {
-    uintptr_t modelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
-    std::string modelName = Memory::ReadString(modelOffset, 1024);
+  [[nodiscard]] std::string getPlayerModelName() const {
+    const auto modelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
+    const std::string modelName = Memory::ReadString(modelOffset, 1024);
 
-    std::unordered_map<std::string, std::string> modelNameMap = {{"dummie", "Dummy"}, {"ash", "Ash"}, {"alter", "Alter"}, {"ballistic", "Ballistic"}, {"bangalore", "Bangalore"}, {"bloodhound", "Bloodhound"}, {"catalyst", "Catalyst"}, {"caustic", "Caustic"}, {"conduit", "Conduit"}, {"crypto", "Crypto"}, {"fuse", "Fuse"}, {"gibraltar", "Gibraltar"}, {"horizon", "Horizon"}, {"nova", "Nova"}, {"holo", "Holo"}, {"mirage", "Mirage"}, {"lifeline", "Lifeline"}, {"loba", "Loba"}, {"madmaggie", "Mad Maggie"}, {"newcastle", "Newcastle"}, {"octane", "Octane"}, {"pathfinder", "Pathfinder"}, {"rampart", "Rampart"}, {"revenant", "Revenant"}, {"seer", "Seer"}, {"stim", "Stim"}, {"valkyrie", "Valkyrie"}, {"vantage", "Vantage"}, {"wattson", "Wattson"}, {"wraith", "Wraith"},};
+    const std::unordered_map<std::string, std::string> modelNameMap = {{"dummie", "Dummy"}, {"ash", "Ash"}, {"alter", "Alter"}, {"ballistic", "Ballistic"}, {"bangalore", "Bangalore"}, {"bloodhound", "Bloodhound"}, {"catalyst", "Catalyst"}, {"caustic", "Caustic"}, {"conduit", "Conduit"}, {"crypto", "Crypto"}, {"fuse", "Fuse"}, {"gibraltar", "Gibraltar"}, {"horizon", "Horizon"}, {"nova", "Nova"}, {"holo", "Holo"}, {"mirage", "Mirage"}, {"lifeline", "Lifeline"}, {"loba", "Loba"}, {"madmaggie", "Mad Maggie"}, {"newcastle", "Newcastle"}, {"octane", "Octane"}, {"pathfinder", "Pathfinder"}, {"rampart", "Rampart"}, {"revenant", "Revenant"}, {"seer", "Seer"}, {"stim", "Stim"}, {"valkyrie", "Valkyrie"}, {"vantage", "Vantage"}, {"wattson", "Wattson"}, {"wraith", "Wraith"},};
 
     std::string replacedName = modelName;
-    for (auto &entry: modelNameMap) {
-      if (modelName.find(entry.first) != std::string::npos) {
-        replacedName = entry.second;
+    for (const auto &[fst, snd]: modelNameMap) {
+      if (modelName.find(fst) != std::string::npos) {
+        replacedName = snd;
         break;
       }
     }
@@ -189,62 +177,62 @@ struct Player {
     return replacedName;
   }
 
-  bool IsItem() {
+  [[nodiscard]] bool IsItem() const {
     return Name == "prop_survival"; //CPropSurvival, add check after name read and print check
   }
 
-  float GetViewYaw() {
+  [[nodiscard]] float GetViewYaw() const {
     if (!IsDummy() || IsPlayer()) { return Memory::Read<float>(BasePointer + OFF_YAW); }
     return 0.0f;
   }
 
-  bool IsValid() { return BasePointer != 0 && Health > 0 && (IsPlayer() || IsDummy()); }
+  [[nodiscard]] bool IsValid() const { return BasePointer != 0 && Health > 0 && (IsPlayer() || IsDummy()); }
 
-  bool IsCombatReady() { return IsValid() && (!IsDead && !IsKnocked || IsDummy()); }
+  [[nodiscard]] bool IsCombatReady() const { return IsValid() && (!IsDead && !IsKnocked || IsDummy()); }
 
-  bool IsPlayer() { return Name == "player"; }
+  [[nodiscard]] bool IsPlayer() const { return Name == "player"; }
 
-  bool IsDummy() { return Team == 97; }
+  [[nodiscard]] bool IsDummy() const { return Team == 97; }
 
-  bool IsTeammate() { if (LvMap::m_mixtape && Myself->Squad == -1) { return (Team & 1) == (Myself->Team & 1); } else { return Team == Myself->Team; } }
+  [[nodiscard]] bool IsTeammate() const { if (LvMap::m_mixtape && Myself->Squad == -1) { return (Team & 1) == (Myself->Team & 1); } else { return Team == Myself->Team; } }
 
   // Bones //
-  int GetBoneFromHitbox(HitboxType HitBox) const {
-    long ModelPointer = Memory::Read<long>(BasePointer + OFF_STUDIOHDR);
+  [[nodiscard]] int GetBoneFromHitbox(HitboxType HitBox) const {
+    const long ModelPointer = Memory::Read<long>(BasePointer + OFF_STUDIOHDR);
     if (!Memory::IsValidPointer(ModelPointer))
       return -1;
 
-    long StudioHDR = Memory::Read<long>(ModelPointer + 0x8);
+    const long StudioHDR = Memory::Read<long>(ModelPointer + 0x8);
     if (!Memory::IsValidPointer(StudioHDR + 0x34))
       return -1;
 
-    auto HitboxCache = Memory::Read<uint16_t>(StudioHDR + 0x34);
-    auto HitboxArray = StudioHDR + ((uint16_t) (HitboxCache & 0xFFFE) << (4 * (HitboxCache & 1)));
+    const auto HitboxCache = Memory::Read<uint16_t>(StudioHDR + 0x34);
+    const auto HitboxArray = StudioHDR + (static_cast<uint16_t>(HitboxCache & 0xFFFE) << (4 * (HitboxCache & 1)));
     if (!Memory::IsValidPointer(HitboxArray + 0x4))
       return -1;
 
-    auto IndexCache = Memory::Read<uint16_t>(HitboxArray + 0x4);
-    auto HitboxIndex = ((uint16_t) (IndexCache & 0xFFFE) << (4 * (IndexCache & 1)));
-    auto BonePointer = HitboxIndex + HitboxArray + (static_cast<int>(HitBox) * 0x20);
+    const auto IndexCache = Memory::Read<uint16_t>(HitboxArray + 0x4);
+    const auto HitboxIndex = (static_cast<uint16_t>(IndexCache & 0xFFFE) << (4 * (IndexCache & 1)));
+    const auto BonePointer = HitboxIndex + HitboxArray + (static_cast<int>(HitBox) * 0x20);
     if (!Memory::IsValidPointer(BonePointer))
       return -1;
 
     return Memory::Read<uint16_t>(BonePointer);
   }
 
-  Vector3D GetBonePosition(HitboxType HitBox) const {
-    Vector3D Offset = Vector3D(0.0f, 0.0f, 0.0f);
+  [[nodiscard]] Vector3D GetBonePosition(const HitboxType HitBox) const {
+    const Vector3D Offset = Vector3D(0.0f, 0.0f, 0.0f);
 
-    int Bone = GetBoneFromHitbox(HitBox);
+    const int Bone = GetBoneFromHitbox(HitBox);
     if (Bone < 0 || Bone > 255)
       return LocalOrigin.Add(Offset);
 
     long BonePtr = Memory::Read<long>(BasePointer + OFF_BONES);
-    BonePtr += (Bone * sizeof(Matrix3x4));
+    BonePtr += Bone * sizeof(Matrix3x4);
     if (!Memory::IsValidPointer(BonePtr))
       return LocalOrigin.Add(Offset);
 
-    Matrix3x4 BoneMatrix = Memory::Read<Matrix3x4>(BonePtr);
+    const auto BoneMatrix = Memory::Read<Matrix3x4>(BonePtr);
     Vector3D BonePosition = BoneMatrix.GetPosition();
 
     if (!BonePosition.IsValid())
@@ -254,8 +242,7 @@ struct Player {
     return BonePosition;
   }
 
-  // For AimbotMode Grinder
-  float calcDesiredPitch() {
+  [[nodiscard]] float calcDesiredPitch() const {
     if (IsLocal)
       return 0;
     const FloatVector3D shift = FloatVector3D(100000, 100000, 100000);
@@ -263,12 +250,12 @@ struct Player {
     const float extraZ = (ducking != -1) ? 10 : 0;
     const FloatVector3D originB = localOrigin_predicted.add(shift).subtract(FloatVector3D(0, 0, extraZ));
     const float deltaZ = originB.z - originA.z;
-    const float pitchInRadians = std::atan2(-deltaZ, Distance2DToLocalPlayer);
+    const double pitchInRadians = std::atan2(-deltaZ, Distance2DToLocalPlayer);
     const float degrees = pitchInRadians * (180.0f / M_PI);
     return degrees;
   }
 
-  float calcDesiredYaw() {
+  [[nodiscard]] float calcDesiredYaw() const {
     if (IsLocal)
       return 0;
     const FloatVector2D shift = FloatVector2D(100000, 100000);
@@ -280,29 +267,29 @@ struct Player {
     return degrees;
   }
 
-  FloatVector2D calcDesiredAngles() { return FloatVector2D(calcDesiredPitch(), calcDesiredYaw()); }
+  [[nodiscard]] FloatVector2D calcDesiredAngles() const { return {calcDesiredPitch(), calcDesiredYaw()}; }
 
-  FloatVector2D calcDesiredAnglesIncrement() { return FloatVector2D(calcPitchIncrement(), calcYawIncrement()); }
+  [[nodiscard]] FloatVector2D calcDesiredAnglesIncrement() const { return {calcPitchIncrement(), calcYawIncrement()}; }
 
-  float calcPitchIncrement() {
-    float wayA = aimbotDesiredAngles.x - Myself->viewAngles.x;
-    float wayB = 180 - abs(wayA);
+  [[nodiscard]] float calcPitchIncrement() const {
+    const float wayA = aimbotDesiredAngles.x - Myself->viewAngles.x;
+    float wayB = 180.0f - std::abs(wayA);
     if (wayA > 0 && wayB > 0)
       wayB *= -1;
-    if (fabs(wayA) < fabs(wayB))
+    if (std::fabs(wayA) < std::fabs(wayB))
       return wayA;
     return wayB;
   }
 
-  float calcYawIncrement() {
-    float wayA = aimbotDesiredAngles.y - Myself->viewAngles.y;
-    float wayB = 360 - abs(wayA);
+  [[nodiscard]] float calcYawIncrement() const {
+    const float wayA = aimbotDesiredAngles.y - Myself->viewAngles.y;
+    float wayB = 360 - std::abs(wayA);
     if (wayA > 0 && wayB > 0)
       wayB *= -1;
-    if (fabs(wayA) < fabs(wayB))
+    if (std::fabs(wayA) < std::fabs(wayB))
       return wayA;
     return wayB;
   }
 
-  float calcAimbotScore() { return (1000 - (fabs(aimbotDesiredAnglesIncrement.x) + fabs(aimbotDesiredAnglesIncrement.y))); }
+  [[nodiscard]] float calcAimbotScore() const { return 1000.0f - (std::fabs(aimbotDesiredAnglesIncrement.x) + std::fabs(aimbotDesiredAnglesIncrement.y)); }
 };

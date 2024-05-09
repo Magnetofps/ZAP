@@ -568,14 +568,14 @@ struct Sense {
     }
 
     // Draw FOV Circle (Legitbot)
-    if (Features::Sense::DrawFOVCircle && Features::Aimbot::AimbotEnabled && !Features::Aimbot::AimbotMode == 1 && Myself->IsCombatReady()) {
+    if (Features::Sense::DrawFOVCircle && Features::Aimbot::AimbotEnabled && Myself->IsCombatReady()) {
       float FOV = std::min(Features::Aimbot::FOV, Features::Aimbot::FOV * (AimAssistState->GetFOVScale() * Features::Aimbot::ZoomScale));
       float Radius = tanf(DEG2RAD(FOV) / 2) / tanf(DEG2RAD(Features::Sense::GameFOV) / 2) * ScreenWidth;
       Renderer::DrawCircle(Canvas, Vector2D(ScreenWidth / 2, ScreenHeight / 2), Radius, 40, ImColor(Features::Colors::FOVColor[0], Features::Colors::FOVColor[1], Features::Colors::FOVColor[2], Features::Colors::FOVColor[3]), Features::Sense::FOVThickness);
     }
 
     // Draw Filled FOV Circle (Legitbot)
-    if (Features::Sense::DrawFilledFOVCircle && Features::Aimbot::AimbotEnabled && !Features::Aimbot::AimbotMode == 1 && Myself->IsCombatReady()) {
+    if (Features::Sense::DrawFilledFOVCircle && Features::Aimbot::AimbotEnabled && Myself->IsCombatReady()) {
       float FOV = std::min(Features::Aimbot::FOV, Features::Aimbot::FOV * (AimAssistState->GetFOVScale() * Features::Aimbot::ZoomScale));
       float Radius = tanf(DEG2RAD(FOV) / 2) / tanf(DEG2RAD(Features::Sense::GameFOV) / 2) * ScreenWidth;
       Renderer::DrawCircleFilled(Canvas, Vector2D(ScreenWidth / 2, ScreenHeight / 2), Radius, 40, ImColor(Features::Colors::FilledFOVColor[0], Features::Colors::FilledFOVColor[1], Features::Colors::FilledFOVColor[2], Features::Colors::FilledFOVColor[3]));

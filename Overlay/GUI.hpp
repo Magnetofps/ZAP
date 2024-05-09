@@ -100,8 +100,6 @@ struct Menu {
         ImGui::Spacing();
         ImGui::Checkbox("Enabled", &Features::Aimbot::AimbotEnabled);
         if (Features::Aimbot::AimbotEnabled) {
-          const char *AimbotModeIndex[] = {"Beta V1", "Grinder", "Beta V2"};
-          ImGui::ComboBox("Aimbot method", &Features::Aimbot::AimbotMode, AimbotModeIndex, IM_ARRAYSIZE(AimbotModeIndex));
           const char *InputMethodIndex[] = {"Mouse movement", "Write memory"};
           ImGui::ComboBox("Input method", &Features::Aimbot::InputMethod, InputMethodIndex, IM_ARRAYSIZE(InputMethodIndex));
         }
@@ -176,24 +174,10 @@ struct Menu {
             }
 
             if (Features::Aimbot::SmoothingMethod == 1) { // Random
-              if (Features::Aimbot::AimbotMode == 0) {
-                ImGui::MainSliderFloat("Minimum Hipfire Smoothing", &Features::Aimbot::MinHipfireSmooth, 0, 0.99, "%.3f");
-                ImGui::MainSliderFloat("Maximum Hipfire Smoothing", &Features::Aimbot::MaxHipfireSmooth, 0, 0.99, "%.3f");
-                ImGui::MainSliderFloat("Minimum ADS Smoothing", &Features::Aimbot::MinADSSmooth, 0, 0.99, "%.3f");
-                ImGui::MainSliderFloat("Maximum ADS Smoothing", &Features::Aimbot::MaxADSSmooth, 0, 0.99, "%.3f");
-              }
-              if (Features::Aimbot::AimbotMode == 2) {
-                ImGui::MainSliderFloat("Minimum Hipfire Smoothing##Test", &Features::Aimbot::MinMouseHipfireSmoothing, 1, 1000, "%.0f");
-                ImGui::MainSliderFloat("Maximum Hipfire Smoothing##Test", &Features::Aimbot::MaxMouseHipfireSmoothing, 1, 1000, "%.0f");
-                ImGui::MainSliderFloat("Minimum ADS Smoothing##Test", &Features::Aimbot::MinMouseADSSmoothing, 1, 1000, "%.0f");
-                ImGui::MainSliderFloat("Maximum ADS Smoothing##Test", &Features::Aimbot::MaxMouseADSSmoothing, 1, 1000, "%.0f");
-              }
-            }
-
-            if (Features::Aimbot::AimbotMode == 2) {
-              ImGui::MainSliderFloat("Distance Smoothing##Test", &Features::Aimbot::MouseExtraSmoothing, 1, 9999, "%.0f");
-              if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Increases the smoothing depending on the distance of the player.");
+              ImGui::MainSliderFloat("Minimum Hipfire Smoothing", &Features::Aimbot::MinHipfireSmooth, 0, 0.99, "%.3f");
+              ImGui::MainSliderFloat("Maximum Hipfire Smoothing", &Features::Aimbot::MaxHipfireSmooth, 0, 0.99, "%.3f");
+              ImGui::MainSliderFloat("Minimum ADS Smoothing", &Features::Aimbot::MinADSSmooth, 0, 0.99, "%.3f");
+              ImGui::MainSliderFloat("Maximum ADS Smoothing", &Features::Aimbot::MaxADSSmooth, 0, 0.99, "%.3f");
             }
 
             ImGui::MainSliderInt("Delay", &Features::Aimbot::Delay, 1, 50);
@@ -244,101 +228,6 @@ struct Menu {
           ImGui::Spacing();
         }
       }
-
-      if (Features::Aimbot::AimbotEnabled && Features::Aimbot::AimbotMode == 1 && !Features::Aimbot::AdvancedAim && Features::Aimbot::InputMethod == 0) {
-        ImGui::Columns(2, nullptr, false);
-        ImGui::BeginChildFrame(3, ImVec2(WindowWidth - 613, 217), true); {
-          ImGui::Spacing();
-          const char *BindMethodIndex[] = {"Memory", "Keybinds"};
-          ImGui::ComboBox("Aim Bind Method", &Features::Aimbot::BindMethod, BindMethodIndex, IM_ARRAYSIZE(BindMethodIndex));
-          if (!Features::Aimbot::AdvancedAim) {
-            if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
-              ImGui::Checkbox("On Fire", &Features::Aimbot::OnFire);
-              ImGui::SameLine();
-              ImGui::Checkbox("On ADS", &Features::Aimbot::OnADS);
-            }
-            if (Features::Aimbot::BindMethod == 1) { // Keybinds
-              int AimBind = static_cast<int>(Features::AimbotBinds::AimBind);
-              ImGui::ComboBox("Aim Bind##Aimbot", &AimBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-              Features::AimbotBinds::AimBind = static_cast<InputKeyType>(AimBind);
-              int ExtraBind = static_cast<int>(Features::AimbotBinds::ExtraBind);
-              ImGui::ComboBox("Extra Bind##Aimbot", &ExtraBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-              Features::AimbotBinds::ExtraBind = static_cast<InputKeyType>(ExtraBind);
-            }
-            ImGui::Text("Aim Conditions");
-            ImGui::Checkbox("Team Check##Aimbot", &Features::Aimbot::TeamCheck);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Disable this if doing 1v1s in the firing range.\nMay not work with Grinder Aim Method.");
-          }
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::BeginChildFrame(4, ImVec2(WindowWidth - 613, 217), true); {
-          ImGui::Spacing();
-
-          const char *SmoothingMethodIndex[] = {"Static", "Random"};
-          ImGui::ComboBox("Smoothing Method", &Features::Aimbot::SmoothingMethod, SmoothingMethodIndex, IM_ARRAYSIZE(SmoothingMethodIndex));
-
-          if (Features::Aimbot::SmoothingMethod == 0) // Static
-          {
-            ImGui::MainSliderFloat("Hipfire Smoothing##Grinder", &Features::Aimbot::HipfireSmooth1, 1, 1000, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Smoothing Of The Aim-Assist Whilst Hipfiring.\nHigher = Smoother");
-            ImGui::MainSliderFloat("ADS Smoothing##Grinder", &Features::Aimbot::ADSSmooth1, 1, 1000, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Smoothing Of The Aim-Assist Longbow Whilst ADS.\nHigher = Smoother");
-          }
-
-          if (Features::Aimbot::SmoothingMethod == 1) // Random
-          {
-            ImGui::MainSliderFloat("Min Hipfire Smoothing##Grinder", &Features::Aimbot::MinHipfireSmooth1, 1, 1000, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Minimum Smoothing Of The Aim-Assist Whilst Hipfiring.\nHigher = Smoother");
-            ImGui::MainSliderFloat("Max Hipfire Smoothing##Grinder", &Features::Aimbot::MaxHipfireSmooth1, 1, 1000, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Maximum Smoothing Of The Aim-Assist Whilst Hipfiring.\nHigher = Smoother");
-
-            ImGui::MainSliderFloat("Min ADS Smoothing##Grinder", &Features::Aimbot::MinADSSmooth1, 1, 1000, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Minimum Smoothing Of The Aim-Assist Whilst ADS.\nHigher = Smoother");
-            ImGui::MainSliderFloat("Max ADS Smoothing##Grinder", &Features::Aimbot::MaxADSSmooth1, 1, 1000, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Maximum Smoothing Of The Aim-Assist Whilst ADS.\nHigher = Smoother");
-          }
-
-          ImGui::MainSliderFloat("Extra Smoothing##Grinder", &Features::Aimbot::ExtraSmoothing, 1, 9999, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Increases the smoothing depending on the distance of the player.");
-          ImGui::MainSliderFloat("Deadzone##Grinder", &Features::Aimbot::Deadzone, 0, 10, "%.03f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("If the aimbot is close enough then the aimbot will stop trying to get any closer.\n If you have very low smoothing then you might want to up this to prevent 'shaking'.");
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::NextColumn();
-
-        ImGui::BeginChildFrame(6, ImVec2(WindowWidth - 630, 217), true); {
-          ImGui::Spacing();
-          ImGui::MainSliderFloat("FOV##Grinder", &Features::Aimbot::FOV1, 1, 90, "%.0f");
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Field of View.");
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::BeginChildFrame(7, ImVec2(WindowWidth - 630, 217), true); {
-          ImGui::Spacing();
-          ImGui::MainSliderFloat("Min Distance", &Features::Aimbot::AdvancedMinDistance1, 1, 500, "%.0f"); // Ignore advanced, will work for both advanced and simple aimbot
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Min distance for Aim-Assist to work");
-          ImGui::MainSliderFloat("Max Distance", &Features::Aimbot::AdvancedMaxDistance1, 1, 500, "%.0f"); // Ignore advanced, will work for both advanced and simple aimbot
-          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            ImGui::SetTooltip("Max distance for Aim-Assist to work");
-          ImGui::EndChildFrame();
-        }
-        ImGui::Spacing();
-      }
-
-      if (Features::Aimbot::AimbotEnabled && Features::Aimbot::AimbotMode == 1 && Features::Aimbot::InputMethod == 1) { ImGui::Text("Selected Input Method Is Not Compatible With Selected Aimbot Method, Please Switch Aimbot Method Or Input Method."); }
 
       if (Features::Aimbot::AimbotEnabled && Features::Aimbot::AdvancedAim) { ImGui::Text("Advanced Aim Is Enabled, Use The Advanced Tab."); }
     }
