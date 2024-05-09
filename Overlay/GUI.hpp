@@ -36,7 +36,7 @@ struct Menu {
     Config
   };
 
-  int SelectedLegitbotSubTab = 0; // 4
+  int SelectedLegitbotSubTab = 0; // 3
   int SelectedTriggerbotSubTab = 0; // 2
   int SelectedGlowSubTab = 0; // 2
   int SelectedESPSubTabLeft = 0; // 2
@@ -57,18 +57,6 @@ struct Menu {
     ImGui::Spacing();
   }
 
-  static void ComboBox(const char *label, const char *desc, int *current_item, const char *items_separated_by_zeros, const int height_in_items) {
-    ImGui::Spacing();
-    ImGui::SameLine(15);
-    ImGui::TextColored(ImColor(255, 255, 255, 255), label);
-
-    ImGui::Spacing();
-    ImGui::SameLine(15);
-    ImGui::TextColored(ImColor(97, 97, 97, 255), desc);
-    ImGui::ComboBox(label, current_item, items_separated_by_zeros, height_in_items);
-    ImGui::Spacing();
-  }
-
   void RenderLegitbot() {
     ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
     ImGui::BeginGroup();
@@ -77,9 +65,9 @@ struct Menu {
     if (ImGui::SubTab("AIMBOT", 0 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 0;
     ImGui::SameLine();
-    if (ImGui::SubTab("ADVANCED##AIMBOT", 1 == SelectedLegitbotSubTab, ImVec2(111, 25)))
-      SelectedLegitbotSubTab = 1;
-    ImGui::SameLine();
+    //if (ImGui::SubTab("ADVANCED##AIMBOT", 1 == SelectedLegitbotSubTab, ImVec2(111, 25)))
+    //  SelectedLegitbotSubTab = 1;
+    //ImGui::SameLine();
     if (ImGui::SubTab("WEAPONS##AIMBOT", 2 == SelectedLegitbotSubTab, ImVec2(111, 25)))
       SelectedLegitbotSubTab = 2;
     ImGui::SameLine();
@@ -96,140 +84,87 @@ struct Menu {
 
     // Aimbot
     if (SelectedLegitbotSubTab == 0) {
-      ImGui::BeginChildFrame(1, ImVec2(0, 135), true); {
+      ImGui::Columns(2, "legitbot columns", false);
+      ImGui::Text("Legit bot");
+      ImGui::BeginChildFrame(1, ImVec2((WindowWidth - 230) / 2, (WindowHeight - 230) / 2), true); {
         ImGui::Spacing();
-        ImGui::Checkbox("Enabled", &Features::Aimbot::AimbotEnabled);
-        if (Features::Aimbot::AimbotEnabled) {
-          const char *InputMethodIndex[] = {"Mouse movement", "Write memory"};
-          ImGui::ComboBox("Input method", &Features::Aimbot::InputMethod, InputMethodIndex, IM_ARRAYSIZE(InputMethodIndex));
-        }
-        ImGui::EndChildFrame();
-      }
+        ImGui::Checkbox("Enable", &Features::Aimbot::AimbotEnabled);
+        ImGui::BeginDisabled(!Features::Aimbot::AimbotEnabled); {
+          const char *InputMethodIndex[] = {"Mouse movement", "Memory"};
+          ImGui::SetCursorPosY(10.0f);
+          ImGui::ComboBox("##Input method", &Features::Aimbot::InputMethod, InputMethodIndex, IM_ARRAYSIZE(InputMethodIndex));
+          const char *BindMethodIndex[] = {"Memory", "Keybinds"};
+          ImGui::ComboBox("Activation method", &Features::Aimbot::BindMethod, BindMethodIndex, IM_ARRAYSIZE(BindMethodIndex));
+          if (Features::Aimbot::BindMethod == 0) {
+            ImGui::Checkbox("On Fire", &Features::Aimbot::OnFire);
+            ImGui::SameLine();
+            ImGui::Checkbox("On ADS", &Features::Aimbot::OnADS);
+          } else { // holy fuck this is cursed, I hate imgui. remind future me to use zgui or something for the rewrite
+            ImGui::SetCursorPosY(80.0f);
+            ImGui::Columns(2, "aimbotkeybinds", false);
+            ImGui::SetColumnWidth(0, 182.5f);
+            int AimBind = static_cast<int>(Features::AimbotBinds::AimBind);
+            ImGui::ComboBox("##Bind 1 aimbot", &AimBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+            Features::AimbotBinds::AimBind = static_cast<InputKeyType>(AimBind);
+            ImGui::NextColumn();
+            ImGui::SetColumnWidth(1, 182.5f);
+            int ExtraBind = static_cast<int>(Features::AimbotBinds::ExtraBind);
+            ImGui::ComboBox("##Bind 2 aimbot", &ExtraBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
+            Features::AimbotBinds::ExtraBind = static_cast<InputKeyType>(ExtraBind);
+          }
+        } ImGui::EndDisabled();
+      } ImGui::EndChildFrame();
 
-      if (Features::Aimbot::AimbotEnabled && !Features::Aimbot::AdvancedAim) {
-        ImGui::Columns(2, nullptr, false);
-        ImGui::BeginChildFrame(2, ImVec2(WindowWidth - 613, 93), true); {
-          ImGui::Spacing();
-          ImGui::Text("Selected Hitbox");
-          ImGui::Checkbox("Closest To Crosshair", &Features::Aimbot::ClosestHitbox);
+      ImGui::Text("Humanization");
+      ImGui::BeginChildFrame(3, ImVec2((WindowWidth - 225) / 2, 0), true); {
+        ImGui::Spacing();
+        ImGui::BeginDisabled(!Features::Aimbot::AimbotEnabled); {
+          ImGui::MainSliderInt("Delay", &Features::Aimbot::Delay, 1, 28);
+          if (Features::Aimbot::InputMethod == 0)
+            ImGui::MainSliderFloat("Mouse speed", &Features::Aimbot::Speed, 1, 100, "%.0f");
+          const char *SmoothingMethodIndex[] = {"Static", "Random"};
+          ImGui::ComboBox("Smoothing type", &Features::Aimbot::SmoothingMethod, SmoothingMethodIndex, IM_ARRAYSIZE(SmoothingMethodIndex));
+          if (Features::Aimbot::SmoothingMethod == 0) { // Static
+            ImGui::MainSliderFloat("Hipfire smoothing", &Features::Aimbot::HipfireSmooth, 0, 0.99, "%.3f");
+            ImGui::MainSliderFloat("ADS smoothing", &Features::Aimbot::ADSSmooth, 0, 0.99, "%.3f");
+          } else {
+            ImGui::MainSliderFloat("Hipfire smoothing (minimum)", &Features::Aimbot::MinHipfireSmooth, 0, 0.99, "%.3f");
+            ImGui::MainSliderFloat("Hipfire smoothing (maximum)", &Features::Aimbot::MaxHipfireSmooth, 0, 0.99, "%.3f");
+            ImGui::MainSliderFloat("ADS smoothing (minimum)", &Features::Aimbot::MinADSSmooth, 0, 0.99, "%.3f");
+            ImGui::MainSliderFloat("ADS smoothing (maximum)", &Features::Aimbot::MaxADSSmooth, 0, 0.99, "%.3f");
+          }
+        } ImGui::EndDisabled();
+      } ImGui::EndChildFrame();
+
+      ImGui::NextColumn();
+
+      ImGui::Text("Targetting");
+      ImGui::BeginChildFrame(2, ImVec2((WindowWidth - 230) / 2, 0), true); {
+        ImGui::Spacing();
+        ImGui::BeginDisabled(!Features::Aimbot::AimbotEnabled); {
+          ImGui::Checkbox("Team check##Aimbot", &Features::Aimbot::TeamCheck);
+          ImGui::SameLine();
+          ImGui::Checkbox("Visibility check##Aimbot", &Features::Aimbot::VisCheck);
+          ImGui::Checkbox("Closest hitbox", &Features::Aimbot::ClosestHitbox);
           if (!Features::Aimbot::ClosestHitbox) {
-            const char *HitboxTypes[] = {"Head", "Neck", "Upper Chest", "Lower Chest", "Stomach", "Hip"};
+            const char *HitboxTypes[] = {"Head", "Neck", "Upper chest", "Lower chest", "Stomach", "Hip"};
             int HitboxTypeIndex = static_cast<int>(Features::AimbotHitboxes::Hitbox);
-            ImGui::ComboBox("Hitbox Type", &HitboxTypeIndex, HitboxTypes, IM_ARRAYSIZE(HitboxTypes));
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Which bone the aimbot will aim at.");
+            ImGui::ComboBox("Hitbox", &HitboxTypeIndex, HitboxTypes, IM_ARRAYSIZE(HitboxTypes));
             Features::AimbotHitboxes::Hitbox = static_cast<HitboxType>(HitboxTypeIndex);
           }
-          ImGui::EndChildFrame();
-        }
-
-        ImGui::BeginChildFrame(3, ImVec2(WindowWidth - 613, 190), true); {
-          ImGui::Spacing();
-          const char *BindMethodIndex[] = {"Memory", "Keybinds"};
-          ImGui::ComboBox("Aim Bind Method", &Features::Aimbot::BindMethod, BindMethodIndex, IM_ARRAYSIZE(BindMethodIndex));
-          if (!Features::Aimbot::AdvancedAim) {
-            if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
-              ImGui::Checkbox("On Fire", &Features::Aimbot::OnFire);
-              ImGui::SameLine();
-              ImGui::Checkbox("On ADS", &Features::Aimbot::OnADS);
-            }
-            if (Features::Aimbot::BindMethod == 1) { // Keybinds
-              int AimBind = static_cast<int>(Features::AimbotBinds::AimBind);
-              ImGui::ComboBox("Aim Bind##Aimbot", &AimBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-              Features::AimbotBinds::AimBind = static_cast<InputKeyType>(AimBind);
-              int ExtraBind = static_cast<int>(Features::AimbotBinds::ExtraBind);
-              ImGui::ComboBox("Extra Bind##Aimbot", &ExtraBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
-              Features::AimbotBinds::ExtraBind = static_cast<InputKeyType>(ExtraBind);
-            }
-            ImGui::Text("Aim Conditions");
-            ImGui::Checkbox("Team Check##Aimbot", &Features::Aimbot::TeamCheck);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Disable this if doing 1v1s in the firing range.\nMay not work with Grinder Aim Method.");
-            ImGui::SameLine();
-            ImGui::Checkbox("Visibility Check", &Features::Aimbot::VisCheck);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("Aims At Only Visible Enemies.");
-
-            ImGui::Text("Targeting Options");
-            ImGui::Checkbox("Allow Target Switching", &Features::Aimbot::TargetSwitching);
-            const char *PriorityIndex[] = {"Closest To Crosshair", "Closest To LocalPlayer", "Both"};
-            ImGui::ComboBox("Target Priority", &Features::Aimbot::Priority, PriorityIndex, IM_ARRAYSIZE(PriorityIndex));
-            DoubleSpacing();
-          }
-          ImGui::EndChildFrame();
-        }
-
-        if (!Features::Aimbot::AdvancedAim) {
-          ImGui::BeginChildFrame(4, ImVec2(WindowWidth - 613, 169), true); {
-            ImGui::Spacing();
-            const char *SmoothingMethodIndex[] = {"Static", "Random"};
-            ImGui::ComboBox("Smoothing Method", &Features::Aimbot::SmoothingMethod, SmoothingMethodIndex, IM_ARRAYSIZE(SmoothingMethodIndex));
-
-            if (Features::Aimbot::InputMethod == 0) // Mouse Only
-              ImGui::MainSliderFloat("Speed", &Features::Aimbot::Speed, 1, 100, "%.0f");
-
-            if (Features::Aimbot::SmoothingMethod == 0) { // Static
-              ImGui::MainSliderFloat("Hipfire Smoothing", &Features::Aimbot::HipfireSmooth, 0, 0.99, "%.3f");
-              ImGui::MainSliderFloat("ADS Smoothing", &Features::Aimbot::ADSSmooth, 0, 0.99, "%.3f");
-            }
-
-            if (Features::Aimbot::SmoothingMethod == 1) { // Random
-              ImGui::MainSliderFloat("Minimum Hipfire Smoothing", &Features::Aimbot::MinHipfireSmooth, 0, 0.99, "%.3f");
-              ImGui::MainSliderFloat("Maximum Hipfire Smoothing", &Features::Aimbot::MaxHipfireSmooth, 0, 0.99, "%.3f");
-              ImGui::MainSliderFloat("Minimum ADS Smoothing", &Features::Aimbot::MinADSSmooth, 0, 0.99, "%.3f");
-              ImGui::MainSliderFloat("Maximum ADS Smoothing", &Features::Aimbot::MaxADSSmooth, 0, 0.99, "%.3f");
-            }
-
-            ImGui::MainSliderInt("Delay", &Features::Aimbot::Delay, 1, 50);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Delay time for the aimbot smoothing.\n");
-
-            ImGui::EndChildFrame();
-          }
-
-          ImGui::NextColumn();
-
-          ImGui::BeginChildFrame(5, ImVec2(WindowWidth - 630, 93), true); {
-            ImGui::Spacing();
-            ImGui::Text("Prediction");
-            ImGui::Checkbox("Predict Movement", &Features::Aimbot::PredictMovement);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Predict target's movement");
-            ImGui::SameLine();
-            ImGui::Checkbox("Predict Bullet Drop", &Features::Aimbot::PredictBulletDrop);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Predict weapon's bullet drop");
-
-            ImGui::EndChildFrame();
-          }
-
-          ImGui::BeginChildFrame(6, ImVec2(WindowWidth - 630, 190), true); {
-            ImGui::Spacing();
-            ImGui::MainSliderFloat("FOV", &Features::Aimbot::FOV, 1, 90, "%.0f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Field of View");
-            ImGui::MainSliderFloat("Zoom Scale", &Features::Aimbot::ZoomScale, 0, 5, "%.1f");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Field of View For Scopes");
-
-            ImGui::EndChildFrame();
-          }
-
-          ImGui::BeginChildFrame(7, ImVec2(WindowWidth - 630, 169), true); {
-            ImGui::Spacing();
-            ImGui::MainSliderFloat("Min Distance", &Features::Aimbot::AdvancedMinDistance1, 1, 500, "%.0f"); // Ignore advanced, will work for both advanced and simple aimbot
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Min distance for Aim-Assist to work");
-            ImGui::MainSliderFloat("Max Distance", &Features::Aimbot::AdvancedMaxDistance1, 1, 500, "%.0f"); // Ignore advanced, will work for both advanced and simple aimbot
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-              ImGui::SetTooltip("Max distance for Aim-Assist to work");
-            ImGui::EndChildFrame();
-          }
-          ImGui::Spacing();
-        }
-      }
-
-      if (Features::Aimbot::AimbotEnabled && Features::Aimbot::AdvancedAim) { ImGui::Text("Advanced Aim Is Enabled, Use The Advanced Tab."); }
+          ImGui::MainSliderFloat("Field of view", &Features::Aimbot::FOV, 1, 90, "%.0f");
+          ImGui::MainSliderFloat("Field of view scoped scaling", &Features::Aimbot::ZoomScale, 0, 5, "%.1f");
+          ImGui::MainSliderFloat("Minimum distance", &Features::Aimbot::AdvancedMinDistance1, 1, 500, "%.0f");
+          ImGui::MainSliderFloat("Maximum distance", &Features::Aimbot::AdvancedMaxDistance1, 1, 500, "%.0f");
+          const char *PriorityIndex[] = {"Closest to crosshair", "Closest to player", "Combined"};
+          ImGui::ComboBox("Target priority", &Features::Aimbot::Priority, PriorityIndex, IM_ARRAYSIZE(PriorityIndex));
+          ImGui::Checkbox("Allow target switching", &Features::Aimbot::TargetSwitching);
+          ImGui::Text("Prediction");
+          ImGui::Checkbox("Movement", &Features::Aimbot::PredictMovement);
+          ImGui::SameLine();
+          ImGui::Checkbox("Bullet drop", &Features::Aimbot::PredictBulletDrop);
+        } ImGui::EndDisabled();
+      } ImGui::EndChildFrame();
     }
 
     // Aimbot weapon config
@@ -237,7 +172,7 @@ struct Menu {
 
     // Aimbot weapon selection
     if (SelectedLegitbotSubTab == 2) {
-      if (Features::Aimbot::AimbotEnabled) {
+      if (!Features::Aimbot::AimbotEnabled) {
           ImGui::Text("Aimbot is disabled");
       } else  {
         ImGui::Columns(3, "##aimbotSelection", false);

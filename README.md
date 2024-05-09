@@ -1,7 +1,7 @@
 # ⚡ ZAP
 hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (X11).
 
-![](https://i.imgur.com/0bNmJQj.png)
+![](https://i.imgur.com/4bwo36x.png)
 
 ## :page_facing_up: Features
     Combat:
@@ -22,6 +22,13 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
 
 <details>
 <summary><b>:memo: Changelog</b></summary>
+
+    v1.0.8 - 10th May 2024
+        - Menu styling changes
+        - Removed rage bot and flick bot
+        - Removed legit bot weapon config (might rewrite)
+        - Removed additional legit bot modes, more follow up soon
+        - Fixed all menu key issues preventing from launching
 
     v1.0.7c - 30th April 2024
         - Added game framerate to watermark

@@ -1384,7 +1384,7 @@ struct Legitbot {
       if (TargetSelected && CurrentTarget) {
         if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
           StartAiming();
-          LastAimTime = now + std::chrono::milliseconds(static_cast<int>(Utils::RandomRange(1, 10)));
+          LastAimTime = now;
         }
       }
     }
