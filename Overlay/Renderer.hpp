@@ -160,6 +160,7 @@ public:
   static void DrawRectFilled(ImDrawList *canvas, float x, float y, float x2, float y2, ImColor color, float rounding, int rounding_corners_flags) { canvas->AddRectFilled(ImVec2(x, y), ImVec2(x2, y2), color, rounding, rounding_corners_flags); }
 
   static void DrawProgressBar(ImDrawList *canvas, float x, float y, float w, float h, int value, int v_max, ImColor barColor) {
+    canvas->AddRectFilled(ImVec2(x - 1, y - 1), ImVec2(x + w + 1, y - h + 1), ImColor(20, 20, 20), 0, 1);
     DrawRectFilled(canvas, x, y, x + w, y - ((h / float(v_max)) * (float) value), barColor, 0.0f, 0);
     canvas->AddRect(ImVec2(x - 1, y - 1), ImVec2(x + w + 1, y - h + 1), ImColor(0, 0, 0), 0, 1);
   }
@@ -187,28 +188,16 @@ public:
 
     if (ColorMode == 1) { // Current shield
       switch (shield) { // WARNING: FUCKERY !!! this switch is using a gcc language extension, will not work when using any other compiler (replace with if-else)
-        case 0
-          ...
-          50
-          :
+        case 0 ... 50:
           shieldBarColor = ImColor(247, 247, 247, 255); // White
           break;
-        case 51
-          ...
-          75
-          :
+        case 51 ... 75 :
           shieldBarColor = ImColor(39, 178, 255, 255); // Blue
           break;
-        case 76
-          ...
-          100
-          :
+        case 76 ... 100:
           shieldBarColor = ImColor(206, 59, 255, 255); // Purple
           break;
-        case 101
-          ...
-          125
-          :
+        case 101 ... 125:
           shieldBarColor = ImColor(219, 2, 2, 255); // Red
           break;
         default:

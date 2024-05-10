@@ -103,17 +103,11 @@ class Overlay {
     };
   }
 
-
 public:
   int ProcessingTime{};
   long long StartTime{};
   int SleepTime{};
   int TimeLeftToSleep{};
-
-  int AsciiArt = 5;
-  int AsciiArtSpeed = 100;
-  bool TeamGamemode = true;
-  bool ErrorLogging = false;
 
   bool InitializeOverlay() {
     glfwSetErrorCallback(GLFWErrorCallback);
@@ -198,59 +192,9 @@ public:
     style.WindowRounding = 7;
     style.ChildRounding = 4;
     style.FrameRounding = 7;
-    /*
-
-    style.Colors[ImGuiCol_Text] = HEXTOIV4("f0f0f0ff");
-    style.Colors[ImGuiCol_TextDisabled] = HEXTOIV4("969696ff");
-    style.Colors[ImGuiCol_WindowBg] = HEXTOIV4("141414ff");
-    style.Colors[ImGuiCol_ChildBg] = HEXTOIV4("00000000");
-    style.Colors[ImGuiCol_PopupBg] = HEXTOIV4("383838ff");
-    style.Colors[ImGuiCol_Border] = HEXTOIV4("80808080");
-    style.Colors[ImGuiCol_BorderShadow] = HEXTOIV4("00000000");
-    style.Colors[ImGuiCol_FrameBg] = HEXTOIV4("141414ff");
-    style.Colors[ImGuiCol_FrameBgHovered] = HEXTOIV4("7878b066");
-    style.Colors[ImGuiCol_FrameBgActive] = HEXTOIV4("6b69a3b0");
-    style.Colors[ImGuiCol_TitleBg] = HEXTOIV4("45458ad4");
-    style.Colors[ImGuiCol_TitleBgActive] = HEXTOIV4("5252a1de");
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.400000f, 0.400000f, 0.800000f, 0.200000f);
-    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.400000f, 0.400000f, 0.550000f, 0.800000f);
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.200000f, 0.250000f, 0.300000f, 0.000000f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.400000f, 0.400000f, 0.400000f, 0.300000f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.400000f, 0.400000f, 0.400000f, 0.400000f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.400000f, 0.400000f, 0.400000f, 0.600000f);
-    style.Colors[ImGuiCol_CheckMark] = HEXTOIV4("ffbf00ff");
-    style.Colors[ImGuiCol_SliderGrab] = HEXTOIV4("ffffff4d");
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.410000f, 0.390000f, 0.800000f, 0.600000f);
-    style.Colors[ImGuiCol_Button] = HEXTOIV4("454545ff");
-    style.Colors[ImGuiCol_ButtonHovered] = HEXTOIV4("454545ff");
-    style.Colors[ImGuiCol_ButtonActive] = HEXTOIV4("454545ff");
-    style.Colors[ImGuiCol_Header] = ImVec4(45 / 255.f, 45 / 255.f, 45 / 255.f, 1);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(50 / 255.f, 50 / 255.f, 50 / 255.f, 1);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(45 / 255.f, 45 / 255.f, 45 / 255.f, 1);
-    style.Colors[ImGuiCol_Separator] = HEXTOIV4("ffbf00ff");
-    style.Colors[ImGuiCol_SeparatorHovered] = HEXTOIV4("00000000");
-    style.Colors[ImGuiCol_SeparatorActive] = HEXTOIV4("ffbf00ff");
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.000000f, 1.000000f, 1.000000f, 0.160000f);
-    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.780000f, 0.820000f, 1.000000f, 0.600000f);
-    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.780000f, 0.820000f, 1.000000f, 0.900000f);
-    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.000000f, 0.000000f, 1.000000f, 0.350000f);
-    style.Colors[ImGuiCol_DragDropTarget] = ImVec4(1.000000f, 1.000000f, 0.000000f, 0.900000f);
-    */
 
     ImGui_ImplGlfw_InitForOpenGL(OverlayWindow, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
-  }
-
-  static bool AlignedButton(const char *label, const float alignment = 0.5f) {
-    const ImGuiStyle &style = ImGui::GetStyle();
-
-    const float size = ImGui::CalcTextSize(label).x + style.FramePadding.x * 2.0f;
-    const float avail = ImGui::GetContentRegionAvail().x;
-
-    if (const float off = (avail - size) * alignment; off > 0.0f)
-      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
-
-    return ImGui::Button(label);
   }
 
   void DestroyOverlay() const {
@@ -264,8 +208,6 @@ public:
   }
 
   void CaptureInput(const bool capture) const { glfwSetWindowAttrib(OverlayWindow, GLFW_MOUSE_PASSTHROUGH, capture ? GLFW_FALSE : GLFW_TRUE); }
-
-  void FocusOverlay() const { glfwFocusWindow(OverlayWindow); }
 
   void Start(void (*Update)(), void (*RenderUI)()) {
     while (!glfwWindowShouldClose(OverlayWindow)) {

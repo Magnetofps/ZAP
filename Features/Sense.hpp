@@ -399,20 +399,19 @@ struct Sense {
     OverlayWindow.GetScreenResolution(ScreenWidth, ScreenHeight);
 
     if (Features::Watermark::Watermark) {
-      if (Features::Watermark::WatermarkPosition == 0) { // Top Right
-        ImGui::SetNextWindowPos(ImVec2(10.0f, 22.0f), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
-      }
+      ImGui::SetNextWindowPos(ImVec2(10.0f, 22.0f), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
       ImGui::SetNextWindowBgAlpha(0.75f);
+
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 8.0f});
+      ImGui::PushStyleColor(ImGuiCol_Border, {1.00f, 0.65f, 0.00f, 1.00f});
       ImGui::Begin("Watermark", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
-      const ImGuiStyle &style = ImGui::GetStyle();
-
       if (Features::Watermark::Name) {
-        ImGui::TextColored(ImVec4(1, 0.75, 0, 1), ZAP_VERSION.c_str());
+        ImGui::TextColored(ImVec4(1, 0.75, 0, 1), "ZAP");
 
         if (Features::Watermark::Spectators || Features::Watermark::ProcessingSpeed || Features::Watermark::GameFPS) {
           ImGui::SameLine();
-          ImGui::Text(" - ");
+          ImGui::TextColored({0.5, 0.5, 0.5, 1}, " | ");
           ImGui::SameLine();
         }
       }
@@ -441,7 +440,7 @@ struct Sense {
 
         if (Features::Watermark::ProcessingSpeed || Features::Watermark::GameFPS) {
           ImGui::SameLine();
-          ImGui::Text(" - ");
+          ImGui::TextColored({0.5, 0.5, 0.5, 1}, " | ");
           ImGui::SameLine();
         }
       }
@@ -465,7 +464,7 @@ struct Sense {
 
         if (Features::Watermark::GameFPS) {
           ImGui::SameLine();
-          ImGui::Text(" - ");
+          ImGui::TextColored({0.5, 0.5, 0.5, 1}, " | ");
           ImGui::SameLine();
         }
       }
@@ -489,6 +488,8 @@ struct Sense {
         ImGui::TextColored(FpsColor, "%i", Fps);
       }
 
+      ImGui::PopStyleVar();
+      ImGui::PopStyleColor();
       ImGui::End();
     }
   }
