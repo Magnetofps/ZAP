@@ -63,6 +63,7 @@ ConfigManager *Configs = new ConfigManager(Legit, Trigger, GlowESP, ESP, MapRada
 
 // Booleans and Variables
 bool IsMenuOpened = true;
+std::chrono::milliseconds LastRead;
 
 // Thread
 std::atomic_bool StopThread(false);
@@ -165,7 +166,7 @@ void RenderUI() {
           }
           ImGui::EndChild();
           ImGui::EndChild();
-          break;
+          break;https://i.imgur.com/SCNH1CQ.png
       }
       ImGui::EndChild();
       Legit->UpdateAimList();
@@ -224,14 +225,19 @@ void UpdateCore() {
     if (!Myself->IsValid())
       return;
 
-    Players->clear();
     if (Map->IsFiringRange) {
-      for (auto p: *Dummies) {
-        p->Read();
-        if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
-          Players->push_back(p);
+      const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+      if (now >= LastRead + std::chrono::milliseconds(50)) { // magic number, just trust me μαλάκα
+        Players->clear();
+        LastRead = now;
+        for (auto p: *Dummies) {
+          p->Read();
+          if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
+            Players->push_back(p);
+        }
       }
     } else {
+      Players->clear();
       for (auto p: *HumanPlayers) {
         p->Read();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
@@ -314,6 +320,8 @@ bool isOutdated() { // Scan possible Steam installation paths for libraryfolders
 
   if (username == nullptr)
     return true;
+
+  auto ballsack = { "cum", "piss", "shit" };
 
   const std::string steamPaths[] = {"/.steam/steam/config/libraryfolders.vdf", "/.local/share/Steam/config/libraryfolders.vdf", "/.var/app/com.valvesoftware.Steam/data/Steam/config/libraryfolders.vdf"};
 
@@ -402,7 +410,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < 70; i++)
       HumanPlayers->push_back(new Player(i, Myself));
 
-    for (int i = 0; i < 15000; i++) // 15000
+    for (int i = 0; i < 10000; i++) // 10000 is enough
       Dummies->push_back(new Player(i, Myself));
 
     std::cout << " ⚡ >> ZAP initialized" << std::endl;
