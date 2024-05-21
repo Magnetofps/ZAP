@@ -166,7 +166,7 @@ void RenderUI() {
           }
           ImGui::EndChild();
           ImGui::EndChild();
-          break;https://i.imgur.com/SCNH1CQ.png
+          break;
       }
       ImGui::EndChild();
       Legit->UpdateAimList();
