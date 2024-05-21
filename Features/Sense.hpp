@@ -1,36 +1,24 @@
 #pragma once
-#include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <iomanip>
-#include <iostream>
 #include <vector>
-#include "../Core/Player.hpp"
-#include "../Core/LocalPlayer.hpp"
-#include "../Core/Offsets.hpp"
-#include "../Core/GlowMode.hpp"
+
 #include "../Core/Camera.hpp"
 #include "../Core/Level.hpp"
-
+#include "../Core/LocalPlayer.hpp"
+#include "../Core/Offsets.hpp"
+#include "../Core/Player.hpp"
 #include "../Features/Legitbot.hpp"
-
+#include "../imgui/imgui.h"
 #include "../Overlay/Overlay.hpp"
 #include "../Overlay/Renderer.hpp"
-
-#include "../Utils/Memory.hpp"
-#include "../Utils/Color.hpp"
-#include "../Utils/Conversion.hpp"
 #include "../Utils/Config.hpp"
+#include "../Utils/Conversion.hpp"
 #include "../Utils/Features.hpp"
 #include "../Utils/HitboxType.hpp"
+#include "../Utils/Memory.hpp"
 #include "../Utils/XDisplay.hpp"
-#include "../Utils/InputManager.hpp"
-#include "../Utils/InputTypes.hpp"
-
-// UI //
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
 
 // Geometry
 #define DEG2RAD(x) ((float)(x) * (float)(M_PI / 180.f))
@@ -422,9 +410,7 @@ struct Sense {
           std::vector<std::string> TempSpectators;
 
           for (const auto p : *Players) {
-            if (p->BasePointer == Myself->BasePointer)
-              continue;
-            if (p->GetViewYaw() == Myself->ViewYaw && p->IsDead) {
+            if (p->IsSpectating()) {
               TempTotalSpectators++;
               TempSpectators.push_back(p->GetPlayerName());
             }
@@ -537,9 +523,7 @@ struct Sense {
         int TempTotalSpectators = 0;
         std::vector<std::string> TempSpectators;
         for (auto p : *Players) {
-          if (p->BasePointer == Myself->BasePointer)
-            continue;
-          if (p->GetViewYaw() == Myself->ViewYaw && p->IsDead) {
+          if (p->IsSpectating()) {
             TempTotalSpectators++;
             TempSpectators.push_back(p->GetPlayerName());
           }
