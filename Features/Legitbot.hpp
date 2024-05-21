@@ -1308,84 +1308,74 @@ struct Legitbot {
       return;
     }
 
-    if (Features::Aimbot::AimbotEnabled) {
-      if (Features::Home::IsMenuOpened)
-        return; // Dont aimbot whilst menu is open
+    if (Features::Home::IsMenuOpened)
+      return;
 
-      UpdateAimList();
-      if (Features::Aimbot::AdvancedAim)
-        UpdateAimbotSettings();
+    UpdateAimList();
+    if (Features::Aimbot::AdvancedAim)
+      UpdateAimbotSettings();
 
-      if (!Myself->IsCombatReady()) {
-        CurrentTarget = nullptr;
-        return;
-      }
+    if (!Myself->IsCombatReady()) {
+      CurrentTarget = nullptr;
+      return;
+    }
 
-      if (!Features::Aimbot::AimList.contains(Myself->WeaponIndex)) {
-        ReleaseTarget();
-        return;
-      }
+    if (!Features::Aimbot::AimList.contains(Myself->WeaponIndex)) {
+      ReleaseTarget();
+      return;
+    }
 
-      if (Myself->IsHoldingGrenade) {
-        ReleaseTarget();
-        return;
-      }
+    if (Myself->IsHoldingGrenade) {
+      ReleaseTarget();
+      return;
+    }
 
-      if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
-        if (Features::Aimbot::OnFire && Features::Aimbot::OnADS) {
-          if (!Myself->IsInAttack) {
-            if (!Myself->IsZooming) {
-              ReleaseTarget();
-              return;
-            }
+    if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
+      if (Features::Aimbot::OnFire) {
+        if (Features::Aimbot::OnADS) {
+          if (!Myself->IsInAttack && !Myself->IsZooming) {
+            ReleaseTarget();
+            return;
           }
-          if (!Myself->IsZooming) {
-            if (!Myself->IsInAttack) {
-              ReleaseTarget();
-              return;
-            }
-          }
-        }
-
-        if (Features::Aimbot::OnFire && !Features::Aimbot::OnADS) {
+        } else {
           if (!Myself->IsInAttack) {
             ReleaseTarget();
             return;
           }
         }
-
-        if (Features::Aimbot::OnFire && !Features::Aimbot::OnFire) {
+      } else {
+        if (Features::Aimbot::OnADS) {
           if (!Myself->IsZooming) {
             ReleaseTarget();
             return;
           }
         }
-      } else if (Features::Aimbot::BindMethod == 1) { // Keybinds
-        if (!isKeybindDown()) {
-          ReleaseTarget();
-          return;
-        }
+      }
+    } else { // Keybinds
+      if (!isKeybindDown()) {
+        ReleaseTarget();
+        return;
+      }
+    }
+
+    if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
+      if (TargetSelected && !Features::Aimbot::TargetSwitching) { return; }
+
+      Target = FindBestTarget();
+      if (!IsValidTarget(Target)) {
+        ReleaseTarget();
+        return;
       }
 
-      if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
-        if (TargetSelected && !Features::Aimbot::TargetSwitching) { return; }
+      CurrentTarget = Target;
+      CurrentTarget->IsLockedOn = true;
+      TargetSelected = true;
+    }
 
-        Target = FindBestTarget();
-        if (!IsValidTarget(Target)) {
-          ReleaseTarget();
-          return;
-        }
-
-        CurrentTarget = Target;
-        CurrentTarget->IsLockedOn = true;
-        TargetSelected = true;
-      }
-
-      if (TargetSelected && CurrentTarget) {
-        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
-          StartAiming();
-          LastAimTime = now;
-        }
+    if (TargetSelected && CurrentTarget) {
+      if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
+        StartAiming();
+        LastAimTime = now;
       }
     }
   }

@@ -321,8 +321,6 @@ bool isOutdated() { // Scan possible Steam installation paths for libraryfolders
   if (username == nullptr)
     return true;
 
-  auto ballsack = { "cum", "piss", "shit" };
-
   const std::string steamPaths[] = {"/.steam/steam/config/libraryfolders.vdf", "/.local/share/Steam/config/libraryfolders.vdf", "/.var/app/com.valvesoftware.Steam/data/Steam/config/libraryfolders.vdf"};
 
   std::vector<std::string> extractedPaths;
@@ -416,7 +414,7 @@ int main(int argc, char *argv[]) {
     std::cout << " ⚡ >> ZAP initialized" << std::endl;
 
     OverlayWindow.Start(&UpdateCore, &RenderUI);
-    srand(static_cast<unsigned>(time(0)));
+    srand(static_cast<unsigned>(time(nullptr)));
   } catch (...) {
   }
 
