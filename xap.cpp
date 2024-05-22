@@ -225,20 +225,12 @@ void UpdateCore() {
     if (!Myself->IsValid())
       return;
 
-    if (Map->IsFiringRange) {
-      const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-      if (now >= LastRead + std::chrono::milliseconds(50)) { // magic number, just trust me μαλάκα
-        Players->clear();
-        LastRead = now;
-        for (auto p: *Dummies) {
-          p->Read();
-          if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
-            Players->push_back(p);
-        }
-      }
-    } else {
+    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if (now >= LastRead + std::chrono::milliseconds(50)) { // update once per tick, trust me μαλάκα
       Players->clear();
-      for (auto p: *HumanPlayers) {
+      LastRead = now;
+
+      for (auto p: Map->IsFiringRange ? *Dummies : *HumanPlayers) {
         p->Read();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
