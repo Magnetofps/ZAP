@@ -196,7 +196,7 @@ void RenderUI() {
     const ImVec2 WindowPosition = ImGui::GetWindowPos();
     auto TextPosition = WindowPosition.x + GUI->WindowWidth / 6 / 2;
     auto TextSize = ImGui::CalcTextSize(ICON_FA_BOLT).x;
-    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition - TextSize / 2, WindowPosition.y + 69), ImColor(255, 191, 0, 255), ICON_FA_BOLT);
+    ImGui::GetForegroundDrawList()->AddText(ImVec2(TextPosition - TextSize / 2, WindowPosition.y + 69), ImColor(255, 190, 0, 255), ICON_FA_BOLT);
 
     ImGui::SetCursorPosY(132);
     CreateTabButton("AIMBOT", Menu::Legitbot, ImVec2(MenuSize.x / 6 - 40, ButtonHeight));
@@ -374,18 +374,18 @@ int main(int argc, char *argv[]) {
   }
 
   if (Memory::GetPID() == 0) {
-    std::cout << " ⚡ >> Waiting for Apex" << std::endl;
+    std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> Waiting for Apex" << std::endl;
     while (Memory::GetPID() == 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
 
-  std::cout << " ⚡ >> Apex is running" << std::endl;
+  std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> Apex is running" << std::endl;
 
   if (!InitializeOverlayWindow())
     return -1;
 
-  std::cout << " ⚡ >> Overlay initialized" << std::endl;
+  std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> Overlay initialized" << std::endl;
 
   // Theading //
   std::thread MenuStateThread(MenuStateRun);
@@ -403,7 +403,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < 10000; i++) // 10000 is enough
       Dummies->push_back(new Player(i, Myself));
 
-    std::cout << " ⚡ >> ZAP initialized" << std::endl;
+    std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> ZAP initialized" << std::endl;
 
     OverlayWindow.Start(&UpdateCore, &RenderUI);
     srand(static_cast<unsigned>(time(nullptr)));

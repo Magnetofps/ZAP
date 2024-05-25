@@ -98,7 +98,6 @@ struct Sense {
       Config::SenseEnemy::DrawTracers = Features::Sense::Enemy::DrawTracers;
       Config::SenseEnemy::TracerThickness = Features::Sense::Enemy::TracerThickness;
       Config::SenseEnemy::DrawNames = Features::Sense::Enemy::DrawNames;
-      Config::SenseEnemy::DrawSeer = Features::Sense::Enemy::DrawSeer;
       Config::SenseEnemy::DrawStatus = Features::Sense::Enemy::DrawStatus;
       Config::SenseEnemy::ShowMaxStatusValues = Features::Sense::Enemy::ShowMaxStatusValues;
       Config::SenseEnemy::DrawWeapon = Features::Sense::Enemy::DrawWeapon;
@@ -130,7 +129,6 @@ struct Sense {
       Config::SenseTeammate::DrawTracers = Features::Sense::Teammate::DrawTracers;
       Config::SenseTeammate::TracerThickness = Features::Sense::Teammate::TracerThickness;
       Config::SenseTeammate::DrawNames = Features::Sense::Teammate::DrawNames;
-      Config::SenseTeammate::DrawSeer = Features::Sense::Teammate::DrawSeer;
       Config::SenseTeammate::DrawStatus = Features::Sense::Teammate::DrawStatus;
       Config::SenseTeammate::ShowMaxStatusValues = Features::Sense::Teammate::ShowMaxStatusValues;
       Config::SenseTeammate::DrawWeapon = Features::Sense::Teammate::DrawWeapon;
@@ -381,7 +379,7 @@ struct Sense {
     } catch (...) { return false; }
   }
 
-  void RenderWatermark(ImDrawList *Canvas, LocalPlayer *Myself, Overlay OverlayWindow) {
+  void RenderWatermark(ImDrawList *Canvas, LocalPlayer *Myself, const Overlay &OverlayWindow) {
     int ScreenWidth;
     int ScreenHeight;
     OverlayWindow.GetScreenResolution(ScreenWidth, ScreenHeight);
@@ -485,26 +483,6 @@ struct Sense {
     int ScreenHeight;
     OverlayWindow.GetScreenResolution(ScreenWidth, ScreenHeight);
 
-    bool GetWeaponID = false; //For finding weapon IDs (Local Player)
-    if (GetWeaponID) {
-      if (!Myself->IsDead) {
-        ImVec2 Center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(ImVec2(0.0f, Center.y), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
-        ImGui::SetNextWindowBgAlpha(0.3f);
-        ImGui::Begin("Current Weapon ID", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
-
-        std::stringstream LocalwepID;
-        LocalwepID << Myself->WeaponIndex;
-        std::string LocalwepInt = LocalwepID.str() + " ";
-        const char *LocalwepText = (char *) LocalwepInt.c_str();
-
-        ImGui::Text("Current ID: ");
-        ImGui::SameLine();
-        ImGui::Text(LocalwepText);
-        ImGui::End();
-      }
-    }
-
     if (!Features::Settings::OverlayEnabled)
       return;
     if (!Map->IsPlayable)
@@ -546,8 +524,8 @@ struct Sense {
 
     // Draw Crosshair
     if (Features::Sense::DrawCrosshair) {
-      int x = (int) (ScreenWidth * 0.5f);
-      int y = (int) (ScreenHeight * 0.5f);
+      int x = static_cast<int>(ScreenWidth * 0.5f);
+      int y = static_cast<int>(ScreenHeight * 0.5f);
       Renderer::DrawLine(Canvas, Vector2D(x - Features::Sense::CrosshairSize, y), Vector2D(x + Features::Sense::CrosshairSize, y), Features::Sense::CrosshairThickness, ImColor(Features::Colors::CrosshairColor[0], Features::Colors::CrosshairColor[1], Features::Colors::CrosshairColor[2], Features::Colors::CrosshairColor[3])); // Left - right
       Renderer::DrawLine(Canvas, Vector2D(x, y - Features::Sense::CrosshairSize), Vector2D(x, y + Features::Sense::CrosshairSize), Features::Sense::CrosshairThickness, ImColor(Features::Colors::CrosshairColor[0], Features::Colors::CrosshairColor[1], Features::Colors::CrosshairColor[2], Features::Colors::CrosshairColor[3])); // Top - bottom
     }
@@ -755,17 +733,17 @@ struct Sense {
 
             if (Features::Sense::Enemy::TracerPosition == 0) { // Top to head
               if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
+                int x = static_cast<int>(ScreenWidth * 0.5f);
                 Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight - ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
               }
             } else if (Features::Sense::Enemy::TracerPosition == 1) { // Middle to bottom
               if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
+                int x = static_cast<int>(ScreenWidth * 0.5f);
                 Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
               }
             } else if (Features::Sense::Enemy::TracerPosition == 2) { // Bottom to bottom
               if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
+                int x = static_cast<int>(ScreenWidth * 0.5f);
                 Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
               }
             }
@@ -774,7 +752,7 @@ struct Sense {
           // Distance
           if (Features::Sense::Enemy::DrawDistance && !Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
             char buffer[256];
-            const char *dist = std::to_string((int) Conversion::ToMeters(p->DistanceToLocalPlayer)).c_str();
+            const char *dist = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
             const char *txt = "[";
             const char *txt2 = " M]";
             strncpy(buffer, txt, sizeof(buffer));
@@ -792,7 +770,7 @@ struct Sense {
             std::stringstream name, space, dist, txt, txt2;
             name << p->GetPlayerName().c_str();
             space << " ";
-            dist << std::to_string((int) Conversion::ToMeters(p->DistanceToLocalPlayer)).c_str();
+            dist << std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
             txt << "[";
             txt2 << " M]";
             std::string combined = name.str() + space.str() + txt.str() + dist.str() + txt2.str();
@@ -813,8 +791,8 @@ struct Sense {
             maxShieldValue << p->MaxShield;
             std::string healthInt = healthValue.str() + " HP";
             std::string shieldInt = shieldValue.str() + " AP";
-            const char *healthText = (char *) healthInt.c_str();
-            const char *shieldText = (char *) shieldInt.c_str();
+            const char *healthText = const_cast<char *>(healthInt.c_str());
+            const char *shieldText = const_cast<char *>(shieldInt.c_str());
             std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
             const char *combinedHealthText = combinedHealth.c_str();
             std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
@@ -850,13 +828,13 @@ struct Sense {
           // Weapon ESP
           int weaponHeldID;
           weaponHeldID = p->WeaponIndex;
-          const char *weaponHeldText = "Unknown";
 
           ImColor weaponHeldColor;
           weaponHeldColor = ImColor(255, 255, 255);
 
           // Draw Weapon
           if (Features::Sense::Enemy::DrawWeapon && bLocalOriginW2SValid && bHeadPositionW2SValid) {
+            const char *weaponHeldText = "Unknown";
             // Light Weapons
             if (weaponHeldID == 107) { // P2020
               weaponHeldText = "P2020";
@@ -1076,12 +1054,6 @@ struct Sense {
             GameCamera->WorldToScreen(HeadPos3D, HeadPos2D);
 
             Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(EnemyHeadCircleColor), Features::Sense::Enemy::HeadCircleThickness);
-          }
-
-          // Seer
-          if (Features::Sense::Enemy::DrawSeer && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            if (!HeadPositionW2S.IsZeroVector())
-              Renderer::DrawSeer(Canvas, HeadPositionW2S.x, HeadPositionW2S.y - 20, p->Shield, p->MaxShield, p->Health);
           }
         }
 
@@ -1121,31 +1093,18 @@ struct Sense {
           }
 
           if (Features::Sense::Enemy::DrawTracers) {
-            // Tracers
             Vector2D chestScreenPosition;
-            if (Features::Sense::Enemy::TracerBone == 0) { GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, 66)), chestScreenPosition); } else
-              if (Features::Sense::Enemy::TracerBone == 1) { GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, 0)), chestScreenPosition); }
+            GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, Features::Sense::Enemy::TracerBone == 0 ? 66 : 0)), chestScreenPosition);
 
-            if (Features::Sense::Enemy::TracerPosition == 0) // top to head
-            {
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
+            if (!chestScreenPosition.IsZeroVector()) {
+              auto x = static_cast<int>(ScreenWidth * 0.5f);
 
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight - ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
-              }
-            } else if (Features::Sense::Enemy::TracerPosition == 1) // middle to bottom
-            {
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
-
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
-              }
-            } else if (Features::Sense::Enemy::TracerPosition == 2) // bottom to bottom
-            {
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
-
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
+              if (Features::Sense::Enemy::TracerPosition == 0) { // top to head
+                Renderer::DrawLine(Canvas, Vector2D(x, 0), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(TeammateTracerColor));
+              } else if (Features::Sense::Enemy::TracerPosition == 1) { // middle to bottom
+                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(TeammateTracerColor));
+              } else if (Features::Sense::Enemy::TracerPosition == 2) { // bottom to bottom
+                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(TeammateTracerColor));
               }
             }
           }
@@ -1153,7 +1112,7 @@ struct Sense {
           // Distance
           if (Features::Sense::Enemy::DrawDistance && !Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
             char buffer[256];
-            const char *dist = std::to_string((int) Conversion::ToMeters(p->DistanceToLocalPlayer)).c_str();
+            const char *dist = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
             const char *txt = "[";
             const char *txt2 = " M]";
             strncpy(buffer, txt, sizeof(buffer));
@@ -1171,7 +1130,7 @@ struct Sense {
             std::stringstream name, space, dist, txt, txt2;
             name << p->GetPlayerName().c_str();
             space << " ";
-            dist << std::to_string((int) Conversion::ToMeters(p->DistanceToLocalPlayer)).c_str();
+            dist << std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
             txt << "[";
             txt2 << " M]";
             std::string combined = name.str() + space.str() + txt.str() + dist.str() + txt2.str();
@@ -1192,8 +1151,8 @@ struct Sense {
             maxShieldValue << p->MaxShield;
             std::string healthInt = healthValue.str() + " HP";
             std::string shieldInt = shieldValue.str() + " AP";
-            const char *healthText = (char *) healthInt.c_str();
-            const char *shieldText = (char *) shieldInt.c_str();
+            const char *healthText = const_cast<char *>(healthInt.c_str());
+            const char *shieldText = const_cast<char *>(shieldInt.c_str());
             std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
             const char *combinedHealthText = combinedHealth.c_str();
             std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
@@ -1224,13 +1183,13 @@ struct Sense {
           // Weapon ESP
           int weaponHeldID;
           weaponHeldID = p->WeaponIndex;
-          const char *weaponHeldText = "Unknown";
 
           ImColor weaponHeldColor;
           weaponHeldColor = ImColor(255, 255, 255);
 
           // Draw Weapon
           if (Features::Sense::Enemy::DrawWeapon && bLocalOriginW2SValid && bHeadPositionW2SValid) {
+            const char *weaponHeldText = "Unknown";
             // Light Weapons
             if (weaponHeldID == 107) { // P2020
               weaponHeldText = "P2020";
@@ -1451,12 +1410,6 @@ struct Sense {
 
             Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(EnemyHeadCircleColor), Features::Sense::Enemy::HeadCircleThickness);
           }
-
-          // Seer
-          if (Features::Sense::Enemy::DrawSeer && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            if (!HeadPositionW2S.IsZeroVector())
-              Renderer::DrawSeer(Canvas, HeadPositionW2S.x, HeadPositionW2S.y - 20, p->Shield, p->MaxShield, p->Health);
-          }
         }
 
         // Team ESP
@@ -1487,30 +1440,17 @@ struct Sense {
           }
 
           if (Features::Sense::Teammate::DrawTracers) {
-            // Tracers
             Vector2D chestScreenPosition;
-            if (Features::Sense::Teammate::TracerBone == 0) { GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, 66)), chestScreenPosition); } else
-              if (Features::Sense::Teammate::TracerBone == 1) { GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, 0)), chestScreenPosition); }
+            GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, Features::Sense::Teammate::TracerBone == 0 ? 66 : 0)), chestScreenPosition);
 
-            if (Features::Sense::Teammate::TracerPosition == 0) // top to head
-            {
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
+            if (!chestScreenPosition.IsZeroVector()) {
+              auto x = static_cast<int>(ScreenWidth * 0.5f);
 
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight - ScreenHeight), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
-              }
-            } else if (Features::Sense::Teammate::TracerPosition == 1) // middle to bottom
-            {
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
-
+              if (Features::Sense::Teammate::TracerPosition == 0) { // top to head
+                Renderer::DrawLine(Canvas, Vector2D(x, 0), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
+              } else if (Features::Sense::Teammate::TracerPosition == 1) { // middle to bottom
                 Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
-              }
-            } else if (Features::Sense::Teammate::TracerPosition == 2) // bottom to bottom
-            {
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = (int) (ScreenWidth * 0.5f);
-
+              } else if (Features::Sense::Teammate::TracerPosition == 2) { // bottom to bottom
                 Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
               }
             }
@@ -1519,14 +1459,15 @@ struct Sense {
           // Distance
           if (Features::Sense::Teammate::DrawDistance && !Features::Sense::Teammate::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
             char buffer[256];
-            const char *dist = std::to_string((int) Conversion::ToMeters(p->DistanceToLocalPlayer)).c_str();
-            const char *txt = "[";
-            const char *txt2 = " M]";
+            const char *dist = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
+            auto txt = "[";
+            auto txt2 = " M]";
             strncpy(buffer, txt, sizeof(buffer));
             strncat(buffer, dist, sizeof(buffer));
             strncat(buffer, txt2, sizeof(buffer));
 
-            if (!LocalOriginW2S.IsZeroVector()) { Renderer::DrawText(Canvas, DistancePosition, buffer, ImColor(EnemyDistanceColor), Features::Sense::TextOutline, true, false); }
+            if (!LocalOriginW2S.IsZeroVector())
+              Renderer::DrawText(Canvas, DistancePosition, buffer, ImColor(EnemyDistanceColor), Features::Sense::TextOutline, true, false);
           }
 
           // Names Only
@@ -1537,7 +1478,7 @@ struct Sense {
             std::stringstream name, space, dist, txt, txt2;
             name << p->GetPlayerName().c_str();
             space << " ";
-            dist << std::to_string((int) Conversion::ToMeters(p->DistanceToLocalPlayer)).c_str();
+            dist << std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
             txt << "[";
             txt2 << " M]";
             std::string combined = name.str() + space.str() + txt.str() + dist.str() + txt2.str();
@@ -1558,45 +1499,42 @@ struct Sense {
             maxShieldValue << p->MaxShield;
             std::string healthInt = healthValue.str() + " HP";
             std::string shieldInt = shieldValue.str() + " AP";
-            const char *healthText = (char *) healthInt.c_str();
-            const char *shieldText = (char *) shieldInt.c_str();
+            const char *healthText = const_cast<char *>(healthInt.c_str());
+            const char *shieldText = const_cast<char *>(shieldInt.c_str());
             std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
             const char *combinedHealthText = combinedHealth.c_str();
             std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
             const char *combinedShieldText = combinedShield.c_str();
 
             ImColor ShieldColor;
-            if (p->MaxShield == 50) { // white
-              ShieldColor = ImColor(247, 247, 247);
-            } else if (p->MaxShield == 75) { // blue
-              ShieldColor = ImColor(39, 178, 255);
-            } else if (p->MaxShield == 100) { // purple
-              ShieldColor = ImColor(206, 59, 255);
-            } else if (p->MaxShield == 125) { // red
-              ShieldColor = ImColor(219, 2, 2);
-            } else { ShieldColor = ImColor(247, 247, 247); }
+            switch (p->MaxShield) {
+              case 75:
+                ShieldColor = ImColor(39, 178, 255, 255); // Blue
+                break;
+              case 100:
+                ShieldColor = ImColor(206, 59, 255, 255); // Purple
+                break;
+              case 125:
+                ShieldColor = ImColor(219, 2, 2, 255); // Red
+                break;
+              default:
+                ShieldColor = ImColor(247, 247, 247, 255); // White
+                break;
+            }
 
-            // Render Text
-            if (!Features::Sense::Teammate::ShowMaxStatusValues) {
-              Renderer::DrawText(Canvas, StatusPosition, healthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-              Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), shieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-            }
-            if (Features::Sense::Teammate::ShowMaxStatusValues) {
-              Renderer::DrawText(Canvas, StatusPosition, combinedHealthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-              Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), combinedShieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-            }
+            Renderer::DrawText(Canvas, StatusPosition, Features::Sense::Teammate::ShowMaxStatusValues ? combinedHealthText : healthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
+            Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), shieldText, ShieldColor, Features::Sense::TextOutline, true, false);
           }
 
           // Weapon ESP
           int weaponHeldID;
           weaponHeldID = p->WeaponIndex;
-          const char *weaponHeldText = "Unknown";
 
-          ImColor weaponHeldColor;
-          weaponHeldColor = ImColor(255, 255, 255);
+          ImColor weaponHeldColor = ImColor(255, 255, 255);
 
           // Draw Weapon
           if (Features::Sense::Teammate::DrawWeapon && bLocalOriginW2SValid && bHeadPositionW2SValid) {
+            const char *weaponHeldText = "Unknown";
             // Light Weapons
             if (weaponHeldID == 107) { // P2020
               weaponHeldText = "P2020";
@@ -1816,12 +1754,6 @@ struct Sense {
             GameCamera->WorldToScreen(HeadPos3D, HeadPos2D);
 
             Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(TeammateHeadCircleColor), Features::Sense::Teammate::HeadCircleThickness);
-          }
-
-          // Seer
-          if (Features::Sense::Teammate::DrawSeer && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            if (!HeadPositionW2S.IsZeroVector())
-              Renderer::DrawSeer(Canvas, HeadPositionW2S.x, HeadPositionW2S.y - 20, p->Shield, p->MaxShield, p->Health);
           }
         }
       }
