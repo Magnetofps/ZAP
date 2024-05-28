@@ -533,7 +533,7 @@ namespace Features {
     };
 
     // Aimbot
-    bool DrawFOVCircle = true;
+    bool DrawFOVCircle = false;
     bool DrawFilledFOVCircle = false;
     float FOVThickness = 1.0;
     float GameFOV = 120;

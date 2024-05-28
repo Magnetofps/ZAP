@@ -555,13 +555,6 @@ struct Glow {
 
       Memory::Write<uint8_t>(currentWeapon + OFF_GLOW_HIGHLIGHT_ID, ViewmodelGlowID);
     }
-
-    if (!Features::Glow::ViewModelGlow) {
-      uint64_t actWeaponID = Memory::Read<uint64_t>(Myself->BasePointer + OFF_VIEWMODELS) & 0xFFFF;
-      uint64_t currentWeapon = Memory::Read<uint64_t>(OFF_REGION + OFF_ENTITY_LIST + (actWeaponID << 5));
-
-      Memory::Write<uint8_t>(currentWeapon + OFF_GLOW_HIGHLIGHT_ID, 0);
-    }
   }
 
   void ViewmodelGlowSettings() {

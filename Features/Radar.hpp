@@ -34,15 +34,13 @@
 #define DEG2RAD(x) ((float)(x) * (float)(M_PI / 180.f))
 
 struct Radar {
-  XDisplay *X11Display;
   Camera *GameCamera;
   Level *m_level;
   LocalPlayer *Myself;
   std::vector<Player *> *Players;
   std::chrono::milliseconds LastUpdateTime;
 
-  Radar(XDisplay *X11Display, std::vector<Player *> *Players, Camera *GameCamera, Level *level, LocalPlayer *localplayer) {
-    this->X11Display = X11Display;
+  Radar(std::vector<Player *> *Players, Camera *GameCamera, Level *level, LocalPlayer *localplayer) {
     this->Players = Players;
     this->GameCamera = GameCamera;
     this->m_level = level;

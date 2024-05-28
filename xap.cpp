@@ -51,7 +51,7 @@ std::vector<Player *> *Players = new std::vector<Player *>;
 
 // Features
 Sense *ESP = new Sense(Map, Players, GameCamera, Myself, X11Display);
-Radar *MapRadar = new Radar(X11Display, Players, GameCamera, Map, Myself);
+Radar *MapRadar = new Radar(Players, GameCamera, Map, Myself);
 Glow *GlowESP = new Glow(Map, Players, GameCamera, Myself);
 Legitbot *Legit = new Legitbot(X11Display, Map, Myself, Players);
 Triggerbot *Trigger = new Triggerbot(X11Display, Map, Myself, Players);
