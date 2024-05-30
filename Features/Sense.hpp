@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -30,17 +29,17 @@ struct Sense {
   Camera *GameCamera;
   LocalPlayer *Myself;
   std::vector<Player *> *Players;
-  std::chrono::milliseconds LastSpectatorUpdateTime;
+  std::chrono::milliseconds LastSpectatorUpdateTime{};
   int TotalSpectators = 0;
   std::vector<std::string> Spectators;
 
-  std::chrono::milliseconds processingLastUpdate;
-  std::vector<double> processingTimes;
-  double processingTime;
+  std::chrono::milliseconds ProcessingLastUpdatae{};
+  std::vector<double> ProcessingTimes;
+  double ProcessingTime = 0;
 
-  std::chrono::milliseconds FpsUpdate;
-  int FpsLastFrame;
-  int Fps;
+  std::chrono::milliseconds FpsUpdate{};
+  int FpsLastFrame = 0;
+  int Fps = 0;
 
   Level *Map;
 
@@ -388,8 +387,8 @@ struct Sense {
       ImGui::SetNextWindowPos(ImVec2(10.0f, 22.0f), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
       ImGui::SetNextWindowBgAlpha(0.75f);
 
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {10.0f, 8.0f});
-      ImGui::PushStyleColor(ImGuiCol_Border, {1.00f, 0.65f, 0.00f, 1.00f});
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 8.0f });
+      ImGui::PushStyleColor(ImGuiCol_Border, { 1.00f, 0.65f, 0.00f, 1.00f });
       ImGui::Begin("Watermark", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
       if (Features::Watermark::Name) {
@@ -397,17 +396,17 @@ struct Sense {
 
         if (Features::Watermark::Spectators || Features::Watermark::ProcessingSpeed || Features::Watermark::GameFPS) {
           ImGui::SameLine();
-          ImGui::TextColored({0.5, 0.5, 0.5, 1}, " | ");
+          ImGui::TextColored({ 0.5, 0.5, 0.5, 1 }, " | ");
           ImGui::SameLine();
         }
       }
 
       if (Features::Watermark::Spectators) {
         if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
-          int TempTotalSpectators = 0;
+          auto TempTotalSpectators = 0;
           std::vector<std::string> TempSpectators;
 
-          for (const auto p : *Players) {
+          for (const auto p: *Players) {
             if (p->IsSpectating()) {
               TempTotalSpectators++;
               TempSpectators.push_back(p->GetPlayerName());
@@ -424,43 +423,42 @@ struct Sense {
 
         if (Features::Watermark::ProcessingSpeed || Features::Watermark::GameFPS) {
           ImGui::SameLine();
-          ImGui::TextColored({0.5, 0.5, 0.5, 1}, " | ");
+          ImGui::TextColored({ 0.5, 0.5, 0.5, 1 }, " | ");
           ImGui::SameLine();
         }
       }
 
       if (Features::Watermark::ProcessingSpeed) {
-        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= processingLastUpdate + std::chrono::milliseconds(600)) {
-          const double averageProcessingTime = std::accumulate(processingTimes.begin(), processingTimes.end(), 0.0) / processingTimes.size();
-          processingTime = averageProcessingTime;
-          processingLastUpdate = now;
+        if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= ProcessingLastUpdatae + std::chrono::milliseconds(600)) {
+          const double averageProcessingTime = std::accumulate(ProcessingTimes.begin(), ProcessingTimes.end(), 0.0) / static_cast<double>(ProcessingTimes.size());
+          ProcessingTime = averageProcessingTime;
+          ProcessingLastUpdatae = now;
         }
 
-        if (processingTimes.size() >= 10)
-          processingTimes.erase(processingTimes.begin());
+        if (ProcessingTimes.size() >= 10)
+          ProcessingTimes.erase(ProcessingTimes.begin());
 
-        processingTimes.push_back(OverlayWindow.ProcessingTime);
+        ProcessingTimes.push_back(OverlayWindow.ProcessingTime);
 
-        const ImVec4 ProcessingTimeColor = processingTime > 20 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1);
+        const ImVec4 ProcessingTimeColor = ProcessingTime > 20 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1);
         ImGui::Text("performance: ");
         ImGui::SameLine();
-        ImGui::TextColored(ProcessingTimeColor, "%.2fms", processingTime);
+        ImGui::TextColored(ProcessingTimeColor, "%.2fms", ProcessingTime);
 
         if (Features::Watermark::GameFPS) {
           ImGui::SameLine();
-          ImGui::TextColored({0.5, 0.5, 0.5, 1}, " | ");
+          ImGui::TextColored({ 0.5, 0.5, 0.5, 1 }, " | ");
           ImGui::SameLine();
         }
       }
 
       if (Features::Watermark::GameFPS) {
-        int FrameNumber = 0;
-        FrameNumber = Memory::Read<int>(OFF_REGION + OFF_GLOBAL_VARS + 0x0008);
+        const auto FrameNumber = Memory::Read<int>(OFF_REGION + OFF_GLOBAL_VARS + 0x0008);;
 
         if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= FpsUpdate + std::chrono::milliseconds(300)) {
           const int FramesSince = FrameNumber - FpsLastFrame;
           const auto Duration = now - FpsUpdate;
-          Fps = FramesSince * 1000 / Duration.count();
+          Fps = static_cast<int>(FramesSince * 1000 / Duration.count());
 
           FpsLastFrame = FrameNumber;
           FpsUpdate = now;
@@ -483,24 +481,16 @@ struct Sense {
     int ScreenHeight;
     OverlayWindow.GetScreenResolution(ScreenWidth, ScreenHeight);
 
-    if (!Features::Settings::OverlayEnabled)
-      return;
-    if (!Map->IsPlayable)
-      return;
-    if (Myself->IsDead)
-      return;
-
     if (Features::Sense::ShowSpectators) {
       ImVec2 Center = ImGui::GetMainViewport()->GetCenter();
       ImGui::SetNextWindowPos(ImVec2(0.0f, Center.y), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
       ImGui::SetNextWindowBgAlpha(0.3f);
       ImGui::Begin("Spectators", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
-      std::chrono::milliseconds Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-      if (Now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
-        int TempTotalSpectators = 0;
+      if (auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); Now >= LastSpectatorUpdateTime + std::chrono::milliseconds(1500)) {
+        auto TempTotalSpectators = 0;
         std::vector<std::string> TempSpectators;
-        for (auto p : *Players) {
+        for (auto p: *Players) {
           if (p->IsSpectating()) {
             TempTotalSpectators++;
             TempSpectators.push_back(p->GetPlayerName());
@@ -517,1230 +507,318 @@ struct Sense {
       ImGui::TextColored(TotalSpectators > 0 ? ImVec4(1, 0.343, 0.475, 1) : ImVec4(0.4, 1, 0.343, 1), "%d", TotalSpectators);
       if (static_cast<int>(Spectators.size()) > 0) {
         ImGui::Separator();
-        for (const auto & Spectator : Spectators) { ImGui::TextColored(ImVec4(1, 0.343, 0.475, 1), "> %s", Spectator.c_str()); }
+        for (const auto &Spectator: Spectators) { ImGui::TextColored(ImVec4(1, 0.343, 0.475, 1), "> %s", Spectator.c_str()); }
       }
       ImGui::End();
     }
 
     // Draw Crosshair
     if (Features::Sense::DrawCrosshair) {
-      int x = static_cast<int>(ScreenWidth * 0.5f);
-      int y = static_cast<int>(ScreenHeight * 0.5f);
+      auto x = static_cast<float>(ScreenWidth) * 0.5f;
+      auto y = static_cast<float>(ScreenHeight) * 0.5f;
       Renderer::DrawLine(Canvas, Vector2D(x - Features::Sense::CrosshairSize, y), Vector2D(x + Features::Sense::CrosshairSize, y), Features::Sense::CrosshairThickness, ImColor(Features::Colors::CrosshairColor[0], Features::Colors::CrosshairColor[1], Features::Colors::CrosshairColor[2], Features::Colors::CrosshairColor[3])); // Left - right
       Renderer::DrawLine(Canvas, Vector2D(x, y - Features::Sense::CrosshairSize), Vector2D(x, y + Features::Sense::CrosshairSize), Features::Sense::CrosshairThickness, ImColor(Features::Colors::CrosshairColor[0], Features::Colors::CrosshairColor[1], Features::Colors::CrosshairColor[2], Features::Colors::CrosshairColor[3])); // Top - bottom
     }
 
     // Draw lot of things
     if (Features::Settings::ESPEnabled) {
-      for (auto p : *Players) {
-        Vector2D LocalOriginW2S, HeadPositionW2S, AboveHeadW2S;
+      if (Features::Sense::DrawSpectatorWarning && TotalSpectators >= 1) {
+        std::stringstream WarningTextStart, Space1, Amount, Space2;
+        WarningTextStart << "SPECTATOR WARNING";
+        Space1 << " [";
+        Amount << TotalSpectators;
+        Space2 << "]";
+        std::string combined = WarningTextStart.str() + Space1.str() + Amount.str() + Space2.str();
+        const char *CombinedText = combined.c_str();
 
-        Vector3D LocalOrigin3D = p->LocalOrigin;
-        Vector3D Head3D = p->GetBonePosition(HitboxType::Head);
-        Vector3D AboveHead3D = p->GetBonePosition(HitboxType::Head);
+        auto TextPos = Vector2D(static_cast<float>(Features::Sense::WarningTextX), static_cast<float>(Features::Sense::WarningTextY) - 12);
+        Renderer::DrawText(Canvas, TextPos, CombinedText, ImColor(Features::Colors::SpectatorWarningColor[0], Features::Colors::SpectatorWarningColor[1], Features::Colors::SpectatorWarningColor[2], Features::Colors::SpectatorWarningColor[3]), Features::Sense::WarningTextOutline ? true : false, true, false);
+      }
 
+      for (auto p: *Players) {
+        if (p->IsLocal)
+          continue;
+
+        if (!p->IsCombatReady())
+          continue;
+
+        if (p->DistanceToLocalPlayer > Conversion::ToGameUnits(Features::Sense::ESPMaxDistance))
+          continue;
+
+        if (Features::Sense::VisibilityCheck && !p->IsVisible)
+          continue;
+
+        if (!Features::Sense::Teammate::DrawTeam && p->IsAlly)
+          continue;
+
+        auto LocalOrigin3D = p->LocalOrigin;
+        auto Head3D = p->GetBonePosition(HitboxType::Head);
+        auto AboveHead3D = Head3D;
         AboveHead3D.z += 10.f; // Y Offset
 
-        bool bLocalOriginW2SValid = GameCamera->WorldToScreen(LocalOrigin3D, LocalOriginW2S);
-        bool bHeadPositionW2SValid = GameCamera->WorldToScreen(Head3D, HeadPositionW2S);
+        Vector2D LocalOriginW2S, HeadW2S, AboveHeadW2S;
+        bool LocalOriginW2SValid = GameCamera->WorldToScreen(LocalOrigin3D, LocalOriginW2S);
+        bool HeadW2SValid = GameCamera->WorldToScreen(Head3D, HeadW2S);
         GameCamera->WorldToScreen(AboveHead3D, AboveHeadW2S);
 
-        // Colors - Players (Enemy)
-        ImVec4 EnemyBoxColor, EnemyFilledBoxColor, EnemyTracerColor, EnemySkeletonColor, EnemyHeadCircleColor, EnemyNameColor, EnemyDistanceColor, EnemyLegendColor, EnemyWeaponColor;
-        if (p->IsVisible) {
-          EnemyBoxColor = ImVec4(Features::Colors::Enemy::VisibleBoxColor[0], Features::Colors::Enemy::VisibleBoxColor[1], Features::Colors::Enemy::VisibleBoxColor[2], Features::Colors::Enemy::VisibleBoxColor[3]);
-          EnemyFilledBoxColor = ImVec4(Features::Colors::Enemy::VisibleFilledBoxColor[0], Features::Colors::Enemy::VisibleFilledBoxColor[1], Features::Colors::Enemy::VisibleFilledBoxColor[2], Features::Colors::Enemy::VisibleFilledBoxColor[3]);
-          EnemyTracerColor = ImVec4(Features::Colors::Enemy::VisibleTracerColor[0], Features::Colors::Enemy::VisibleTracerColor[1], Features::Colors::Enemy::VisibleTracerColor[2], Features::Colors::Enemy::VisibleTracerColor[3]);
-          EnemySkeletonColor = ImVec4(Features::Colors::Enemy::VisibleSkeletonColor[0], Features::Colors::Enemy::VisibleSkeletonColor[1], Features::Colors::Enemy::VisibleSkeletonColor[2], Features::Colors::Enemy::VisibleSkeletonColor[3]);
-          EnemyHeadCircleColor = ImVec4(Features::Colors::Enemy::VisibleHeadCircleColor[0], Features::Colors::Enemy::VisibleHeadCircleColor[1], Features::Colors::Enemy::VisibleHeadCircleColor[2], Features::Colors::Enemy::VisibleHeadCircleColor[3]);
-          EnemyNameColor = ImVec4(Features::Colors::Enemy::VisibleNameColor[0], Features::Colors::Enemy::VisibleNameColor[1], Features::Colors::Enemy::VisibleNameColor[2], Features::Colors::Enemy::VisibleNameColor[3]);
-          EnemyDistanceColor = ImVec4(Features::Colors::Enemy::VisibleDistanceColor[0], Features::Colors::Enemy::VisibleDistanceColor[1], Features::Colors::Enemy::VisibleDistanceColor[2], Features::Colors::Enemy::VisibleDistanceColor[3]);
-          EnemyLegendColor = ImVec4(Features::Colors::Enemy::VisibleLegendColor[0], Features::Colors::Enemy::VisibleLegendColor[1], Features::Colors::Enemy::VisibleLegendColor[2], Features::Colors::Enemy::VisibleLegendColor[3]);
-          EnemyWeaponColor = ImVec4(Features::Colors::Enemy::VisibleWeaponColor[0], Features::Colors::Enemy::VisibleWeaponColor[1], Features::Colors::Enemy::VisibleWeaponColor[2], Features::Colors::Enemy::VisibleWeaponColor[3]);
-        } else {
-          EnemyBoxColor = ImVec4(Features::Colors::Enemy::InvisibleBoxColor[0], Features::Colors::Enemy::InvisibleBoxColor[1], Features::Colors::Enemy::InvisibleBoxColor[2], Features::Colors::Enemy::InvisibleBoxColor[3]);
-          EnemyFilledBoxColor = ImVec4(Features::Colors::Enemy::InvisibleFilledBoxColor[0], Features::Colors::Enemy::InvisibleFilledBoxColor[1], Features::Colors::Enemy::InvisibleFilledBoxColor[2], Features::Colors::Enemy::InvisibleFilledBoxColor[3]);
-          EnemyTracerColor = ImVec4(Features::Colors::Enemy::InvisibleTracerColor[0], Features::Colors::Enemy::InvisibleTracerColor[1], Features::Colors::Enemy::InvisibleTracerColor[2], Features::Colors::Enemy::InvisibleTracerColor[3]);
-          EnemySkeletonColor = ImVec4(Features::Colors::Enemy::InvisibleSkeletonColor[0], Features::Colors::Enemy::InvisibleSkeletonColor[1], Features::Colors::Enemy::InvisibleSkeletonColor[2], Features::Colors::Enemy::InvisibleSkeletonColor[3]);
-          EnemyHeadCircleColor = ImVec4(Features::Colors::Enemy::InvisibleHeadCircleColor[0], Features::Colors::Enemy::InvisibleHeadCircleColor[1], Features::Colors::Enemy::InvisibleHeadCircleColor[2], Features::Colors::Enemy::InvisibleHeadCircleColor[3]);
-          EnemyNameColor = ImVec4(Features::Colors::Enemy::InvisibleNameColor[0], Features::Colors::Enemy::InvisibleNameColor[1], Features::Colors::Enemy::InvisibleNameColor[2], Features::Colors::Enemy::InvisibleNameColor[3]);
-          EnemyDistanceColor = ImVec4(Features::Colors::Enemy::InvisibleDistanceColor[0], Features::Colors::Enemy::InvisibleDistanceColor[1], Features::Colors::Enemy::InvisibleDistanceColor[2], Features::Colors::Enemy::InvisibleDistanceColor[3]);
-          EnemyLegendColor = ImVec4(Features::Colors::Enemy::InvisibleLegendColor[0], Features::Colors::Enemy::InvisibleLegendColor[1], Features::Colors::Enemy::InvisibleLegendColor[2], Features::Colors::Enemy::InvisibleLegendColor[3]);
-          EnemyWeaponColor = ImVec4(Features::Colors::Enemy::InvisibleWeaponColor[0], Features::Colors::Enemy::InvisibleWeaponColor[1], Features::Colors::Enemy::InvisibleWeaponColor[2], Features::Colors::Enemy::InvisibleWeaponColor[3]);
+        auto getColor = [p](const float *VisibleColor_ALLY, const float *InvisibleColor_ALLY, const float *VisibleColor_ENEMY, const float *InvisibleColor_ENEMY) {
+          const float *ChosenColor_ALLY = p->IsVisible ? VisibleColor_ALLY : InvisibleColor_ALLY;
+          const float *ChosenColor_ENEMY = p->IsVisible ? VisibleColor_ENEMY : InvisibleColor_ENEMY;
+          const float *ChosenColor = p->IsAlly ? ChosenColor_ALLY : ChosenColor_ENEMY;
+          return ImVec4(ChosenColor[0], ChosenColor[1], ChosenColor[2], ChosenColor[3]);
+        };
+
+        auto BoxColor = getColor(Features::Colors::Teammate::VisibleBoxColor, Features::Colors::Teammate::InvisibleBoxColor, Features::Colors::Enemy::VisibleBoxColor, Features::Colors::Enemy::InvisibleBoxColor);
+        auto FilledBoxColor = getColor(Features::Colors::Teammate::VisibleFilledBoxColor, Features::Colors::Teammate::InvisibleFilledBoxColor, Features::Colors::Enemy::VisibleFilledBoxColor, Features::Colors::Enemy::InvisibleFilledBoxColor);
+        auto TracerColor = getColor(Features::Colors::Teammate::VisibleTracerColor, Features::Colors::Teammate::InvisibleTracerColor, Features::Colors::Enemy::VisibleTracerColor, Features::Colors::Enemy::InvisibleTracerColor);
+        auto SkeletonColor = getColor(Features::Colors::Teammate::VisibleSkeletonColor, Features::Colors::Teammate::InvisibleSkeletonColor, Features::Colors::Enemy::VisibleSkeletonColor, Features::Colors::Enemy::InvisibleSkeletonColor);
+        auto HeadCircleColor = getColor(Features::Colors::Teammate::VisibleHeadCircleColor, Features::Colors::Teammate::InvisibleHeadCircleColor, Features::Colors::Enemy::VisibleHeadCircleColor, Features::Colors::Enemy::InvisibleHeadCircleColor);
+        auto NameColor = getColor(Features::Colors::Teammate::VisibleNameColor, Features::Colors::Teammate::InvisibleNameColor, Features::Colors::Enemy::VisibleNameColor, Features::Colors::Enemy::InvisibleNameColor);
+        auto DistanceColor = getColor(Features::Colors::Teammate::VisibleLegendColor, Features::Colors::Teammate::InvisibleLegendColor, Features::Colors::Enemy::VisibleDistanceColor, Features::Colors::Enemy::InvisibleDistanceColor);
+        auto LegendColor = getColor(Features::Colors::Teammate::VisibleWeaponColor, Features::Colors::Teammate::InvisibleWeaponColor, Features::Colors::Enemy::VisibleLegendColor, Features::Colors::Enemy::InvisibleLegendColor);
+        auto WeaponColor = getColor(Features::Colors::Enemy::VisibleWeaponColor, Features::Colors::Enemy::InvisibleWeaponColor, Features::Colors::Enemy::VisibleWeaponColor, Features::Colors::Enemy::InvisibleWeaponColor);
+
+        auto calculatePosition = [](const int PositionIndex, const Vector2D &AboveHeadPosition, const Vector2D &LocalOriginPosition) {
+          switch (PositionIndex) {
+            case 0: // Top 1
+              return AboveHeadPosition.Subtract({ 0, 15 });
+            case 1: // Top 2
+              return AboveHeadPosition.Subtract({ 0, 30 });
+            case 2: // Bottom 1
+              return LocalOriginPosition;
+            case 3: // Bottom 2
+              return LocalOriginPosition.Add({ 0, 10 });
+            case 4: // Bottom 3
+              return LocalOriginPosition.Add({ 0, 20 });
+            default:
+              return Vector2D();
+          }
+        };
+
+        Vector2D NamePosition = calculatePosition(Features::Sense::Positions::NamePosition, AboveHeadW2S, LocalOriginW2S);
+        Vector2D DistancePosition = calculatePosition(Features::Sense::Positions::DistancePosition, AboveHeadW2S, LocalOriginW2S);
+        Vector2D LegendPosition = calculatePosition(Features::Sense::Positions::LegendPosition, AboveHeadW2S, LocalOriginW2S);
+        Vector2D WeaponPosition = calculatePosition(Features::Sense::Positions::WeaponPosition, AboveHeadW2S, LocalOriginW2S);
+        Vector2D StatusPosition = calculatePosition(Features::Sense::Positions::StatusPosition, AboveHeadW2S, LocalOriginW2S);
+
+        bool DrawTracers = p->IsAlly ? Features::Sense::Teammate::DrawTracers : Features::Sense::Enemy::DrawTracers;
+        bool DrawStatus = p->IsAlly ? Features::Sense::Teammate::DrawStatus : Features::Sense::Enemy::DrawSkeleton;
+        bool DrawBars = p->IsAlly ? Features::Sense::Teammate::DrawBars : Features::Sense::Enemy::DrawBars;
+        bool DrawDistance = p->IsAlly ? Features::Sense::Teammate::DrawDistance : Features::Sense::Enemy::DrawDistance;
+        bool DrawNames = p->IsAlly ? Features::Sense::Teammate::DrawNames : Features::Sense::Enemy::DrawNames;
+        bool DrawLegend = p->IsAlly ? Features::Sense::Teammate::DrawLegend : Features::Sense::Enemy::DrawLegend;
+        bool DrawWeapon = p->IsAlly ? Features::Sense::Teammate::DrawWeapon : Features::Sense::Enemy::DrawWeapon;
+        bool DrawBoxes = p->IsAlly ? Features::Sense::Teammate::DrawBoxes : Features::Sense::Enemy::DrawBoxes;
+        bool DrawSkeleton = p->IsAlly ? Features::Sense::Teammate::DrawSkeleton : Features::Sense::Enemy::DrawSkeleton;
+        bool DrawHeadCircle = p->IsAlly ? Features::Sense::Teammate::DrawHeadCircle : Features::Sense::Enemy::DrawHeadCircle;
+
+        if (DrawTracers) {
+          Vector2D ChestScreenPosition;
+          auto TracerBone = p->IsAlly ? Features::Sense::Teammate::TracerBone : Features::Sense::Enemy::TracerBone;
+          auto TracerPosition = p->IsAlly ? Features::Sense::Teammate::TracerPosition : Features::Sense::Enemy::TracerPosition;
+          auto TracerThickness = p->IsAlly ? Features::Sense::Teammate::TracerThickness : Features::Sense::Enemy::TracerThickness;
+          GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, TracerBone == 0 ? 66 : 0)), ChestScreenPosition);
+
+          auto Position = Vector2D(static_cast<float>(ScreenWidth) * 0.5f, TracerPosition == 0 ? 0 : TracerPosition == 1 ? static_cast<float>(ScreenHeight) / 2 : static_cast<float>(ScreenHeight));
+
+          if (!ChestScreenPosition.IsZeroVector())
+            Renderer::DrawLine(Canvas, Position, ChestScreenPosition, TracerThickness, ImColor(TracerColor));
         }
 
-        // Colors - Players (Teammate)
-        ImVec4 TeammateBoxColor, TeammateFilledBoxColor, TeammateTracerColor, TeammateSkeletonColor, TeammateHeadCircleColor, TeammateNameColor, TeammateDistanceColor, TeammateLegendColor, TeammateWeaponColor;
-        if (p->IsVisible) {
-          TeammateBoxColor = ImVec4(Features::Colors::Teammate::VisibleBoxColor[0], Features::Colors::Teammate::VisibleBoxColor[1], Features::Colors::Teammate::VisibleBoxColor[2], Features::Colors::Teammate::VisibleBoxColor[3]);
-          TeammateFilledBoxColor = ImVec4(Features::Colors::Teammate::VisibleFilledBoxColor[0], Features::Colors::Teammate::VisibleFilledBoxColor[1], Features::Colors::Teammate::VisibleFilledBoxColor[2], Features::Colors::Teammate::VisibleFilledBoxColor[3]);
-          TeammateTracerColor = ImVec4(Features::Colors::Teammate::VisibleTracerColor[0], Features::Colors::Teammate::VisibleTracerColor[1], Features::Colors::Teammate::VisibleTracerColor[2], Features::Colors::Teammate::VisibleTracerColor[3]);
-          TeammateSkeletonColor = ImVec4(Features::Colors::Teammate::VisibleSkeletonColor[0], Features::Colors::Teammate::VisibleSkeletonColor[1], Features::Colors::Teammate::VisibleSkeletonColor[2], Features::Colors::Teammate::VisibleSkeletonColor[3]);
-          TeammateHeadCircleColor = ImVec4(Features::Colors::Teammate::VisibleHeadCircleColor[0], Features::Colors::Teammate::VisibleHeadCircleColor[1], Features::Colors::Teammate::VisibleHeadCircleColor[2], Features::Colors::Teammate::VisibleHeadCircleColor[3]);
-          TeammateNameColor = ImVec4(Features::Colors::Teammate::VisibleNameColor[0], Features::Colors::Teammate::VisibleNameColor[1], Features::Colors::Teammate::VisibleNameColor[2], Features::Colors::Teammate::VisibleNameColor[3]);
-          TeammateDistanceColor = ImVec4(Features::Colors::Teammate::VisibleDistanceColor[0], Features::Colors::Teammate::VisibleDistanceColor[1], Features::Colors::Teammate::VisibleDistanceColor[2], Features::Colors::Teammate::VisibleDistanceColor[3]);
-          TeammateLegendColor = ImVec4(Features::Colors::Teammate::VisibleLegendColor[0], Features::Colors::Teammate::VisibleLegendColor[1], Features::Colors::Teammate::VisibleLegendColor[2], Features::Colors::Teammate::VisibleLegendColor[3]);
-          TeammateWeaponColor = ImVec4(Features::Colors::Teammate::VisibleWeaponColor[0], Features::Colors::Teammate::VisibleWeaponColor[1], Features::Colors::Teammate::VisibleWeaponColor[2], Features::Colors::Teammate::VisibleWeaponColor[3]);
-        } else {
-          TeammateBoxColor = ImVec4(Features::Colors::Teammate::InvisibleBoxColor[0], Features::Colors::Teammate::InvisibleBoxColor[1], Features::Colors::Teammate::InvisibleBoxColor[2], Features::Colors::Teammate::InvisibleBoxColor[3]);
-          TeammateFilledBoxColor = ImVec4(Features::Colors::Teammate::InvisibleFilledBoxColor[0], Features::Colors::Teammate::InvisibleFilledBoxColor[1], Features::Colors::Teammate::InvisibleFilledBoxColor[2], Features::Colors::Teammate::InvisibleFilledBoxColor[3]);
-          TeammateTracerColor = ImVec4(Features::Colors::Teammate::InvisibleTracerColor[0], Features::Colors::Teammate::InvisibleTracerColor[1], Features::Colors::Teammate::InvisibleTracerColor[2], Features::Colors::Teammate::InvisibleTracerColor[3]);
-          TeammateSkeletonColor = ImVec4(Features::Colors::Teammate::InvisibleSkeletonColor[0], Features::Colors::Teammate::InvisibleSkeletonColor[1], Features::Colors::Teammate::InvisibleSkeletonColor[2], Features::Colors::Teammate::InvisibleSkeletonColor[3]);
-          TeammateHeadCircleColor = ImVec4(Features::Colors::Teammate::InvisibleHeadCircleColor[0], Features::Colors::Teammate::InvisibleHeadCircleColor[1], Features::Colors::Teammate::InvisibleHeadCircleColor[2], Features::Colors::Teammate::InvisibleHeadCircleColor[3]);
-          TeammateNameColor = ImVec4(Features::Colors::Teammate::InvisibleNameColor[0], Features::Colors::Teammate::InvisibleNameColor[1], Features::Colors::Teammate::InvisibleNameColor[2], Features::Colors::Teammate::InvisibleNameColor[3]);
-          TeammateDistanceColor = ImVec4(Features::Colors::Teammate::InvisibleDistanceColor[0], Features::Colors::Teammate::InvisibleDistanceColor[1], Features::Colors::Teammate::InvisibleDistanceColor[2], Features::Colors::Teammate::InvisibleDistanceColor[3]);
-          TeammateLegendColor = ImVec4(Features::Colors::Teammate::InvisibleLegendColor[0], Features::Colors::Teammate::InvisibleLegendColor[1], Features::Colors::Teammate::InvisibleLegendColor[2], Features::Colors::Teammate::InvisibleLegendColor[3]);
-          TeammateWeaponColor = ImVec4(Features::Colors::Teammate::InvisibleWeaponColor[0], Features::Colors::Teammate::InvisibleWeaponColor[1], Features::Colors::Teammate::InvisibleWeaponColor[2], Features::Colors::Teammate::InvisibleWeaponColor[3]);
-        }
+        if (!LocalOriginW2SValid)
+          continue;
 
-        // Positions - god this is some shitass code... but it works
-        Vector2D NamePosition;
-        if (Features::Sense::Positions::NamePosition == 0) { // Top 1
-          NamePosition = AboveHeadW2S.Subtract(Vector2D(0, 15));
-        }
-        if (Features::Sense::Positions::NamePosition == 1) { // Top 2
-          NamePosition = AboveHeadW2S.Subtract(Vector2D(0, 30));
-        }
-        if (Features::Sense::Positions::NamePosition == 2) { // Bottom 1
-          NamePosition = LocalOriginW2S;
-        }
-        if (Features::Sense::Positions::NamePosition == 3) { // Bottom 2
-          NamePosition = LocalOriginW2S.Add(Vector2D(0, 10));
-        }
-        if (Features::Sense::Positions::NamePosition == 4) { // Bottom 1
-          NamePosition = LocalOriginW2S.Add(Vector2D(0, 20));
-        }
-        Vector2D DistancePosition;
-        if (Features::Sense::Positions::DistancePosition == 0) { // Top 1
-          DistancePosition = AboveHeadW2S.Subtract(Vector2D(0, 15));
-        }
-        if (Features::Sense::Positions::DistancePosition == 1) { // Top 2
-          DistancePosition = AboveHeadW2S.Subtract(Vector2D(0, 30));
-        }
-        if (Features::Sense::Positions::DistancePosition == 2) { // Bottom 1
-          DistancePosition = LocalOriginW2S;
-        }
-        if (Features::Sense::Positions::DistancePosition == 3) { // Bottom 2
-          DistancePosition = LocalOriginW2S.Add(Vector2D(0, 10));
-        }
-        if (Features::Sense::Positions::DistancePosition == 4) { // Bottom 1
-          DistancePosition = LocalOriginW2S.Add(Vector2D(0, 20));
-        }
-        Vector2D LegendPosition;
-        if (Features::Sense::Positions::LegendPosition == 0) { // Top 1
-          LegendPosition = AboveHeadW2S.Subtract(Vector2D(0, 15));
-        }
-        if (Features::Sense::Positions::LegendPosition == 1) { // Top 2
-          LegendPosition = AboveHeadW2S.Subtract(Vector2D(0, 30));
-        }
-        if (Features::Sense::Positions::LegendPosition == 2) { // Bottom 1
-          LegendPosition = LocalOriginW2S;
-        }
-        if (Features::Sense::Positions::LegendPosition == 3) { // Bottom 2
-          LegendPosition = LocalOriginW2S.Add(Vector2D(0, 10));
-        }
-        if (Features::Sense::Positions::LegendPosition == 4) { // Bottom 1
-          LegendPosition = LocalOriginW2S.Add(Vector2D(0, 20));
-        }
-        Vector2D WeaponPosition;
-        if (Features::Sense::Positions::WeaponPosition == 0) { // Top 1
-          WeaponPosition = AboveHeadW2S.Subtract(Vector2D(0, 15));
-        }
-        if (Features::Sense::Positions::WeaponPosition == 1) { // Top 2
-          WeaponPosition = AboveHeadW2S.Subtract(Vector2D(0, 30));
-        }
-        if (Features::Sense::Positions::WeaponPosition == 2) { // Bottom 1
-          WeaponPosition = LocalOriginW2S;
-        }
-        if (Features::Sense::Positions::WeaponPosition == 3) { // Bottom 2
-          WeaponPosition = LocalOriginW2S.Add(Vector2D(0, 10));
-        }
-        if (Features::Sense::Positions::WeaponPosition == 4) { // Bottom 1
-          WeaponPosition = LocalOriginW2S.Add(Vector2D(0, 20));
-        }
-        Vector2D StatusPosition;
-        if (Features::Sense::Positions::StatusPosition == 0) { // Top 1
-          StatusPosition = AboveHeadW2S.Subtract(Vector2D(0, 15));
-        }
-        if (Features::Sense::Positions::StatusPosition == 1) { // Top 2
-          StatusPosition = AboveHeadW2S.Subtract(Vector2D(0, 30));
-        }
-        if (Features::Sense::Positions::StatusPosition == 2) { // Bottom 1
-          StatusPosition = LocalOriginW2S;
-        }
-        if (Features::Sense::Positions::StatusPosition == 3) { // Bottom 2
-          StatusPosition = LocalOriginW2S.Add(Vector2D(0, 10));
-        }
-        if (Features::Sense::Positions::StatusPosition == 4) { // Bottom 1
-          StatusPosition = LocalOriginW2S.Add(Vector2D(0, 20));
-        }
+        if (DrawStatus) {
+          std::stringstream healthValue, shieldValue, maxHealthValue, maxShieldValue;
+          healthValue << p->Health;
+          shieldValue << p->Shield;
+          maxHealthValue << p->MaxHealth;
+          maxShieldValue << p->MaxShield;
+          std::string healthInt = healthValue.str() + " HP";
+          std::string shieldInt = shieldValue.str() + " AP";
+          const char *healthText = const_cast<char *>(healthInt.c_str());
+          const char *shieldText = const_cast<char *>(shieldInt.c_str());
+          std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
+          const char *combinedHealthText = combinedHealth.c_str();
+          std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
+          const char *combinedShieldText = combinedShield.c_str();
 
-        // EnemyESP
-        // VisibilityCheck = false
-        if (!Features::Sense::VisibilityCheck && !p->IsLocal && p->IsHostile && p->IsCombatReady() && p->DistanceToLocalPlayer < (Conversion::ToGameUnits(Features::Sense::ESPMaxDistance))) {
-          // Draw Warning Text - Spectators
-          if (Features::Sense::DrawSpectatorWarning && TotalSpectators >= 1) {
-            std::stringstream WarningTextStart, Space1, Amount, Space2;
-            WarningTextStart << "SPECTATOR WARNING";
-            Space1 << " [";
-            Amount << TotalSpectators;
-            Space2 << "]";
-            std::string combined = WarningTextStart.str() + Space1.str() + Amount.str() + Space2.str();
-            const char *CombinedText = combined.c_str();
-
-            int TextPosX = Features::Sense::WarningTextX;
-            int TextPosY = Features::Sense::WarningTextY - 12;
-            Renderer::DrawText(Canvas, Vector2D(TextPosX, TextPosY), CombinedText, ImColor(Features::Colors::SpectatorWarningColor[0], Features::Colors::SpectatorWarningColor[1], Features::Colors::SpectatorWarningColor[2], Features::Colors::SpectatorWarningColor[3]), Features::Sense::WarningTextOutline ? true : false, true, false);
+          ImColor ShieldColor;
+          switch (p->MaxShield) {
+            case 75:
+              ShieldColor = ImColor(39, 178, 255); // Blue
+              break;
+            case 100:
+              ShieldColor = ImColor(206, 59, 255); // Purple
+              break;
+            case 125:
+              ShieldColor = ImColor(219, 2, 2); // Red
+              break;
+            default:
+              ShieldColor = ImColor(247, 247, 247); // White
+              break;
           }
 
-          // Draw Warning Text - Visible
-          if (Features::Sense::DrawVisibleWarning && p->IsVisible) {
-            const char *Text = "VISIBLE WARNING!";
-            int TextPosX = Features::Sense::WarningTextX;
-            int TextPosY = Features::Sense::WarningTextY;
-            Renderer::DrawText(Canvas, Vector2D(TextPosX, TextPosY), Text, ImColor(Features::Colors::VisibleWarningColor[0], Features::Colors::VisibleWarningColor[1], Features::Colors::VisibleWarningColor[2], Features::Colors::VisibleWarningColor[3]), Features::Sense::WarningTextOutline ? true : false, true, false);
-          }
+          auto ShowMaxStatusValues = p->IsAlly ? Features::Sense::Teammate::ShowMaxStatusValues : Features::Sense::Enemy::ShowMaxStatusValues;
+          Renderer::DrawText(Canvas, StatusPosition, ShowMaxStatusValues ? combinedHealthText : healthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
+          Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), ShowMaxStatusValues ? combinedShieldText : shieldText, ShieldColor, Features::Sense::TextOutline, true, false);
+        }
 
-          // Draw Info Bars
-          if (Features::Sense::Enemy::DrawBars && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            int health = p->Health;
-            int maxHealth = p->MaxHealth;
-            int shield = p->Shield;
-            int maxShield = p->MaxShield;
+        if (!HeadW2SValid)
+          continue;
 
-            Renderer::Draw2DBar(Canvas, Features::Sense::Enemy::BarMode, Features::Sense::Enemy::BarStyle, Features::Sense::Enemy::BarColorMode, LocalOriginW2S, HeadPositionW2S, AboveHeadW2S, health, maxHealth, shield, maxShield, Features::Sense::Enemy::BarThickness, Features::Sense::Enemy::BarThickness2, Features::Sense::Enemy::BarWidth, Features::Sense::Enemy::BarHeight);
-          }
+        if (DrawBars) {
+          int health = p->Health;
+          int maxHealth = p->MaxHealth;
+          int shield = p->Shield;
+          int maxShield = p->MaxShield;
 
-          if (Features::Sense::Enemy::DrawTracers) {
-            // Tracers
-            Vector2D chestScreenPosition;
-            if (Features::Sense::Enemy::TracerBone == 0) { GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, 66)), chestScreenPosition); } else
-              if (Features::Sense::Enemy::TracerBone == 1) { GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, 0)), chestScreenPosition); }
+          auto BarMode = p->IsAlly ? Features::Sense::Teammate::BarMode : Features::Sense::Enemy::BarMode;
+          auto BarStyle = p->IsAlly ? Features::Sense::Teammate::BarStyle : Features::Sense::Enemy::BarStyle;
+          auto BarColorMode = p->IsAlly ? Features::Sense::Teammate::BarColorMode : Features::Sense::Enemy::BarColorMode;
+          auto BarThickness = p->IsAlly ? Features::Sense::Teammate::BarThickness : Features::Sense::Enemy::BarThickness;
+          auto BarThickness2 = p->IsAlly ? Features::Sense::Teammate::BarThickness2 : Features::Sense::Enemy::BarThickness2;
+          auto BarWidth = p->IsAlly ? Features::Sense::Teammate::BarWidth : Features::Sense::Enemy::BarWidth;
+          auto BarHeight = p->IsAlly ? Features::Sense::Teammate::BarHeight : Features::Sense::Enemy::BarHeight;
 
-            if (Features::Sense::Enemy::TracerPosition == 0) { // Top to head
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = static_cast<int>(ScreenWidth * 0.5f);
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight - ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
-              }
-            } else if (Features::Sense::Enemy::TracerPosition == 1) { // Middle to bottom
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = static_cast<int>(ScreenWidth * 0.5f);
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
-              }
-            } else if (Features::Sense::Enemy::TracerPosition == 2) { // Bottom to bottom
-              if (!chestScreenPosition.IsZeroVector()) {
-                int x = static_cast<int>(ScreenWidth * 0.5f);
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(EnemyTracerColor));
-              }
-            }
-          }
+          Renderer::Draw2DBar(Canvas, BarMode, BarStyle, BarColorMode, LocalOriginW2S, HeadW2S, AboveHeadW2S, health, maxHealth, shield, maxShield, BarThickness, BarThickness2, BarWidth, BarHeight);
+        }
 
-          // Distance
-          if (Features::Sense::Enemy::DrawDistance && !Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            char buffer[256];
-            const char *dist = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
-            const char *txt = "[";
-            const char *txt2 = " M]";
-            strncpy(buffer, txt, sizeof(buffer));
-            strncat(buffer, dist, sizeof(buffer));
-            strncat(buffer, txt2, sizeof(buffer));
+        if (DrawDistance && !DrawNames) {
+          std::string DistanceStr = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer)));
+          std::string Buffer = "[" + DistanceStr + " M]";
 
-            if (!LocalOriginW2S.IsZeroVector()) { Renderer::DrawText(Canvas, DistancePosition, buffer, ImColor(EnemyDistanceColor), Features::Sense::TextOutline, true, false); }
-          }
+          if (!LocalOriginW2S.IsZeroVector())
+            Renderer::DrawText(Canvas, DistancePosition, Buffer.c_str(), ImColor(DistanceColor), Features::Sense::TextOutline, true, false);
+        }
 
-          // Names Only
-          if (!Features::Sense::Enemy::DrawDistance && Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::DrawText(Canvas, AboveHeadW2S.Subtract(Vector2D(0, 16)), p->GetPlayerName().c_str(), ImColor(EnemyNameColor), Features::Sense::TextOutline, true, false); }
+        if (!DrawDistance && DrawNames)
+          Renderer::DrawText(Canvas, AboveHeadW2S.Subtract(Vector2D(0, 16)), p->GetPlayerName().c_str(), ImColor(NameColor), Features::Sense::TextOutline, true, false);
 
-          // Name & Distance
-          if (Features::Sense::Enemy::DrawDistance && Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            std::stringstream name, space, dist, txt, txt2;
-            name << p->GetPlayerName().c_str();
-            space << " ";
-            dist << std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
-            txt << "[";
-            txt2 << " M]";
-            std::string combined = name.str() + space.str() + txt.str() + dist.str() + txt2.str();
-            const char *combinedText = combined.c_str();
+        if (DrawDistance && DrawNames) {
+          std::ostringstream TextStream;
+          TextStream << p->GetPlayerName() << " [" << static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer)) << " M]";
+          std::string Combined = TextStream.str();
 
-            Renderer::DrawText(Canvas, NamePosition, combinedText, ImColor(EnemyNameColor), Features::Sense::TextOutline, true, false);
-          }
+          Renderer::DrawText(Canvas, NamePosition, Combined.c_str(), ImColor(NameColor), Features::Sense::TextOutline, true, false);
+        }
 
-          // Legend
-          if (Features::Sense::Enemy::DrawLegend && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::DrawText(Canvas, LocalOriginW2S, p->getPlayerModelName().c_str(), ImColor(EnemyLegendColor), Features::Sense::TextOutline, true, false); }
+        if (DrawLegend)
+          Renderer::DrawText(Canvas, LegendPosition, p->getPlayerModelName().c_str(), ImColor(LegendColor), Features::Sense::TextOutline, true, false);
 
-          // Draw Health + Shield Text
-          if (Features::Sense::Enemy::DrawStatus && bLocalOriginW2SValid) {
-            std::stringstream healthValue, shieldValue, maxHealthValue, maxShieldValue;
-            healthValue << p->Health;
-            shieldValue << p->Shield;
-            maxHealthValue << p->MaxHealth;
-            maxShieldValue << p->MaxShield;
-            std::string healthInt = healthValue.str() + " HP";
-            std::string shieldInt = shieldValue.str() + " AP";
-            const char *healthText = const_cast<char *>(healthInt.c_str());
-            const char *shieldText = const_cast<char *>(shieldInt.c_str());
-            std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
-            const char *combinedHealthText = combinedHealth.c_str();
-            std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
-            const char *combinedShieldText = combinedShield.c_str();
+        if (DrawWeapon) {
+          int WeaponHeldId = p->WeaponIndex;
+          auto WeaponHeldColor = ImColor(255, 255, 255);
+          std::string WeaponHeldText = "Unknown";
 
-            ImColor ShieldColor;
-            switch (p->MaxShield) {
-              case 75:
-                ShieldColor = ImColor(39, 178, 255); // Blue
-                break;
-              case 100:
-                ShieldColor = ImColor(206, 59, 255); // Purple
-                break;
-              case 125:
-                ShieldColor = ImColor(219, 2, 2); // Red
-                break;
-              default:
-                ShieldColor = ImColor(247, 247, 247); // White
-                break;
-            }
-
-            // Render Text
-            if (!Features::Sense::Enemy::ShowMaxStatusValues) {
-              Renderer::DrawText(Canvas, StatusPosition, healthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-              Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), shieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-            }
-            if (Features::Sense::Enemy::ShowMaxStatusValues) {
-              Renderer::DrawText(Canvas, StatusPosition, combinedHealthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-              Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), combinedShieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-            }
-          }
-
-          // Weapon ESP
-          int weaponHeldID;
-          weaponHeldID = p->WeaponIndex;
-
-          ImColor weaponHeldColor;
-          weaponHeldColor = ImColor(255, 255, 255);
-
-          // Draw Weapon
-          if (Features::Sense::Enemy::DrawWeapon && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            const char *weaponHeldText = "Unknown";
+          // Map of weapon IDs to weapon names and colors
+          std::unordered_map<int, std::pair<std::string, ImColor> > weaponInfo = {
             // Light Weapons
-            if (weaponHeldID == 107) { // P2020
-              weaponHeldText = "P2020";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 82) { // RE-45
-              weaponHeldText = "RE-45";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 81) { // Alternator
-              weaponHeldText = "Alternator";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 106) { // R-99
-              weaponHeldText = "R-99";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 0) { // R-301
-              weaponHeldText = "R-301";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 108) { // Spitfire
-              weaponHeldText = "Spitfire";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 91) { // G7
-              weaponHeldText = "G7 Scout";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
+            { WeaponIDs::P2020, { "P2020", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
+            { WeaponIDs::RE45, { "RE-45", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
+            { WeaponIDs::ALTERNATOR, { "Alternator", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
+            { WeaponIDs::R99, { "R-99", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
+            { WeaponIDs::R301, { "R-301", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
+            { WeaponIDs::SPITFIRE, { "Spitfire", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
+            { WeaponIDs::G7, { "G7 Scout", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
             // Heavy Weapons
-            if (weaponHeldID == 114) { // CARSMG
-              weaponHeldText = "CAR SMG";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 6) { // Rampage
-              weaponHeldText = "Rampage";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 113) { // Repeater
-              weaponHeldText = "Repeater";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 92) { // Hemlock
-              weaponHeldText = "Hemlock";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 90) { // Flatline
-              weaponHeldText = "Flatline";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
+            { WeaponIDs::CAR, { "CAR SMG", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
+            { WeaponIDs::RAMPAGE, { "Rampage", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
+            { WeaponIDs::REPEATER, { "Repeater", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
+            { WeaponIDs::HEMLOCK, { "Hemlock", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
+            { WeaponIDs::FLATLINE, { "Flatline", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
             // Energy Weapons
-            if (weaponHeldID == 115) { // Nemesis
-              weaponHeldText = "Nemesis";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 112) { // Volt
-              weaponHeldText = "Volt";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 109) { // TripleTake
-              weaponHeldText = "Triple Take";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 95) { // LSTAR
-              weaponHeldText = "L-STAR";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 85) { // Devotion
-              weaponHeldText = "Devotion";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 87) { // Havoc
-              weaponHeldText = "Havoc";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
+            { WeaponIDs::NEMESIS, { "Nemesis", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
+            { WeaponIDs::VOLT, { "Volt", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
+            { WeaponIDs::TRIPLETAKE, { "Triple Take", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
+            { WeaponIDs::LSTAR, { "L-STAR", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
+            { WeaponIDs::DEVOTION, { "Devotion", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
+            { WeaponIDs::HAVOC, { "Havoc", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
             // Shotguns
-            if (weaponHeldID == 98) { // Mozambique
-              weaponHeldText = "Mozambique";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 89) { // EVA8
-              weaponHeldText = "EVA-8 Auto";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 105) { // Peacekeeper
-              weaponHeldText = "Peacekeeper";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 97) { // Mastiff
-              weaponHeldText = "Mastiff";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
+            { WeaponIDs::MOZAMBIQUE, { "Mozambique", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
+            { WeaponIDs::EVA8, { "EVA-8 Auto", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
+            { WeaponIDs::PEACEKEEPER, { "Peacekeeper", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
+            { WeaponIDs::MASTIFF, { "Mastiff", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
             // Snipers
-            if (weaponHeldID == 1) { // Sentinel
-              weaponHeldText = "Sentinel";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            if (weaponHeldID == 84) { // ChargeRifle
-              weaponHeldText = "Charge Rifle";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            if (weaponHeldID == 86) { // Longbow
-              weaponHeldText = "Longbow";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
+            { WeaponIDs::SENTINEL, { "Sentinel", ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]) } },
+            { WeaponIDs::CHARGE_RIFLE, { "Charge Rifle", ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]) } },
+            { WeaponIDs::LONGBOW, { "Longbow", ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]) } },
             // Legendary Weapons
-            if (weaponHeldID == 111) { // Wingman
-              weaponHeldText = "Wingman";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 103) { // Prowler
-              weaponHeldText = "Prowler";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 2) { // Bocek
-              weaponHeldText = "Bocek";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 94) { // Kraber
-              weaponHeldText = "Kraber";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 169) { // Knife
-              weaponHeldText = "Throwing Knife";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            /*if (weaponHeldID == 3) { //BusterSword
-              weaponHeldText = "Buster Sword";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }*/
-            // Melee & Grenade
-            /*if (weaponHeldID == 213) { //Thermite Grenade
-              weaponHeldText = "Thermite Grenade";
-              weaponHeldColor = ThrowableWeaponColor;
-            }*/
-            if (p->IsHoldingGrenade) {
-              weaponHeldText = "Throwable";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ThrowableWeaponColor[0], Features::Colors::Enemy::ThrowableWeaponColor[1], Features::Colors::Enemy::ThrowableWeaponColor[2], Features::Colors::Enemy::ThrowableWeaponColor[3]);
-            }
-            if (weaponHeldID == 116) { // Melee
-              weaponHeldText = "Melee";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::MeleeWeaponColor[0], Features::Colors::Enemy::MeleeWeaponColor[1], Features::Colors::Enemy::MeleeWeaponColor[2], Features::Colors::Enemy::MeleeWeaponColor[3]);
-            }
+            { WeaponIDs::WINGMAN, { "Wingman", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
+            { WeaponIDs::PROWLER, { "Prowler", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
+            { WeaponIDs::BOCEK, { "Bocek", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
+            { WeaponIDs::KRABER, { "Kraber", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
+            { WeaponIDs::KNIFE, { "Throwing Knife", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
+            // Melee
+            { WeaponIDs::HANDS, { "Melee", ImColor(Features::Colors::Enemy::MeleeWeaponColor[0], Features::Colors::Enemy::MeleeWeaponColor[1], Features::Colors::Enemy::MeleeWeaponColor[2], Features::Colors::Enemy::MeleeWeaponColor[3]) } },
+          };
 
-            if (Features::Colors::WeaponColorMode == 1) { // Changes color to ammo type
-              Renderer::DrawText(Canvas, WeaponPosition, weaponHeldText, ImColor(weaponHeldColor), Features::Sense::TextOutline, true, false);
-            }
-
-            if (Features::Colors::WeaponColorMode == 0) { // Single Color
-              Renderer::DrawText(Canvas, WeaponPosition, weaponHeldText, ImColor(EnemyWeaponColor), Features::Sense::TextOutline, true, false);
+          if (p->IsHoldingGrenade) {
+            WeaponHeldText = "Grenade";
+            WeaponHeldColor = ImColor(Features::Colors::Enemy::ThrowableWeaponColor[0], Features::Colors::Enemy::ThrowableWeaponColor[1], Features::Colors::Enemy::ThrowableWeaponColor[2], Features::Colors::Enemy::ThrowableWeaponColor[3]);
+          } else {
+            if (auto WeaponIt = weaponInfo.find(WeaponHeldId); WeaponIt != weaponInfo.end()) {
+              WeaponHeldText = WeaponIt->second.first;
+              WeaponHeldColor = WeaponIt->second.second;
             }
           }
 
-          /*bool TestWeaponID = false; //For finding weapon IDs (Used for finding melee ID)
-          if (TestWeaponID && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            if (p->IsHostile) {
-              std::stringstream wepID;
-              wepID << p->WeaponIndex;
-              std::string wepInt = wepID.str() + " ";
-              const char* wepText = (char*)wepInt.c_str();
-
-              ImColor weaponWHeldColor;
-              weaponWHeldColor = ImColor(255, 255, 255);
-
-              Renderer::DrawText(Canvas, LocalOriginW2S.Add(Vector2D(0, 0)), wepText, ImColor(weaponWHeldColor), true, true, false);
-            }
-          }*/
-
-          // Draw Boxes
-          if (Features::Sense::Enemy::DrawBoxes && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::Draw2DBox(Canvas, Features::Sense::Enemy::BoxType, Features::Sense::Enemy::BoxStyle, LocalOriginW2S, HeadPositionW2S, ImColor(EnemyBoxColor), ImColor(EnemyFilledBoxColor), Features::Sense::Enemy::BoxThickness); }
-
-          // Draw Skeleton
-          if (Features::Sense::Enemy::DrawSkeleton && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            Vector2D Neck, UpperChest, LowerChest, Stomach, Leftshoulder, Leftelbow, LeftHand, Rightshoulder, RightelbowBone, RightHand, LeftThighs, Leftknees, Leftleg, RightThighs, Rightknees, Rightleg;
-            // Head bone is HeadPositionW2S
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Neck), Neck);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::UpperChest), UpperChest);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LowerChest), LowerChest);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Stomach), Stomach);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftshoulder), Leftshoulder);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftelbow), Leftelbow);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftHand), LeftHand);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightshoulder), Rightshoulder);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightelbowBone), RightelbowBone);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightHand), RightHand);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftThighs), LeftThighs);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftknees), Leftknees);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftleg), Leftleg);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightThighs), RightThighs);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightknees), Rightknees);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightleg), Rightleg);
-
-            Renderer::DrawLine(Canvas, HeadPositionW2S, Neck, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, UpperChest, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, UpperChest, LowerChest, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, LowerChest, Stomach, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, Leftshoulder, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Leftshoulder, Leftelbow, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Leftelbow, LeftHand, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, Rightshoulder, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Rightshoulder, RightelbowBone, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, RightelbowBone, RightHand, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Stomach, LeftThighs, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, LeftThighs, Leftknees, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Leftknees, Leftleg, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Stomach, RightThighs, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, RightThighs, Rightknees, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Rightknees, Rightleg, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-          }
-
-          // Draw Head Circle
-          if (Features::Sense::Enemy::DrawHeadCircle && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            Vector2D HeadPos2D;
-            Vector3D HeadPos3D = p->GetBonePosition(HitboxType::Head);
-            HeadPos3D.z += 3.f;
-
-            GameCamera->WorldToScreen(HeadPos3D, HeadPos2D);
-
-            Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(EnemyHeadCircleColor), Features::Sense::Enemy::HeadCircleThickness);
-          }
+          Renderer::DrawText(Canvas, WeaponPosition, WeaponHeldText.c_str(), Features::Colors::WeaponColorMode == 1 ? WeaponHeldColor : ImColor(WeaponColor), Features::Sense::TextOutline, true, false);
         }
 
-        // VisibilityCheck = true
-        if (Features::Sense::VisibilityCheck && !p->IsLocal && p->IsHostile && p->IsCombatReady() && p->IsVisible && p->DistanceToLocalPlayer < (Conversion::ToGameUnits(Features::Sense::ESPMaxDistance))) {
-          // Draw Warning Text - Spectators
-          if (Features::Sense::DrawSpectatorWarning && TotalSpectators >= 1) {
-            std::stringstream WarningTextStart, Space1, Amount, Space2;
-            WarningTextStart << "SPECTATOR WARNING";
-            Space1 << " [";
-            Amount << TotalSpectators;
-            Space2 << "]";
-            std::string combined = WarningTextStart.str() + Space1.str() + Amount.str() + Space2.str();
-            const char *CombinedText = combined.c_str();
-
-            int TextPosX = Features::Sense::WarningTextX;
-            int TextPosY = Features::Sense::WarningTextY - 12;
-            Renderer::DrawText(Canvas, Vector2D(TextPosX, TextPosY), CombinedText, ImColor(Features::Colors::SpectatorWarningColor[0], Features::Colors::SpectatorWarningColor[1], Features::Colors::SpectatorWarningColor[2], Features::Colors::SpectatorWarningColor[3]), Features::Sense::WarningTextOutline ? true : false, true, false);
-          }
-
-          // Draw Warning Text - Visible
-          if (Features::Sense::DrawVisibleWarning && p->IsVisible) {
-            const char *Text = "VISIBLE WARNING!";
-            int TextPosX = Features::Sense::WarningTextX;
-            int TextPosY = Features::Sense::WarningTextY;
-            Renderer::DrawText(Canvas, Vector2D(TextPosX, TextPosY), Text, ImColor(Features::Colors::VisibleWarningColor[0], Features::Colors::VisibleWarningColor[1], Features::Colors::VisibleWarningColor[2], Features::Colors::VisibleWarningColor[3]), Features::Sense::WarningTextOutline ? true : false, true, false);
-          }
-
-          // Draw Info Bars
-          if (Features::Sense::Enemy::DrawBars && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            int health = p->Health;
-            int maxHealth = p->MaxHealth;
-            int shield = p->Shield;
-            int maxShield = p->MaxShield;
-
-            Renderer::Draw2DBar(Canvas, Features::Sense::Enemy::BarMode, Features::Sense::Enemy::BarStyle, Features::Sense::Enemy::BarColorMode, LocalOriginW2S, HeadPositionW2S, AboveHeadW2S, health, maxHealth, shield, maxShield, Features::Sense::Enemy::BarThickness, Features::Sense::Enemy::BarThickness2, Features::Sense::Enemy::BarWidth, Features::Sense::Enemy::BarHeight);
-          }
-
-          if (Features::Sense::Enemy::DrawTracers) {
-            Vector2D chestScreenPosition;
-            GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, Features::Sense::Enemy::TracerBone == 0 ? 66 : 0)), chestScreenPosition);
-
-            if (!chestScreenPosition.IsZeroVector()) {
-              auto x = static_cast<int>(ScreenWidth * 0.5f);
-
-              if (Features::Sense::Enemy::TracerPosition == 0) { // top to head
-                Renderer::DrawLine(Canvas, Vector2D(x, 0), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(TeammateTracerColor));
-              } else if (Features::Sense::Enemy::TracerPosition == 1) { // middle to bottom
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(TeammateTracerColor));
-              } else if (Features::Sense::Enemy::TracerPosition == 2) { // bottom to bottom
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Enemy::TracerThickness, ImColor(TeammateTracerColor));
-              }
-            }
-          }
-
-          // Distance
-          if (Features::Sense::Enemy::DrawDistance && !Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            char buffer[256];
-            const char *dist = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
-            const char *txt = "[";
-            const char *txt2 = " M]";
-            strncpy(buffer, txt, sizeof(buffer));
-            strncat(buffer, dist, sizeof(buffer));
-            strncat(buffer, txt2, sizeof(buffer));
-
-            if (!LocalOriginW2S.IsZeroVector()) { Renderer::DrawText(Canvas, DistancePosition, buffer, ImColor(EnemyDistanceColor), Features::Sense::TextOutline, true, false); }
-          }
-
-          // Names Only
-          if (!Features::Sense::Enemy::DrawDistance && Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::DrawText(Canvas, AboveHeadW2S.Subtract(Vector2D(0, 16)), p->GetPlayerName().c_str(), ImColor(EnemyNameColor), Features::Sense::TextOutline, true, false); }
-
-          // Name & Distance
-          if (Features::Sense::Enemy::DrawDistance && Features::Sense::Enemy::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            std::stringstream name, space, dist, txt, txt2;
-            name << p->GetPlayerName().c_str();
-            space << " ";
-            dist << std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
-            txt << "[";
-            txt2 << " M]";
-            std::string combined = name.str() + space.str() + txt.str() + dist.str() + txt2.str();
-            const char *combinedText = combined.c_str();
-
-            Renderer::DrawText(Canvas, NamePosition, combinedText, ImColor(EnemyNameColor), Features::Sense::TextOutline, true, false);
-          }
-
-          // Legend
-          if (Features::Sense::Enemy::DrawLegend && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::DrawText(Canvas, LocalOriginW2S, p->getPlayerModelName().c_str(), ImColor(EnemyLegendColor), Features::Sense::TextOutline, true, false); }
-
-          // Draw Health + Shield Text
-          if (Features::Sense::Enemy::DrawStatus && bLocalOriginW2SValid) {
-            std::stringstream healthValue, shieldValue, maxHealthValue, maxShieldValue;
-            healthValue << p->Health;
-            shieldValue << p->Shield;
-            maxHealthValue << p->MaxHealth;
-            maxShieldValue << p->MaxShield;
-            std::string healthInt = healthValue.str() + " HP";
-            std::string shieldInt = shieldValue.str() + " AP";
-            const char *healthText = const_cast<char *>(healthInt.c_str());
-            const char *shieldText = const_cast<char *>(shieldInt.c_str());
-            std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
-            const char *combinedHealthText = combinedHealth.c_str();
-            std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
-            const char *combinedShieldText = combinedShield.c_str();
-
-            ImColor ShieldColor;
-            if (p->MaxShield == 50) { // white
-              ShieldColor = ImColor(247, 247, 247);
-            } else if (p->MaxShield == 75) { // blue
-              ShieldColor = ImColor(39, 178, 255);
-            } else if (p->MaxShield == 100) { // purple
-              ShieldColor = ImColor(206, 59, 255);
-            } else if (p->MaxShield == 125) { // red
-              ShieldColor = ImColor(219, 2, 2);
-            } else { ShieldColor = ImColor(247, 247, 247); }
-
-            // Render Text
-            if (!Features::Sense::Enemy::ShowMaxStatusValues) {
-              Renderer::DrawText(Canvas, StatusPosition, healthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-              Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), shieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-            }
-            if (Features::Sense::Enemy::ShowMaxStatusValues) {
-              Renderer::DrawText(Canvas, StatusPosition, combinedHealthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-              Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), combinedShieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-            }
-          }
-
-          // Weapon ESP
-          int weaponHeldID;
-          weaponHeldID = p->WeaponIndex;
-
-          ImColor weaponHeldColor;
-          weaponHeldColor = ImColor(255, 255, 255);
-
-          // Draw Weapon
-          if (Features::Sense::Enemy::DrawWeapon && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            const char *weaponHeldText = "Unknown";
-            // Light Weapons
-            if (weaponHeldID == 107) { // P2020
-              weaponHeldText = "P2020";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 82) { // RE-45
-              weaponHeldText = "RE-45";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 81) { // Alternator
-              weaponHeldText = "Alternator";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 106) { // R-99
-              weaponHeldText = "R-99";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 0) { // R-301
-              weaponHeldText = "R-301";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 108) { // Spitfire
-              weaponHeldText = "Spitfire";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 91) { // G7
-              weaponHeldText = "G7 Scout";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            // Heavy Weapons
-            if (weaponHeldID == 114) { // CARSMG
-              weaponHeldText = "CAR SMG";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 6) { // Rampage
-              weaponHeldText = "Rampage";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 113) { // Repeater
-              weaponHeldText = "Repeater";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 92) { // Hemlock
-              weaponHeldText = "Hemlock";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 90) { // Flatline
-              weaponHeldText = "Flatline";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            // Energy Weapons
-            if (weaponHeldID == 115) { // Nemesis
-              weaponHeldText = "Nemesis";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 112) { // Volt
-              weaponHeldText = "Volt";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 109) { // TripleTake
-              weaponHeldText = "Triple Take";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 95) { // LSTAR
-              weaponHeldText = "L-STAR";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 85) { // Devotion
-              weaponHeldText = "Devotion";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 87) { // Havoc
-              weaponHeldText = "Havoc";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            // Shotguns
-            if (weaponHeldID == 98) { // Mozambique
-              weaponHeldText = "Mozambique";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 89) { // EVA8
-              weaponHeldText = "EVA-8 Auto";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 105) { // Peacekeeper
-              weaponHeldText = "Peacekeeper";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 97) { // Mastiff
-              weaponHeldText = "Mastiff";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            // Snipers
-            if (weaponHeldID == 1) { // Sentinel
-              weaponHeldText = "Sentinel";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            if (weaponHeldID == 84) { // ChargeRifle
-              weaponHeldText = "Charge Rifle";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            if (weaponHeldID == 86) { // Longbow
-              weaponHeldText = "Longbow";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            // Legendary Weapons
-            if (weaponHeldID == 111) { // Wingman
-              weaponHeldText = "Wingman";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 103) { // Prowler
-              weaponHeldText = "Prowler";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 2) { // Bocek
-              weaponHeldText = "Bocek";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 94) { // Kraber
-              weaponHeldText = "Kraber";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 169) { // Knife
-              weaponHeldText = "Throwing Knife";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            /*if (weaponHeldID == 3) { //BusterSword
-              weaponHeldText = "Buster Sword";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }*/
-            // Melee & Grenade
-            /*if (weaponHeldID == 213) { //Thermite Grenade
-              weaponHeldText = "Thermite Grenade";
-              weaponHeldColor = ThrowableWeaponColor;
-            }*/
-            if (p->IsHoldingGrenade) {
-              weaponHeldText = "Throwable";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ThrowableWeaponColor[0], Features::Colors::Enemy::ThrowableWeaponColor[1], Features::Colors::Enemy::ThrowableWeaponColor[2], Features::Colors::Enemy::ThrowableWeaponColor[3]);
-            }
-            if (weaponHeldID == 116) { // Melee
-              weaponHeldText = "Melee";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::MeleeWeaponColor[0], Features::Colors::Enemy::MeleeWeaponColor[1], Features::Colors::Enemy::MeleeWeaponColor[2], Features::Colors::Enemy::MeleeWeaponColor[3]);
-            }
-
-            if (Features::Colors::WeaponColorMode == 1) { // Changes color to ammo type
-              Renderer::DrawText(Canvas, WeaponPosition, weaponHeldText, ImColor(weaponHeldColor), Features::Sense::TextOutline, true, false);
-            }
-
-            if (Features::Colors::WeaponColorMode == 0) { // Single Color
-              Renderer::DrawText(Canvas, WeaponPosition, weaponHeldText, ImColor(EnemyWeaponColor), Features::Sense::TextOutline, true, false);
-            }
-          }
-
-          /*bool TestWeaponID = false; //For finding weapon IDs (Used for finding melee ID)
-          if (TestWeaponID && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            if (p->IsHostile) {
-              std::stringstream wepID;
-              wepID << p->WeaponIndex;
-              std::string wepInt = wepID.str() + " ";
-              const char* wepText = (char*)wepInt.c_str();
-
-              ImColor weaponWHeldColor;
-              weaponWHeldColor = ImColor(255, 255, 255);
-
-              Renderer::DrawText(Canvas, LocalOriginW2S.Add(Vector2D(0, 0)), wepText, ImColor(weaponWHeldColor), true, true, false);
-            }
-          }*/
-
-          // Draw Boxes
-          if (Features::Sense::Enemy::DrawBoxes && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::Draw2DBox(Canvas, Features::Sense::Enemy::BoxType, Features::Sense::Enemy::BoxStyle, LocalOriginW2S, HeadPositionW2S, ImColor(EnemyBoxColor), ImColor(EnemyFilledBoxColor), Features::Sense::Enemy::BoxThickness); }
-
-          // Draw Skeleton
-          if (Features::Sense::Enemy::DrawSkeleton && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            Vector2D Neck, UpperChest, LowerChest, Stomach, Leftshoulder, Leftelbow, LeftHand, Rightshoulder, RightelbowBone, RightHand, LeftThighs, Leftknees, Leftleg, RightThighs, Rightknees, Rightleg;
-            // Head bone is HeadPositionW2S
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Neck), Neck);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::UpperChest), UpperChest);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LowerChest), LowerChest);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Stomach), Stomach);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftshoulder), Leftshoulder);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftelbow), Leftelbow);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftHand), LeftHand);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightshoulder), Rightshoulder);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightelbowBone), RightelbowBone);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightHand), RightHand);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftThighs), LeftThighs);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftknees), Leftknees);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftleg), Leftleg);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightThighs), RightThighs);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightknees), Rightknees);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightleg), Rightleg);
-
-            Renderer::DrawLine(Canvas, HeadPositionW2S, Neck, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, UpperChest, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, UpperChest, LowerChest, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, LowerChest, Stomach, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, Leftshoulder, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Leftshoulder, Leftelbow, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Leftelbow, LeftHand, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, Rightshoulder, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Rightshoulder, RightelbowBone, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, RightelbowBone, RightHand, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Stomach, LeftThighs, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, LeftThighs, Leftknees, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Leftknees, Leftleg, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Stomach, RightThighs, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, RightThighs, Rightknees, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-            Renderer::DrawLine(Canvas, Rightknees, Rightleg, Features::Sense::Enemy::SkeletonThickness, ImColor(EnemySkeletonColor));
-          }
-
-          // Draw Head Circle
-          if (Features::Sense::Enemy::DrawHeadCircle && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            Vector2D HeadPos2D;
-            Vector3D HeadPos3D = p->GetBonePosition(HitboxType::Head);
-            HeadPos3D.z += 3.f;
-
-            GameCamera->WorldToScreen(HeadPos3D, HeadPos2D);
-
-            Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(EnemyHeadCircleColor), Features::Sense::Enemy::HeadCircleThickness);
-          }
+        if (DrawBoxes) {
+          auto BoxType = p->IsAlly ? Features::Sense::Teammate::BoxType : Features::Sense::Enemy::BoxType;
+          auto BoxStyle = p->IsAlly ? Features::Sense::Teammate::BoxStyle : Features::Sense::Enemy::BoxStyle;
+          auto BoxThickness = p->IsAlly ? Features::Sense::Teammate::BoxThickness : Features::Sense::Enemy::BoxThickness;
+          Renderer::Draw2DBox(Canvas, BoxType, BoxStyle, LocalOriginW2S, HeadW2S, ImColor(BoxColor), ImColor(FilledBoxColor), BoxThickness);
         }
 
-        // Team ESP
-        if (Features::Sense::Teammate::DrawTeam && !p->IsLocal && p->IsAlly && p->IsCombatReady() && p->DistanceToLocalPlayer < (Conversion::ToGameUnits(Features::Sense::ESPMaxDistance))) {
-          // Draw Warning Text - Spectators
-          if (Features::Sense::DrawSpectatorWarning && TotalSpectators >= 1) {
-            std::stringstream WarningTextStart, Space1, Amount, Space2;
-            WarningTextStart << "SPECTATOR WARNING";
-            Space1 << " [";
-            Amount << TotalSpectators;
-            Space2 << "]";
-            std::string combined = WarningTextStart.str() + Space1.str() + Amount.str() + Space2.str();
-            const char *CombinedText = combined.c_str();
+        if (DrawSkeleton) {
+          Vector2D Neck, UpperChest, LowerChest, Stomach, Leftshoulder, Leftelbow, LeftHand, Rightshoulder, RightelbowBone, RightHand, LeftThighs, Leftknees, Leftleg, RightThighs, Rightknees, Rightleg;
 
-            int TextPosX = Features::Sense::WarningTextX;
-            int TextPosY = Features::Sense::WarningTextY - 12;
-            Renderer::DrawText(Canvas, Vector2D(TextPosX, TextPosY), CombinedText, ImColor(Features::Colors::SpectatorWarningColor[0], Features::Colors::SpectatorWarningColor[1], Features::Colors::SpectatorWarningColor[2], Features::Colors::SpectatorWarningColor[3]), Features::Sense::WarningTextOutline ? true : false, true, false);
-          }
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Neck), Neck);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::UpperChest), UpperChest);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LowerChest), LowerChest);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Stomach), Stomach);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftshoulder), Leftshoulder);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftelbow), Leftelbow);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftHand), LeftHand);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightshoulder), Rightshoulder);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightelbowBone), RightelbowBone);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightHand), RightHand);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftThighs), LeftThighs);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftknees), Leftknees);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftleg), Leftleg);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightThighs), RightThighs);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightknees), Rightknees);
+          GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightleg), Rightleg);
 
-          // Draw Info Bars
-          if (Features::Sense::Teammate::DrawBars && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            int health = p->Health;
-            int maxHealth = p->MaxHealth;
-            int shield = p->Shield;
-            int maxShield = p->MaxShield;
+          auto SkeletonThickness = p->IsAlly ? Features::Sense::Teammate::SkeletonThickness : Features::Sense::Enemy::SkeletonThickness;
+          Renderer::DrawLine(Canvas, HeadW2S, Neck, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Neck, UpperChest, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, UpperChest, LowerChest, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, LowerChest, Stomach, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Neck, Leftshoulder, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Leftshoulder, Leftelbow, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Leftelbow, LeftHand, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Neck, Rightshoulder, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Rightshoulder, RightelbowBone, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, RightelbowBone, RightHand, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Stomach, LeftThighs, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, LeftThighs, Leftknees, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Leftknees, Leftleg, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Stomach, RightThighs, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, RightThighs, Rightknees, SkeletonThickness, SkeletonColor);
+          Renderer::DrawLine(Canvas, Rightknees, Rightleg, SkeletonThickness, SkeletonColor);
+        }
 
-            Renderer::Draw2DBar(Canvas, Features::Sense::Enemy::BarMode, Features::Sense::Enemy::BarStyle, Features::Sense::Enemy::BarColorMode, LocalOriginW2S, HeadPositionW2S, AboveHeadW2S, health, maxHealth, shield, maxShield, Features::Sense::Enemy::BarThickness, Features::Sense::Enemy::BarThickness2, Features::Sense::Enemy::BarWidth, Features::Sense::Enemy::BarHeight);
-          }
+        if (DrawHeadCircle) {
+          Vector2D HeadPos2D;
+          Vector3D HeadPos3D = p->GetBonePosition(HitboxType::Head);
+          HeadPos3D.z += 3.f;
 
-          if (Features::Sense::Teammate::DrawTracers) {
-            Vector2D chestScreenPosition;
-            GameCamera->WorldToScreen(p->LocalOrigin.Add(Vector3D(0, 0, Features::Sense::Teammate::TracerBone == 0 ? 66 : 0)), chestScreenPosition);
-
-            if (!chestScreenPosition.IsZeroVector()) {
-              auto x = static_cast<int>(ScreenWidth * 0.5f);
-
-              if (Features::Sense::Teammate::TracerPosition == 0) { // top to head
-                Renderer::DrawLine(Canvas, Vector2D(x, 0), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
-              } else if (Features::Sense::Teammate::TracerPosition == 1) { // middle to bottom
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight / 2), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
-              } else if (Features::Sense::Teammate::TracerPosition == 2) { // bottom to bottom
-                Renderer::DrawLine(Canvas, Vector2D(x, ScreenHeight), chestScreenPosition, Features::Sense::Teammate::TracerThickness, ImColor(TeammateTracerColor));
-              }
-            }
-          }
-
-          // Distance
-          if (Features::Sense::Teammate::DrawDistance && !Features::Sense::Teammate::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            char buffer[256];
-            const char *dist = std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
-            auto txt = "[";
-            auto txt2 = " M]";
-            strncpy(buffer, txt, sizeof(buffer));
-            strncat(buffer, dist, sizeof(buffer));
-            strncat(buffer, txt2, sizeof(buffer));
-
-            if (!LocalOriginW2S.IsZeroVector())
-              Renderer::DrawText(Canvas, DistancePosition, buffer, ImColor(EnemyDistanceColor), Features::Sense::TextOutline, true, false);
-          }
-
-          // Names Only
-          if (!Features::Sense::Teammate::DrawDistance && Features::Sense::Teammate::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::DrawText(Canvas, AboveHeadW2S.Subtract(Vector2D(0, 16)), p->GetPlayerName().c_str(), ImColor(TeammateNameColor), Features::Sense::TextOutline, true, false); }
-
-          // Name & Distance
-          if (Features::Sense::Teammate::DrawDistance && Features::Sense::Teammate::DrawNames && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            std::stringstream name, space, dist, txt, txt2;
-            name << p->GetPlayerName().c_str();
-            space << " ";
-            dist << std::to_string(static_cast<int>(Conversion::ToMeters(p->DistanceToLocalPlayer))).c_str();
-            txt << "[";
-            txt2 << " M]";
-            std::string combined = name.str() + space.str() + txt.str() + dist.str() + txt2.str();
-            const char *combinedText = combined.c_str();
-
-            Renderer::DrawText(Canvas, NamePosition, combinedText, ImColor(TeammateNameColor), Features::Sense::TextOutline, true, false);
-          }
-
-          // Legend
-          if (Features::Sense::Teammate::DrawLegend && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::DrawText(Canvas, LocalOriginW2S, p->getPlayerModelName().c_str(), ImColor(TeammateLegendColor), Features::Sense::TextOutline, true, false); }
-
-          // Draw Health + Shield Text
-          if (Features::Sense::Teammate::DrawStatus && bLocalOriginW2SValid) {
-            std::stringstream healthValue, shieldValue, maxHealthValue, maxShieldValue;
-            healthValue << p->Health;
-            shieldValue << p->Shield;
-            maxHealthValue << p->MaxHealth;
-            maxShieldValue << p->MaxShield;
-            std::string healthInt = healthValue.str() + " HP";
-            std::string shieldInt = shieldValue.str() + " AP";
-            const char *healthText = const_cast<char *>(healthInt.c_str());
-            const char *shieldText = const_cast<char *>(shieldInt.c_str());
-            std::string combinedHealth = healthValue.str() + " / " + maxHealthValue.str() + " HP";
-            const char *combinedHealthText = combinedHealth.c_str();
-            std::string combinedShield = shieldValue.str() + " / " + maxShieldValue.str() + " AP";
-            const char *combinedShieldText = combinedShield.c_str();
-
-            ImColor ShieldColor;
-            switch (p->MaxShield) {
-              case 75:
-                ShieldColor = ImColor(39, 178, 255, 255); // Blue
-                break;
-              case 100:
-                ShieldColor = ImColor(206, 59, 255, 255); // Purple
-                break;
-              case 125:
-                ShieldColor = ImColor(219, 2, 2, 255); // Red
-                break;
-              default:
-                ShieldColor = ImColor(247, 247, 247, 255); // White
-                break;
-            }
-
-            Renderer::DrawText(Canvas, StatusPosition, Features::Sense::Teammate::ShowMaxStatusValues ? combinedHealthText : healthText, ImColor(0, 255, 0), Features::Sense::TextOutline, true, false);
-            Renderer::DrawText(Canvas, StatusPosition.Add(Vector2D(0, 0 + 10)), shieldText, ShieldColor, Features::Sense::TextOutline, true, false);
-          }
-
-          // Weapon ESP
-          int weaponHeldID;
-          weaponHeldID = p->WeaponIndex;
-
-          ImColor weaponHeldColor = ImColor(255, 255, 255);
-
-          // Draw Weapon
-          if (Features::Sense::Teammate::DrawWeapon && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            const char *weaponHeldText = "Unknown";
-            // Light Weapons
-            if (weaponHeldID == 107) { // P2020
-              weaponHeldText = "P2020";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 82) { // RE-45
-              weaponHeldText = "RE-45";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 81) { // Alternator
-              weaponHeldText = "Alternator";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 106) { // R-99
-              weaponHeldText = "R-99";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 0) { // R-301
-              weaponHeldText = "R-301";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 108) { // Spitfire
-              weaponHeldText = "Spitfire";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            if (weaponHeldID == 91) { // G7
-              weaponHeldText = "G7 Scout";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
-            }
-            // Heavy Weapons
-            if (weaponHeldID == 114) { // CARSMG
-              weaponHeldText = "CAR SMG";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 6) { // Rampage
-              weaponHeldText = "Rampage";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 113) { // Repeater
-              weaponHeldText = "Repeater";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 92) { // Hemlock
-              weaponHeldText = "Hemlock";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            if (weaponHeldID == 90) { // Flatline
-              weaponHeldText = "Flatline";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
-            }
-            // Energy Weapons
-            if (weaponHeldID == 115) { // Nemesis
-              weaponHeldText = "Nemesis";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 112) { // Volt
-              weaponHeldText = "Volt";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 109) { // TripleTake
-              weaponHeldText = "Triple Take";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 95) { // LSTAR
-              weaponHeldText = "L-STAR";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 85) { // Devotion
-              weaponHeldText = "Devotion";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            if (weaponHeldID == 87) { // Havoc
-              weaponHeldText = "Havoc";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
-            }
-            // Shotguns
-            if (weaponHeldID == 98) { // Mozambique
-              weaponHeldText = "Mozambique";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 89) { // EVA8
-              weaponHeldText = "EVA-8 Auto";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 105) { // Peacekeeper
-              weaponHeldText = "Peacekeeper";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            if (weaponHeldID == 97) { // Mastiff
-              weaponHeldText = "Mastiff";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
-            }
-            // Snipers
-            if (weaponHeldID == 1) { // Sentinel
-              weaponHeldText = "Sentinel";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            if (weaponHeldID == 84) { // ChargeRifle
-              weaponHeldText = "Charge Rifle";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            if (weaponHeldID == 86) { // Longbow
-              weaponHeldText = "Longbow";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
-            }
-            // Legendary Weapons
-            if (weaponHeldID == 111) { // Wingman
-              weaponHeldText = "Wingman";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 103) { // Prowler
-              weaponHeldText = "Prowler";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 2) { // Bocek
-              weaponHeldText = "Bocek";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 94) { // Kraber
-              weaponHeldText = "Kraber";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            if (weaponHeldID == 169) { // Knife
-              weaponHeldText = "Throwing Knife";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }
-            /*if (weaponHeldID == 3) { //BusterSword
-              weaponHeldText = "Buster Sword";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
-            }*/
-            // Melee & Grenade
-            /*if (weaponHeldID == 213) { //Thermite Grenade
-              weaponHeldText = "Thermite Grenade";
-              weaponHeldColor = ThrowableWeaponColor;
-            }*/
-            if (p->IsHoldingGrenade) {
-              weaponHeldText = "Throwable";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::ThrowableWeaponColor[0], Features::Colors::Enemy::ThrowableWeaponColor[1], Features::Colors::Enemy::ThrowableWeaponColor[2], Features::Colors::Enemy::ThrowableWeaponColor[3]);
-            }
-            if (weaponHeldID == 116) { // Melee
-              weaponHeldText = "Melee";
-              weaponHeldColor = ImColor(Features::Colors::Enemy::MeleeWeaponColor[0], Features::Colors::Enemy::MeleeWeaponColor[1], Features::Colors::Enemy::MeleeWeaponColor[2], Features::Colors::Enemy::MeleeWeaponColor[3]);
-            }
-
-            if (Features::Colors::WeaponColorMode == 1) { // Changes color to ammo type
-              Renderer::DrawText(Canvas, WeaponPosition, weaponHeldText, ImColor(weaponHeldColor), Features::Sense::TextOutline, true, false);
-            }
-
-            if (Features::Colors::WeaponColorMode == 0) { // Single Color
-              Renderer::DrawText(Canvas, WeaponPosition, weaponHeldText, ImColor(TeammateWeaponColor), Features::Sense::TextOutline, true, false);
-            }
-          }
-
-          /*bool TestWeaponID = false; //For finding weapon IDs (Used for finding melee ID)
-          if (TestWeaponID && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            if (p->IsHostile) {
-              std::stringstream wepID;
-              wepID << p->WeaponIndex;
-              std::string wepInt = wepID.str() + " ";
-              const char* wepText = (char*)wepInt.c_str();
-
-              ImColor weaponWHeldColor;
-              weaponWHeldColor = ImColor(255, 255, 255);
-
-              Renderer::DrawText(Canvas, LocalOriginW2S.Add(Vector2D(0, 0)), wepText, ImColor(weaponWHeldColor), true, true, false);
-            }
-          }*/
-
-          // Draw Boxes
-          if (Features::Sense::Teammate::DrawBoxes && bLocalOriginW2SValid && bHeadPositionW2SValid) { Renderer::Draw2DBox(Canvas, Features::Sense::Teammate::BoxType, Features::Sense::Teammate::BoxStyle, LocalOriginW2S, HeadPositionW2S, ImColor(TeammateBoxColor), ImColor(TeammateFilledBoxColor), Features::Sense::Teammate::BoxThickness); }
-
-          // Draw Skeleton
-          if (Features::Sense::Teammate::DrawSkeleton && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            Vector2D Neck, UpperChest, LowerChest, Stomach, Leftshoulder, Leftelbow, LeftHand, Rightshoulder, RightelbowBone, RightHand, LeftThighs, Leftknees, Leftleg, RightThighs, Rightknees, Rightleg;
-            // Head bone is HeadPositionW2S
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Neck), Neck);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::UpperChest), UpperChest);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LowerChest), LowerChest);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Stomach), Stomach);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftshoulder), Leftshoulder);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftelbow), Leftelbow);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftHand), LeftHand);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightshoulder), Rightshoulder);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightelbowBone), RightelbowBone);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightHand), RightHand);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::LeftThighs), LeftThighs);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftknees), Leftknees);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Leftleg), Leftleg);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::RightThighs), RightThighs);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightknees), Rightknees);
-            GameCamera->WorldToScreen(p->GetBonePosition(HitboxType::Rightleg), Rightleg);
-
-            Renderer::DrawLine(Canvas, HeadPositionW2S, Neck, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, UpperChest, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, UpperChest, LowerChest, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, LowerChest, Stomach, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, Leftshoulder, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Leftshoulder, Leftelbow, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Leftelbow, LeftHand, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Neck, Rightshoulder, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Rightshoulder, RightelbowBone, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, RightelbowBone, RightHand, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Stomach, LeftThighs, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, LeftThighs, Leftknees, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Leftknees, Leftleg, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Stomach, RightThighs, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, RightThighs, Rightknees, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-            Renderer::DrawLine(Canvas, Rightknees, Rightleg, Features::Sense::Teammate::SkeletonThickness, ImColor(TeammateSkeletonColor));
-          }
-
-          // Draw Head Circle
-          if (Features::Sense::Teammate::DrawHeadCircle && bLocalOriginW2SValid && bHeadPositionW2SValid) {
-            Vector2D HeadPos2D;
-            Vector3D HeadPos3D = p->GetBonePosition(HitboxType::Head);
-            HeadPos3D.z += 3.f;
-
-            GameCamera->WorldToScreen(HeadPos3D, HeadPos2D);
-
-            Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(TeammateHeadCircleColor), Features::Sense::Teammate::HeadCircleThickness);
-          }
+          GameCamera->WorldToScreen(HeadPos3D, HeadPos2D);
+          Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(HeadCircleColor), p->IsAlly ? Features::Sense::Teammate::HeadCircleThickness : Features::Sense::Enemy::HeadCircleThickness);
         }
       }
     }

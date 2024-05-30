@@ -1,68 +1,65 @@
-#include <iostream>
-#include <string>
-#include <unistd.h>
 #include <atomic>
-#include <vector>
 #include <chrono>
-#include <thread>
+#include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
-#include <filesystem>
-#include <cstdlib>
+#include <iostream>
 #include <pwd.h>
+#include <string>
+#include <thread>
+#include <unistd.h>
+#include <vector>
 
-#include "Core/Level.hpp"
-#include "Core/Player.hpp"
-#include "Core/LocalPlayer.hpp"
 #include "Core/Camera.hpp"
-
-#include "Features/Legitbot.hpp"
-#include "Features/Sense.hpp"
-#include "Features/Radar.hpp"
-#include "Features/Triggerbot.hpp"
-#include "Features/Misc.hpp"
+#include "Core/Level.hpp"
+#include "Core/LocalPlayer.hpp"
+#include "Core/Player.hpp"
 #include "Features/Glow.hpp"
-
-#include "Overlay/Overlay.hpp"
+#include "Features/Legitbot.hpp"
+#include "Features/Misc.hpp"
+#include "Features/Radar.hpp"
+#include "Features/Sense.hpp"
+#include "Features/Triggerbot.hpp"
 #include "Overlay/GUI.hpp"
-
+#include "Overlay/Overlay.hpp"
 #include "Utils/ConfigManager.hpp"
 #include "Utils/Features.hpp"
 #include "Utils/Memory.hpp"
-#include "Utils/XDisplay.hpp"
 #include "Utils/termcolor.hpp"
+#include "Utils/XDisplay.hpp"
 
 namespace tc = termcolor;
 
 // Objects
-XDisplay *X11Display = new XDisplay();
-Overlay OverlayWindow = Overlay();
+auto X11Display = new XDisplay();
+auto OverlayWindow = Overlay();
 ImDrawList *Canvas;
 
 // Game Objects
-Level *Map = new Level();
-LocalPlayer *Myself = new LocalPlayer();
-Camera *GameCamera = new Camera();
+auto Map = new Level();
+auto Myself = new LocalPlayer();
+auto GameCamera = new Camera();
 
 // Players
-std::vector<Player *> *HumanPlayers = new std::vector<Player *>;
-std::vector<Player *> *Dummies = new std::vector<Player *>;
-std::vector<Player *> *Players = new std::vector<Player *>;
+auto HumanPlayers = new std::vector<Player *>;
+auto Dummies = new std::vector<Player *>;
+auto Players = new std::vector<Player *>;
 
 // Features
-Sense *ESP = new Sense(Map, Players, GameCamera, Myself, X11Display);
-Radar *MapRadar = new Radar(Players, GameCamera, Map, Myself);
-Glow *GlowESP = new Glow(Map, Players, GameCamera, Myself);
-Legitbot *Legit = new Legitbot(X11Display, Map, Myself, Players);
-Triggerbot *Trigger = new Triggerbot(X11Display, Map, Myself, Players);
-Misc *MiscTab = new Misc(X11Display, Map, Myself, Players);
-Overlay *Home = new Overlay;
-AdvancedGUI *Advanced = new AdvancedGUI;
-Menu *GUI = new Menu(Myself, Advanced);
-ConfigManager *Configs = new ConfigManager(Legit, Trigger, GlowESP, ESP, MapRadar, MiscTab);
+auto ESP = new Sense(Map, Players, GameCamera, Myself, X11Display);
+auto MapRadar = new Radar(Players, GameCamera, Map, Myself);
+auto GlowESP = new Glow(Map, Players, GameCamera, Myself);
+auto Legit = new Legitbot(X11Display, Map, Myself, Players);
+auto Trigger = new Triggerbot(X11Display, Map, Myself, Players);
+auto MiscTab = new Misc(X11Display, Map, Myself, Players);
+auto Home = new Overlay;
+auto Advanced = new AdvancedGUI;
+auto GUI = new Menu(Myself, Advanced);
+auto Configs = new ConfigManager(Legit, Trigger, GlowESP, ESP, MapRadar, MiscTab);
 
 // Booleans and Variables
-bool IsMenuOpened = true;
+auto IsMenuOpened = true;
 std::chrono::milliseconds LastRead;
 
 // Thread
@@ -97,29 +94,34 @@ bool InitializeOverlayWindow() {
 ImVec4 ProcessingTimeColor;
 
 void CreateTabButton(const char *title, const Menu::MenuTabs tab, const ImVec2 size) {
-  constexpr ImVec4 BaseTabButton = ImVec4(0.20f, 0.20f, 0.20f, 0.10f);
-  const ImVec4 BaseTabButtonActive = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.250f);
-  constexpr ImVec4 BaseTabButtonHovered = ImVec4(0.35f, 0.38f, 0.43f, 0.5f);
+  constexpr auto BaseTabButton = ImVec4(0.20f, 0.20f, 0.20f, 0.10f);
+  const auto BaseTabButtonActive = ImVec4(GUI->DetailColor.x, GUI->DetailColor.y, GUI->DetailColor.z, 0.250f);
+  constexpr auto BaseTabButtonHovered = ImVec4(0.35f, 0.38f, 0.43f, 0.5f);
   ImGui::PushStyleColor(ImGuiCol_Button, (GUI->CurrentTab == tab) ? BaseTabButtonActive : BaseTabButton);
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (GUI->CurrentTab == tab) ? BaseTabButtonActive : BaseTabButtonHovered);
   ImGui::SetCursorPosX(15);
-  if (ImGui::Button(title, size)) {
+  if (ImGui::Button(title, size))
     GUI->CurrentTab = tab;
-  }
+
   ImGui::PopStyleColor(2);
 }
 
 void RenderUI() {
-  const auto io = ImGui::GetIO();
-  ImGui::SetNextWindowSize(io.DisplaySize);
-  ImGui::SetNextWindowPos(ImVec2(0, 0));
-  ImGui::Begin("##Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiSliderFlags_AlwaysClamp);
-  Canvas = ImGui::GetWindowDrawList();
 
-  MapRadar->RenderDrawings(Myself, OverlayWindow);
-  ESP->RenderWatermark(Canvas, Myself, OverlayWindow);
-  ESP->RenderDrawings(Canvas, Legit, Myself, OverlayWindow);
-  ImGui::End();
+  const auto io = ImGui::GetIO();
+  if (Features::Settings::OverlayEnabled) {
+    ImGui::SetNextWindowSize(io.DisplaySize);
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::Begin("##Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiSliderFlags_AlwaysClamp);
+    Canvas = ImGui::GetWindowDrawList();
+
+    if (Map->IsPlayable && !Myself->IsDead) {
+      MapRadar->RenderDrawings(Myself, OverlayWindow);
+      ESP->RenderWatermark(Canvas, Myself, OverlayWindow);
+      ESP->RenderDrawings(Canvas, Legit, Myself, OverlayWindow);
+    }
+    ImGui::End();
+  }
 
   if (!Features::Home::IsMenuOpened)
     return;
@@ -152,14 +154,12 @@ void RenderUI() {
           GUI->RenderMisc();
           break;
         case GUI->MenuTabs::Config:
-          ImVec2 TabSize;
-          TabSize = ImGui::GetWindowSize();
           ImGui::SetCursorPos(ImVec2(0, 0));
           ImGui::BeginChild("workzone", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar);
           ImGui::SetCursorPos({15, 15});
           ImGui::BeginChild("workzone", ImVec2(GUI->WindowWidth - 186, GUI->WindowHeight - 60), false, ImGuiWindowFlags_NoScrollbar);
           ImGui::BeginChildFrame(1, ImVec2(GUI->WindowWidth - 220, GUI->WindowHeight - 73), true); {
-            GUI->DoubleSpacing();
+            Menu::DoubleSpacing();
             Configs->LoadConfigs();
             Configs->RenderConfigs();
             ImGui::EndChildFrame();
@@ -167,10 +167,13 @@ void RenderUI() {
           ImGui::EndChild();
           ImGui::EndChild();
           break;
+        default:
+          GUI->RenderLegitbot();
+          break;
       }
       ImGui::EndChild();
-      Legit->UpdateAimList();
-      Legit->UpdateRCSList();
+      Legitbot::UpdateAimList();
+      Legitbot::UpdateRCSList();
       Trigger->UpdateWeaponList();
       MiscTab->UpdateRapidFireList();
     }
@@ -191,7 +194,7 @@ void RenderUI() {
     ImVec4 *colors = ImGui::GetStyle().Colors;
 
     colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    constexpr int ButtonHeight = 36;
+    constexpr auto ButtonHeight = 36;
 
     const ImVec2 WindowPosition = ImGui::GetWindowPos();
     auto TextPosition = WindowPosition.x + GUI->WindowWidth / 6 / 2;
@@ -225,10 +228,10 @@ void UpdateCore() {
     if (!Myself->IsValid())
       return;
 
-    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    if (now >= LastRead + std::chrono::milliseconds(50)) { // update once per tick, trust me μαλάκα
+    // update once per tick, trust me μαλάκα
+    if (const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); Now >= LastRead + std::chrono::milliseconds(50)) {
       Players->clear();
-      LastRead = now;
+      LastRead = Now;
 
       for (auto p: Map->IsFiringRange ? *Dummies : *HumanPlayers) {
         p->Read();
@@ -283,14 +286,12 @@ std::string slurpFile(const std::string &absolutePath) {
   std::ifstream file;
   file.open(absolutePath, std::ios::in);
 
-  if (file.fail()) {
+  if (file.fail())
     return contents;
-  }
 
   char c;
-  while (file.get(c)) {
+  while (file.get(c))
     contents += c;
-  }
 
   file.close();
   std::erase(contents, '\n');
@@ -337,9 +338,8 @@ bool isOutdated() { // Scan possible Steam installation paths for libraryfolders
         std::stringstream finalPath;
         finalPath << extractedPath << R"(/steamapps/common/Apex Legends/gameversion.txt)";
 
-        if (std::string version = slurpFile(finalPath.str()); version == GAME_VERSION) {
+        if (std::string version = slurpFile(finalPath.str()); version == GAME_VERSION)
           return false;
-        }
       }
 
       currentPos = pathEnd;
@@ -397,16 +397,17 @@ int main(int argc, char *argv[]) {
 
   // Initialize the whole process //
   try {
-    for (int i = 0; i < 70; i++)
+    for (auto i = 0; i < 70; i++)
       HumanPlayers->push_back(new Player(i, Myself));
 
-    for (int i = 0; i < 10000; i++) // 10000 is enough
+    for (auto i = 0; i < 10000; i++) // 10000 is enough
       Dummies->push_back(new Player(i, Myself));
 
     std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> ZAP initialized" << std::endl;
 
     OverlayWindow.Start(&UpdateCore, &RenderUI);
-    srand(static_cast<unsigned>(time(nullptr)));
+    std::random_device rd;
+    srand(rd() ^ std::chrono::high_resolution_clock::now().time_since_epoch().count());
   } catch (...) {
   }
 
