@@ -662,7 +662,7 @@ struct Legitbot {
     if (target == nullptr)
       return false;
 
-    if (target->IsAlly && !Features::Aimbot::TeamCheck)
+    if (target->IsAlly && Features::Aimbot::TeamCheck)
       return false;
 
     if (!target->IsCombatReady())
