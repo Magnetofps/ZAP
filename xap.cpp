@@ -403,6 +403,8 @@ int main(int argc, char *argv[]) {
     for (auto i = 0; i < 10000; i++) // 10000 is enough
       Dummies->push_back(new Player(i, Myself));
 
+    Configs->LoadConfigs();
+
     std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> ZAP initialized" << std::endl;
 
     OverlayWindow.Start(&UpdateCore, &RenderUI);

@@ -1,24 +1,21 @@
 #pragma once
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <thread>
 
+#include "../imgui/imgui.h"
 #include "../Utils/Config.hpp"
 #include "../Utils/Features.hpp"
 #include "../Utils/HitboxType.hpp"
 #include "../Utils/InputTypes.hpp"
 #include "../Utils/termcolor.hpp"
-
-#include "Features/Legitbot.hpp"
-#include "Features/Sense.hpp"
-#include "Features/Radar.hpp"
-#include "Features/Triggerbot.hpp"
-#include "Features/Misc.hpp"
 #include "Features/Glow.hpp"
-
-#include "../imgui/imgui.h"
+#include "Features/Legitbot.hpp"
+#include "Features/Misc.hpp"
+#include "Features/Radar.hpp"
+#include "Features/Sense.hpp"
+#include "Features/Triggerbot.hpp"
 
 namespace tc = termcolor;
 
@@ -41,6 +38,7 @@ struct ConfigManager {
   std::vector<std::string> configFiles;
   char configName[64] = {0};
   int selectedConfig = 0;
+  bool finishedStartup = false;
 
   Legitbot *Legit;
   Triggerbot *Trigger;
@@ -68,11 +66,18 @@ struct ConfigManager {
     }
 
     ImGui::SameLine();
+    if (ImGui::Button("Load"))
+      LoadConfig();
 
-    if (ImGui::Button("Load")) { LoadConfig(); }
+    ImGui::SameLine();
+    if (ImGui::Button("Startup"))
+      copy_file("Configs/" + std::string(configName) + ".ini", "Configs/STARTUP.ini", std::filesystem::copy_options::overwrite_existing);
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+      ImGui::SetTooltip("Save to STARTUP slot, which gets automatically loaded on startup");
+
 
     ImGui::BeginListBox("##Configs", ImVec2(600, 300)); {
-      int n = 0;
+      auto n = 0;
       for (const auto& config: configFiles) {
         const bool is_selected = (selectedConfig == n);
         if (ImGui::Selectable(config.c_str(), is_selected)) {
@@ -89,15 +94,25 @@ struct ConfigManager {
   }
 
   void LoadConfigs() { // List Configs For The ListBox
-    std::string configDirectory = "Configs";
+    const std::string configDirectory = "Configs";
     configFiles.clear();
-    for (const auto &entry: std::filesystem::directory_iterator(configDirectory)) { if (entry.is_regular_file() && entry.path().extension() == ".ini") { configFiles.push_back(entry.path().stem().string()); } }
+    for (const auto &entry: std::filesystem::directory_iterator(configDirectory)) {
+      if (!entry.is_regular_file() || entry.path().extension() != ".ini")
+        continue;
+
+      if (!finishedStartup && entry.path().filename().string() == "STARTUP.ini") {
+        strcpy(configName, entry.path().stem().string().c_str());
+        LoadConfig();
+        finishedStartup = true;
+      } else {
+        configFiles.push_back(entry.path().stem().string());
+      }
+    }
   }
 
   void UpdateConfig() {
-    std::string ConfigName = "Configs/" + std::string(configName) + ".ini";
-    std::ofstream conf(ConfigName);
-    if (conf.is_open()) {
+    const std::string ConfigName = "Configs/" + std::string(configName) + ".ini";
+    if (std::ofstream conf(ConfigName); conf.is_open()) {
       WriteSection(Aimbot);
       WritePair(Aimbot, AimbotEnabled);
       WritePair(Aimbot, BindMethod);
@@ -1035,8 +1050,7 @@ struct ConfigManager {
 
   void LoadConfig() {
     std::string ConfigName1 = "Configs/" + std::string(configName) + ".ini";
-    bool success = ReadConfig();
-    if (success)
+    if (ReadConfig())
       std::cout << tc::color<255, 190, 0> << " ⚡ " << tc::reset << ">> Loaded config " << configName << std::endl;
     else
       std::cout << tc::red << " ! " << tc::reset << " >> Failed to load config " << configName << ", created new one instead" << std::endl;
@@ -1812,8 +1826,8 @@ struct ConfigManager {
   }
 
   bool ReadConfig() {
-    std::string ConfigName = "Configs/" + std::string(configName) + ".ini";
-    INIReader reader(ConfigName);
+    const std::string ConfigName = "Configs/" + std::string(configName) + ".ini";
+    const INIReader reader(ConfigName);
     if (reader.ParseError() < 0) {
       UpdateConfig();
       return false;
