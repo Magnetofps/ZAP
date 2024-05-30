@@ -1,24 +1,24 @@
+// ReSharper disable CppDFAUnreachableCode CppDFAConstantConditions
 #pragma once
-#include <iostream>
+#include <random>
 #include <vector>
-#include "../Core/Player.hpp"
+
+#include "../Core/Level.hpp"
 #include "../Core/LocalPlayer.hpp"
 #include "../Core/Offsets.hpp"
-#include "../Core/Level.hpp"
-
-#include "../Math/Vector2D.hpp"
-#include "../Math/Vector3D.hpp"
+#include "../Core/Player.hpp"
 #include "../Math/QAngle.hpp"
 #include "../Math/Resolver.hpp"
-
-#include "../Utils/Memory.hpp"
-#include "../Utils/XDisplay.hpp"
-#include "../Utils/Conversion.hpp"
+#include "../Math/Vector2D.hpp"
+#include "../Math/Vector3D.hpp"
 #include "../Utils/Config.hpp"
+#include "../Utils/Conversion.hpp"
 #include "../Utils/Features.hpp"
 #include "../Utils/HitboxType.hpp"
 #include "../Utils/InputManager.hpp"
+#include "../Utils/Memory.hpp"
 #include "../Utils/Weapons.hpp"
+#include "../Utils/XDisplay.hpp"
 
 // Conversion
 #define DEG2RAD(x) ((float)(x) * (float)(M_PI / 180.f))
@@ -295,7 +295,7 @@ struct Legitbot {
     } catch (...) { return false; }
   }
 
-  static void UpdateAimList() {
+  static auto UpdateAimList() -> void {
     Features::Aimbot::AimList.clear();
     // Light
     if (Features::Aimbot::P2020)
@@ -365,7 +365,7 @@ struct Legitbot {
       Features::Aimbot::AimList.insert(WeaponIDs::KNIFE);
   }
 
-  static void UpdateRCSList() {
+  static auto UpdateRCSList() -> void {
     Features::RCS::RCSList.clear();
     // Light
     if (Features::RCS::P2020)
@@ -431,7 +431,7 @@ struct Legitbot {
       Features::RCS::RCSList.insert(WeaponIDs::KRABER);
   }
 
-  void UpdateAimbot() {
+  auto UpdateAimbot() -> void {
     if (!Features::Aimbot::AimbotEnabled) {
       ReleaseTarget();
       return;
@@ -500,14 +500,14 @@ struct Legitbot {
     }
 
     if (TargetSelected && CurrentTarget) {
-      if (const std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
+      if (const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); Now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
         StartAiming();
-        LastAimTime = now;
+        LastAimTime = Now;
       }
     }
   }
 
-  void UpdateRCS() const {
+  auto UpdateRCS() const -> void {
     if (!Features::RCS::RCSEnabled)
       return;
     if (!Map->IsPlayable)
@@ -521,65 +521,46 @@ struct Legitbot {
       if (Features::Aimbot::InputMethod == 1) // Memory Input Method - Must Use Combined
         return;
 
-      if (Features::RCS::OnADS) {
-        if (!Myself->IsCombatReady())
-          return;
-        if (!Myself->IsZooming)
-          return;
-        if (!Myself->IsInAttack)
-          return;
+      if (!Myself->IsCombatReady())
+        return;
+      if (!Myself->IsInAttack)
+        return;
+      if (Features::RCS::OnADS && !Myself->IsZooming)
+        return;
 
-        const int PitchPower = Features::RCS::AdvancedRCS ? Features::RCS::AdvancedPitchPower : Features::RCS::PitchPower;
-        const int YawPower = Features::RCS::AdvancedRCS ? Features::RCS::AdvancedYawPower : Features::RCS::YawPower;
 
-        FloatVector2D punchAnglesDiff = Myself->punchAnglesDiff;
-        if (punchAnglesDiff.isZeroVector())
-          return;
+      const auto PunchAnglesDiff = Myself->punchAnglesDiff;
+      if (PunchAnglesDiff.isZeroVector())
+        return;
 
-        const int pitch = (punchAnglesDiff.x > 0) ? RoundHalfEven(punchAnglesDiff.x * PitchPower) : 0;
-        const int yaw = RoundHalfEven(-punchAnglesDiff.y * YawPower);
-        X11Display->MoveMouse(pitch, yaw);
-      }
+      const auto PitchPower = Features::RCS::AdvancedRCS ? Features::RCS::AdvancedPitchPower : Features::RCS::PitchPower;
+      const auto YawPower = Features::RCS::AdvancedRCS ? Features::RCS::AdvancedYawPower : Features::RCS::YawPower;
 
-      if (!Features::RCS::OnADS) {
-        if (!Myself->IsCombatReady())
-          return;
-        if (!Myself->IsInAttack)
-          return;
-        FloatVector2D punchAnglesDiff = Myself->punchAnglesDiff;
-        if (punchAnglesDiff.isZeroVector())
-          return;
-
-        const int PitchPower = Features::RCS::AdvancedRCS ? Features::RCS::AdvancedPitchPower : Features::RCS::PitchPower;
-        const int YawPower = Features::RCS::AdvancedRCS ? Features::RCS::AdvancedYawPower : Features::RCS::YawPower;
-
-        const int pitch = (punchAnglesDiff.x > 0) ? RoundHalfEven(punchAnglesDiff.x * PitchPower) : 0;
-        const int yaw = RoundHalfEven(-punchAnglesDiff.y * YawPower);
-        X11Display->MoveMouse(pitch, yaw);
-      }
+      const int Pitch = (PunchAnglesDiff.x > 0) ? RoundHalfEven(PunchAnglesDiff.x * static_cast<float>(PitchPower)) : 0;
+      const int Yaw = RoundHalfEven(-PunchAnglesDiff.y * static_cast<float>(YawPower));
+      X11Display->MoveMouse(Pitch, Yaw);
     }
   }
 
-  // Cubic Beizer (xap-client)
-  static bool isKeybindDown() {
+  static auto isKeybindDown() -> bool {
     return InputManager::isKeyDownOrPress(Features::AimbotBinds::AimBind) || InputManager::isKeyDownOrPress(Features::AimbotBinds::ExtraBind);
   }
 
-  void StartAiming() const {
+  auto StartAiming() const -> void {
     if (Features::Aimbot::InputMethod == 0) { // Mouse movement
       // Get Target Angle
-      QAngle DesiredAngles = QAngle(0, 0);
+      auto DesiredAngles = QAngle(0, 0);
       if (!GetAngle(CurrentTarget, DesiredAngles))
         return;
 
       if (Features::RCS::RCSEnabled && Features::RCS::RCSMode == 1) {
         auto PunchAngles = Memory::Read<QAngle>(Myself->BasePointer + OFF_PUNCH_ANGLES);
         if (Features::RCS::AdvancedRCS) {
-          PunchAngles.x *= (Features::RCS::AdvancedPitchReduction / 100.f);
-          PunchAngles.y *= (Features::RCS::AdvancedYawReduction / 100.f);
+          PunchAngles.x *= Features::RCS::AdvancedPitchReduction / 100.f;
+          PunchAngles.y *= Features::RCS::AdvancedYawReduction / 100.f;
         } else if (!Features::RCS::AdvancedRCS) {
-          PunchAngles.x *= (Features::RCS::PitchReduction / 100.f);
-          PunchAngles.y *= (Features::RCS::YawReduction / 100.f);
+          PunchAngles.x *= Features::RCS::PitchReduction / 100.f;
+          PunchAngles.y *= Features::RCS::YawReduction / 100.f;
         }
 
         DesiredAngles -= PunchAngles;
@@ -591,7 +572,7 @@ struct Legitbot {
       DesiredAngles.NormalizeAngles();
 
       // Smoothing
-      SmoothAngle(CurrentTarget, DesiredAngles);
+      SmoothAngle(DesiredAngles);
 
       const Vector2D aimbotDelta = Vector2D(CalculatePitchIncrement(DesiredAngles), CalculateYawIncrement(DesiredAngles)).Multiply(Features::Aimbot::Speed);
       const int totalYawIncrementInt = RoundHalfEven(AL1AF0(aimbotDelta.x));
@@ -603,15 +584,15 @@ struct Legitbot {
       X11Display->MoveMouse(totalYawIncrementInt, totalPitchIncrementInt);
     } else if (Features::Aimbot::InputMethod == 1) { // Write ViewAngles / Controller
       // Get Target Angle
-      QAngle DesiredAngles = QAngle(0, 0);
+      auto DesiredAngles = QAngle(0, 0);
       if (!GetAngle(CurrentTarget, DesiredAngles)) // Get Angle to target + prediction
         return;
 
       // Recoil Control
       if (Features::RCS::RCSEnabled) {
         auto PunchAngles = Memory::Read<Vector2D>(Myself->BasePointer + OFF_PUNCH_ANGLES); // Get punch angles
-        PunchAngles.x *= (Features::RCS::PitchReduction / 100.f);
-        PunchAngles.y *= (Features::RCS::YawReduction / 100.f);
+        PunchAngles.x *= Features::RCS::PitchReduction / 100.f;
+        PunchAngles.y *= Features::RCS::YawReduction / 100.f;
 
         DesiredAngles -= QAngle(PunchAngles.x, PunchAngles.y);
       }
@@ -620,20 +601,19 @@ struct Legitbot {
         return;
 
       DesiredAngles.NormalizeAngles();
-      SmoothAngle(CurrentTarget, DesiredAngles); // Apply Smoothing
+      SmoothAngle(DesiredAngles); // Apply Smoothing
 
       // Memory Aimbot
-      const Vector2D VectorDesiredAngles = Vector2D(DesiredAngles.x, DesiredAngles.y);
+      const auto VectorDesiredAngles = Vector2D(DesiredAngles.x, DesiredAngles.y);
       Myself->SetViewAngle(VectorDesiredAngles);
     }
   }
 
-  void SmoothAngle(Player *Target, QAngle &Angle) const {
+  auto SmoothAngle(QAngle &Angle) const -> void {
     const QAngle ViewAngles = QAngle(Myself->ViewAngles.x, Myself->ViewAngles.y).NormalizeAngles();
     QAngle Delta = Angle - ViewAngles;
     Delta.NormalizeAngles();
 
-    // Calculate Smoothing
     float SmoothValue;
 
     if (Features::Aimbot::SmoothingMethod == 0) // Static Smoothing
@@ -642,15 +622,12 @@ struct Legitbot {
       SmoothValue = RandomSmoothing(Myself->IsZooming ? Features::Aimbot::MinADSSmooth : Features::Aimbot::MinHipfireSmooth, Myself->IsZooming ? Features::Aimbot::MaxADSSmooth : Features::Aimbot::MaxHipfireSmooth);
 
     SmoothValue = std::min(0.999f, SmoothValue);
-
-
-    QAngle ToChange = QAngle();
-    ToChange = Delta - Delta * SmoothValue;
+    const auto ToChange = Delta - Delta * SmoothValue;
 
     Angle = ViewAngles + ToChange;
   }
 
-  bool GetAngle(const Player *Target, QAngle &Angle) const {
+  auto GetAngle(const Player *Target, QAngle &Angle) const -> bool {
     if (const QAngle CurrentAngle = QAngle(Myself->ViewAngles.x, Myself->ViewAngles.y).NormalizeAngles(); !CurrentAngle.isValid())
       return false;
 
@@ -660,11 +637,10 @@ struct Legitbot {
     return true;
   }
 
-  bool GetAngleToTarget(const Player *Target, QAngle &Angle) const {
+  auto GetAngleToTarget(const Player *Target, QAngle &Angle) const -> bool {
     const Vector3D TargetPosition = Target->GetBonePosition(Features::Aimbot::ClosestHitbox ? static_cast<HitboxType>(GetBestBone(Target)) : Features::AimbotHitboxes::Hitbox);
     const Vector3D TargetVelocity = Target->AbsoluteVelocity;
     const Vector3D CameraPosition = Myself->CameraPosition;
-    QAngle CurrentAngle = QAngle(Myself->ViewAngles.x, Myself->ViewAngles.y).NormalizeAngles();
 
     if (Myself->WeaponProjectileSpeed > 1.0f) {
       if (Features::Aimbot::PredictBulletDrop && Features::Aimbot::PredictMovement) {
@@ -682,8 +658,11 @@ struct Legitbot {
     return true;
   }
 
-  static bool IsValidTarget(Player *target) {
+  static auto IsValidTarget(const Player *target) -> bool {
     if (target == nullptr)
+      return false;
+
+    if (target->IsAlly && !Features::Aimbot::TeamCheck)
       return false;
 
     if (!target->IsCombatReady())
@@ -692,16 +671,16 @@ struct Legitbot {
     if (Features::Aimbot::VisCheck && !target->IsVisible)
       return false;
 
-    if (target->Distance2DToLocalPlayer < Conversion::ToGameUnits(Features::Aimbot::MinDistance))
+    if (target->Distance2DToLocalPlayer < Conversion::ToGameUnits((Features::Aimbot::MinDistance)))
       return false;
 
-    if (target->Distance2DToLocalPlayer > Conversion::ToGameUnits(Features::Aimbot::MaxDistance))
+    if (target->Distance2DToLocalPlayer > Conversion::ToGameUnits((Features::Aimbot::MaxDistance)))
       return false;
 
     return true;
   }
 
-  [[nodiscard]] double CalculateDistanceFromCrosshair(const Vector3D TargetPosition) const {
+  [[nodiscard]] auto CalculateDistanceFromCrosshair(const Vector3D TargetPosition) const -> float {
     const Vector3D CameraPosition = Myself->CameraPosition;
     const QAngle CurrentAngle = QAngle(Myself->ViewAngles.x, Myself->ViewAngles.y).NormalizeAngles();
 
@@ -715,7 +694,7 @@ struct Legitbot {
     return CurrentAngle.distanceTo(TargetAngle);
   }
 
-  void ReleaseTarget() {
+  auto ReleaseTarget() -> void {
     if (CurrentTarget != nullptr && CurrentTarget->IsValid())
       CurrentTarget->IsLockedOn = false;
 
@@ -723,17 +702,17 @@ struct Legitbot {
     CurrentTarget = nullptr;
   }
 
-  [[nodiscard]] float GetFOVScale() const {
+  [[nodiscard]] auto GetFOVScale() const -> float {
     if (Myself->IsValid()) { if (Myself->IsZooming) { if (Myself->TargetZoomFOV > 1.0 && Myself->TargetZoomFOV < 90.0) { return tanf(DEG2RAD(Myself->TargetZoomFOV) * (0.64285714285)); } } }
     return 1.0;
   }
 
-  int GetBestBone(const Player *Target) const {
+  auto GetBestBone(const Player *Target) const -> int {
     float NearestDistance = 999;
-    int NearestBone = 2;
-    for (int i = 0; i < 6; i++) {
+    auto NearestBone = 2;
+    for (auto i = 0; i < 6; i++) {
       const auto Bone = static_cast<HitboxType>(i);
-      if (const double DistanceFromCrosshair = CalculateDistanceFromCrosshair(Target->GetBonePosition(Bone)); DistanceFromCrosshair < NearestDistance) {
+      if (const float DistanceFromCrosshair = CalculateDistanceFromCrosshair(Target->GetBonePosition(Bone)); DistanceFromCrosshair < NearestDistance) {
         NearestBone = i;
         NearestDistance = DistanceFromCrosshair;
       }
@@ -741,10 +720,11 @@ struct Legitbot {
     return NearestBone;
   }
 
-  [[nodiscard]] Player *FindBestTarget() const {
+  [[nodiscard]] auto FindBestTarget() const -> Player * {
     Player *NearestTarget = nullptr;
     float BestDistance = 9999;
-    const float BestFOV = std::min(Features::Aimbot::FOV, Features::Aimbot::FOV * (GetFOVScale() * Features::Aimbot::ZoomScale));
+    const auto ScaledFOV = Features::Aimbot::FOV * (GetFOVScale() * Features::Aimbot::ZoomScale);
+    const auto BestFOV = std::min(Features::Aimbot::FOV, ScaledFOV);
     float LastPov = 9999;
     const Vector3D CameraPosition = Myself->CameraPosition;
     for (const auto p : *Players) {
@@ -778,16 +758,28 @@ struct Legitbot {
   }
 
   // Math
-  static float RandomSmoothing(const float a, const float b) {
-    const float random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    const float diff = b - a;
-    const float r = random * diff;
-    return a + r;
+  static auto RandomSmoothing(const auto a, const auto b) -> float {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution dis(0.0, 1.0);
+
+    const auto random = dis(gen);
+    return a + random * (b - a);
   }
 
-  [[nodiscard]] float CalculatePitchIncrement(const QAngle AimbotDesiredAngles) const {
+  [[nodiscard]] auto CalculatePitchIncrement(const QAngle AimbotDesiredAngles) const -> float {
     const float wayA = AimbotDesiredAngles.x - Myself->ViewAngles.x;
-    float wayB = 180 - abs(wayA);
+    float wayB = 180.0f - fabsf(wayA);
+    if (wayA > 0 && wayB > 0)
+      wayB *= -1;
+    if (fabsf(wayA) < fabsf(wayB))
+      return wayA;
+    return wayB;
+  }
+
+  [[nodiscard]] auto CalculateYawIncrement(const QAngle AimbotDesiredAngles) const -> float {
+    const auto wayA = AimbotDesiredAngles.y - Myself->ViewAngles.y;
+    auto wayB = 360.0f - fabsf(wayA);
     if (wayA > 0 && wayB > 0)
       wayB *= -1;
     if (fabs(wayA) < fabs(wayB))
@@ -795,25 +787,15 @@ struct Legitbot {
     return wayB;
   }
 
-  [[nodiscard]] float CalculateYawIncrement(const QAngle AimbotDesiredAngles) const {
-    const float wayA = AimbotDesiredAngles.y - Myself->ViewAngles.y;
-    float wayB = 360 - abs(wayA);
-    if (wayA > 0 && wayB > 0)
-      wayB *= -1;
-    if (fabs(wayA) < fabs(wayB))
-      return wayA;
-    return wayB;
-  }
+  static auto RoundHalfEven(const float x) -> int { return (x >= 0.0) ? static_cast<int>(std::round(x)) : static_cast<int>(std::round(-x)) * -1; }
 
-  static int RoundHalfEven(const float x) { return (x >= 0.0) ? static_cast<int>(std::round(x)) : static_cast<int>(std::round(-x)) * -1; }
-
-  static float AL1AF0(const float num) {
+  static auto AL1AF0(const float num) -> float {
     if (num > 0)
       return std::max(num, 1.0f);
     return std::min(num, -1.0f);
   }
 
-  void UpdateRCSSettings() const {
+  auto UpdateRCSSettings() const -> void {
     if (!Features::RCS::AdvancedRCS) { return; }
 
     const int weaponHeld = Myself->WeaponIndex;

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+
 #include "LocalPlayer.hpp"
 #include "Offsets.hpp"
 #include "../Math/Matrix.hpp"
@@ -60,7 +61,7 @@ struct Player {
     this->Myself = Me;
   }
 
-  void Read() {
+  auto Read() -> void {
     BasePointer = Memory::Read<long>(OFF_REGION + OFF_ENTITY_LIST + ((Index + 1) << 5));
     if (BasePointer == 0)
       return;
@@ -121,14 +122,14 @@ struct Player {
     Distance2DToLocalPlayer = Myself->LocalOrigin.To2D().Distance(LocalOrigin.To2D());
   }
 
-  [[nodiscard]] std::string GetPlayerName() const {
+  [[nodiscard]] auto GetPlayerName() const -> std::string {
     const auto NameIndex = Memory::Read<uintptr_t>(BasePointer + OFF_NAME_INDEX);
     const auto NameOffset = Memory::Read<uintptr_t>(OFF_REGION + OFF_NAME_LIST + ((NameIndex - 1) * 24));
     std::string PlayerName = Memory::ReadString(NameOffset, 64);
     return PlayerName;
   }
 
-  [[nodiscard]] std::string getPlayerModelName() const {
+  [[nodiscard]] auto getPlayerModelName() const -> std::string {
     const auto ModelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
     const std::string ModelName = Memory::ReadString(ModelOffset, 1024);
 
@@ -145,34 +146,34 @@ struct Player {
     return ReplacedName;
   }
 
-  [[nodiscard]] float GetViewYaw() const {
+  [[nodiscard]] auto GetViewYaw() const -> float {
     if (!IsDummy() || IsPlayer()) {
       return Memory::Read<float>(BasePointer + OFF_YAW);
     }
     return 0.0f;
   }
 
-  [[nodiscard]] bool IsValid() const {
+  [[nodiscard]] auto IsValid() const -> bool {
     return BasePointer != 0 && Health > 0 && (IsPlayer() || IsDummy());
   }
 
-  [[nodiscard]] bool IsCombatReady() const {
+  [[nodiscard]] auto IsCombatReady() const -> bool {
     return IsValid() && (!IsDead && !IsKnocked || IsDummy());
   }
 
-  [[nodiscard]] bool IsPlayer() const {
+  [[nodiscard]] auto IsPlayer() const -> bool {
     return Name == "player";
   }
 
-  [[nodiscard]] bool IsDummy() const {
+  [[nodiscard]] auto IsDummy() const -> bool {
     return Team == 97;
   }
 
-  [[nodiscard]] bool IsTeammate() const {
+  [[nodiscard]] auto IsTeammate() const -> bool {
     return LvMap::m_mixtape && Myself->Squad == -1 ? (Team & 1) == (Myself->Team & 1) : Team == Myself->Team;
   }
 
-  [[nodiscard]] bool IsSpectating() const {
+  [[nodiscard]] auto IsSpectating() const -> bool {
     if (!IsDead)
       return false;
 
@@ -181,7 +182,7 @@ struct Player {
   }
 
   // Bones //
-  [[nodiscard]] int GetBoneFromHitbox(HitboxType HitBox) const {
+  [[nodiscard]] auto GetBoneFromHitbox(HitboxType HitBox) const -> int {
     const long ModelPointer = Memory::Read<long>(BasePointer + OFF_STUDIOHDR);
     if (!Memory::IsValidPointer(ModelPointer))
       return -1;
@@ -204,8 +205,8 @@ struct Player {
     return Memory::Read<uint16_t>(BonePointer);
   }
 
-  [[nodiscard]] Vector3D GetBonePosition(const HitboxType HitBox) const {
-    const Vector3D Offset = Vector3D(0.0f, 0.0f, 0.0f);
+  [[nodiscard]] auto GetBonePosition(const HitboxType HitBox) const -> Vector3D {
+    const auto Offset = Vector3D(0.0f, 0.0f, 0.0f);
 
     const int Bone = GetBoneFromHitbox(HitBox);
     if (Bone < 0 || Bone > 255)
