@@ -1,3 +1,6 @@
+# THIS CHEAT IS BEING SOLD AS "PremiumX"
+# DO NOT BUY IT, IT'S A SCAM.
+
 # ⚡ ZAP
 hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (X11).
 
