@@ -2,7 +2,7 @@
 sudo clear
  
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-original_binary_name="zapclient"
+original_binary_name="zap"
 temp_binary_name=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)
 
 mkdir -p temp

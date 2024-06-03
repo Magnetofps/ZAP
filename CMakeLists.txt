@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(zapclient VERSION 0.1)
+project(zap VERSION 1.1)
 
 #No Warnings
 add_definitions(-w)
@@ -32,12 +32,10 @@ find_package (X11 REQUIRED)
 link_directories(/usr/local/lib)
 
 # Add the executable target
-add_executable(zapclient xap.cpp
-        Utils/termcolor.hpp
-        Overlay/AdvancedGUI.hpp)
+add_executable(zap main.cpp)
 
 # Link the executable against the ImGui library, GLFW/OpenGL libraries and X11 libraries
-target_link_libraries(zapclient
+target_link_libraries(zap
   imgui
   glfw3
   GL
@@ -50,7 +48,7 @@ target_link_libraries(zapclient
 )
 
 # Set the include directories for the executable
-target_include_directories(zapclient PUBLIC
+target_include_directories(zap PUBLIC
   /usr/local/include
   ${CMAKE_CURRENT_SOURCE_DIR}/Utils
   ${CMAKE_CURRENT_SOURCE_DIR}/Core

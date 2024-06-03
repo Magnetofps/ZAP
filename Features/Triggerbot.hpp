@@ -1,20 +1,21 @@
 #pragma once
-#include <vector>
 #include <set>
-#include "../Core/Player.hpp"
+#include <vector>
+
+#include "../Core/Level.hpp"
 #include "../Core/LocalPlayer.hpp"
-#include "../Utils/XDisplay.hpp"
-#include "../Utils/Conversion.hpp"
+#include "../Core/Player.hpp"
 #include "../Utils/Config.hpp"
+#include "../Utils/Conversion.hpp"
 #include "../Utils/Features.hpp"
 #include "../Utils/Weapons.hpp"
-#include "../Core/Level.hpp"
+#include "../Utils/XDisplay.hpp"
 
 struct Triggerbot {
-  std::chrono::milliseconds ScopeTime;
+  std::chrono::milliseconds ScopeTime{};
   std::set<int> WeaponList = {};
-  int Range;
-  int RangeHipfire;
+  int Range{};
+  int RangeHipfire{};
 
   XDisplay *X11Display;
   LocalPlayer *Myself;
@@ -174,7 +175,7 @@ struct Triggerbot {
         continue;
       if (!player->IsAimedAt)
         continue;
-      if (player->DistanceToLocalPlayer < Conversion::ToGameUnits(TargetRange)) {
+      if (player->DistanceToLocalPlayer < Conversion::ToGameUnits(static_cast<float>(TargetRange))) {
         X11Display->MouseClickLeft();
         break;
       }
@@ -182,8 +183,6 @@ struct Triggerbot {
   }
 
   void Update() {
-    if (!Map->IsPlayable) // do we even need this? don't we check in updatecore already
-      return;
     if (Features::Home::IsMenuOpened)
       return;
     if (!Features::Triggerbot::Enabled)
@@ -229,71 +228,47 @@ struct Triggerbot {
   }
 
   void UpdateTriggerbotSettings() {
+    RangeHipfire = static_cast<int>(Features::Triggerbot::RangeHipfire);
     if (!Features::Triggerbot::AdvancedTriggerbot) {
-      Range = Features::Triggerbot::Range;
-      RangeHipfire = Features::Triggerbot::RangeHipfire;
+      Range = static_cast<int>(Features::Triggerbot::Range);
+      return;
     }
 
-    if (Features::Triggerbot::AdvancedTriggerbot) {
-      if (Features::Triggerbot::P2020 && Myself->WeaponIndex == WeaponIDs::P2020) { Range = Features::Triggerbot::P2020Range; }
+    std::unordered_map<int, float> weaponRangeMap = {
+      {WeaponIDs::P2020, Features::Triggerbot::P2020Range},
+      {WeaponIDs::RE45, Features::Triggerbot::RE45Range},
+      {WeaponIDs::ALTERNATOR, Features::Triggerbot::AlternatorRange},
+      {WeaponIDs::R99, Features::Triggerbot::R99Range},
+      {WeaponIDs::R301, Features::Triggerbot::R301Range},
+      {WeaponIDs::SPITFIRE, Features::Triggerbot::SpitfireRange},
+      {WeaponIDs::G7, Features::Triggerbot::G7Range},
+      {WeaponIDs::FLATLINE, Features::Triggerbot::FlatlineRange},
+      {WeaponIDs::PROWLER, Features::Triggerbot::ProwlerRange},
+      {WeaponIDs::HEMLOCK, Features::Triggerbot::HemlockRange},
+      {WeaponIDs::REPEATER, Features::Triggerbot::RepeaterRange},
+      {WeaponIDs::RAMPAGE, Features::Triggerbot::RampageRange},
+      {WeaponIDs::CAR, Features::Triggerbot::CARSMGRange},
+      {WeaponIDs::HAVOC, Features::Triggerbot::HavocRange},
+      {WeaponIDs::DEVOTION, Features::Triggerbot::DevotionRange},
+      {WeaponIDs::LSTAR, Features::Triggerbot::LSTARRange},
+      {WeaponIDs::TRIPLETAKE, Features::Triggerbot::TripleTakeRange},
+      {WeaponIDs::VOLT, Features::Triggerbot::VoltRange},
+      {WeaponIDs::NEMESIS, Features::Triggerbot::NemesisRange},
+      {WeaponIDs::MOZAMBIQUE, Features::Triggerbot::MozambiqueRange},
+      {WeaponIDs::PEACEKEEPER, Features::Triggerbot::PeacekeeperRange},
+      {WeaponIDs::MASTIFF, Features::Triggerbot::MastiffRange},
+      {WeaponIDs::LONGBOW, Features::Triggerbot::LongbowRange},
+      {WeaponIDs::CHARGE_RIFLE, Features::Triggerbot::ChargeRifleRange},
+      {WeaponIDs::SENTINEL, Features::Triggerbot::SentinelRange},
+      {WeaponIDs::WINGMAN, Features::Triggerbot::WingmanRange},
+      {WeaponIDs::EVA8, Features::Triggerbot::EVA8Range},
+      {WeaponIDs::BOCEK, Features::Triggerbot::BocekRange},
+      {WeaponIDs::KRABER, Features::Triggerbot::KraberRange},
+      {WeaponIDs::KNIFE, Features::Triggerbot::ThrowingKnifeRange}
+    };
 
-      if (Features::Triggerbot::RE45 && Myself->WeaponIndex == WeaponIDs::RE45) { Range = Features::Triggerbot::RE45Range; }
-
-      if (Features::Triggerbot::Alternator && Myself->WeaponIndex == WeaponIDs::ALTERNATOR) { Range = Features::Triggerbot::AlternatorRange; }
-
-      if (Features::Triggerbot::R99 && Myself->WeaponIndex == WeaponIDs::R99) { Range = Features::Triggerbot::R99Range; }
-
-      if (Features::Triggerbot::R301 && Myself->WeaponIndex == WeaponIDs::R301) { Range = Features::Triggerbot::R301Range; }
-
-      if (Features::Triggerbot::Spitfire && Myself->WeaponIndex == WeaponIDs::SPITFIRE) { Range = Features::Triggerbot::SpitfireRange; }
-
-      if (Features::Triggerbot::G7 && Myself->WeaponIndex == WeaponIDs::G7) { Range = Features::Triggerbot::G7Range; }
-
-      if (Features::Triggerbot::Flatline && Myself->WeaponIndex == WeaponIDs::FLATLINE) { Range = Features::Triggerbot::FlatlineRange; }
-
-      if (Features::Triggerbot::Prowler && Myself->WeaponIndex == WeaponIDs::PROWLER) { Range = Features::Triggerbot::ProwlerRange; }
-
-      if (Features::Triggerbot::Hemlock && Myself->WeaponIndex == WeaponIDs::HEMLOCK) { Range = Features::Triggerbot::HemlockRange; }
-
-      if (Features::Triggerbot::Repeater && Myself->WeaponIndex == WeaponIDs::REPEATER) { Range = Features::Triggerbot::RepeaterRange; }
-
-      if (Features::Triggerbot::Rampage && Myself->WeaponIndex == WeaponIDs::RAMPAGE) { Range = Features::Triggerbot::RampageRange; }
-
-      if (Features::Triggerbot::CARSMG && Myself->WeaponIndex == WeaponIDs::CAR) { Range = Features::Triggerbot::CARSMGRange; }
-
-      if (Features::Triggerbot::Havoc && Myself->WeaponIndex == WeaponIDs::HAVOC) { Range = Features::Triggerbot::HavocRange; }
-
-      if (Features::Triggerbot::Devotion && Myself->WeaponIndex == WeaponIDs::DEVOTION) { Range = Features::Triggerbot::DevotionRange; }
-
-      if (Features::Triggerbot::LSTAR && Myself->WeaponIndex == WeaponIDs::LSTAR) { Range = Features::Triggerbot::LSTARRange; }
-
-      if (Features::Triggerbot::TripleTake && Myself->WeaponIndex == WeaponIDs::TRIPLETAKE) { Range = Features::Triggerbot::TripleTakeRange; }
-
-      if (Features::Triggerbot::Volt && Myself->WeaponIndex == WeaponIDs::VOLT) { Range = Features::Triggerbot::VoltRange; }
-
-      if (Features::Triggerbot::Nemesis && Myself->WeaponIndex == WeaponIDs::NEMESIS) { Range = Features::Triggerbot::NemesisRange; }
-
-      if (Features::Triggerbot::Mozambique && Myself->WeaponIndex == WeaponIDs::MOZAMBIQUE) { Range = Features::Triggerbot::MozambiqueRange; }
-
-      if (Features::Triggerbot::Peacekeeper && Myself->WeaponIndex == WeaponIDs::PEACEKEEPER) { Range = Features::Triggerbot::PeacekeeperRange; }
-
-      if (Features::Triggerbot::Mastiff && Myself->WeaponIndex == WeaponIDs::MASTIFF) { Range = Features::Triggerbot::MastiffRange; }
-
-      if (Features::Triggerbot::Longbow && Myself->WeaponIndex == WeaponIDs::LONGBOW) { Range = Features::Triggerbot::LongbowRange; }
-
-      if (Features::Triggerbot::ChargeRifle && Myself->WeaponIndex == WeaponIDs::CHARGE_RIFLE) { Range = Features::Triggerbot::ChargeRifleRange; }
-
-      if (Features::Triggerbot::Sentinel && Myself->WeaponIndex == WeaponIDs::SENTINEL) { Range = Features::Triggerbot::SentinelRange; }
-
-      if (Features::Triggerbot::Wingman && Myself->WeaponIndex == WeaponIDs::WINGMAN) { Range = Features::Triggerbot::WingmanRange; }
-
-      if (Features::Triggerbot::EVA8 && Myself->WeaponIndex == WeaponIDs::EVA8) { Range = Features::Triggerbot::EVA8Range; }
-
-      if (Features::Triggerbot::Bocek && Myself->WeaponIndex == WeaponIDs::BOCEK) { Range = Features::Triggerbot::BocekRange; }
-
-      if (Features::Triggerbot::Kraber && Myself->WeaponIndex == WeaponIDs::KRABER) { Range = Features::Triggerbot::KraberRange; }
-
-      if (Features::Triggerbot::Knife && Myself->WeaponIndex == WeaponIDs::KNIFE) { Range = Features::Triggerbot::ThrowingKnifeRange; }
+    if (weaponRangeMap.contains(Myself->WeaponIndex)) {
+      Range = static_cast<int>(weaponRangeMap[Myself->WeaponIndex]);
     }
   }
 };

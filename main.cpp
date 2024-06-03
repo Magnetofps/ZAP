@@ -232,11 +232,14 @@ void UpdateCore() {
     if (const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); Now >= LastRead + std::chrono::milliseconds(50)) {
       Players->clear();
       LastRead = Now;
-
       for (auto p: Map->IsFiringRange ? *Dummies : *HumanPlayers) {
-        p->Read();
+        p->fullRead();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
+      }
+    } else { // update *some* things constantly to keep ESP smooth
+      for (const auto p : *Players) {
+        p->shortRead();
       }
     }
 
@@ -301,7 +304,7 @@ std::string slurpFile(const std::string &absolutePath) {
 
 bool isOutdated() { // Scan possible Steam installation paths for libraryfolders.vdf to then scan existing library folders for the games "gameversion.txt"
   // Get currently logged in user, since getuid won't work when we're run as root
-  struct passwd *pw;
+  passwd *pw;
   const char *username = nullptr;
   while ((pw = getpwent()) != nullptr) {
     if (strncmp(pw->pw_dir, "/home/", 6) == 0) {

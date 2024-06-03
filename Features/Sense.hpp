@@ -602,7 +602,7 @@ struct Sense {
         Vector2D StatusPosition = calculatePosition(Features::Sense::Positions::StatusPosition, AboveHeadW2S, LocalOriginW2S);
 
         bool DrawTracers = p->IsAlly ? Features::Sense::Teammate::DrawTracers : Features::Sense::Enemy::DrawTracers;
-        bool DrawStatus = p->IsAlly ? Features::Sense::Teammate::DrawStatus : Features::Sense::Enemy::DrawSkeleton;
+        bool DrawStatus = p->IsAlly ? Features::Sense::Teammate::DrawStatus : Features::Sense::Enemy::DrawStatus;
         bool DrawBars = p->IsAlly ? Features::Sense::Teammate::DrawBars : Features::Sense::Enemy::DrawBars;
         bool DrawDistance = p->IsAlly ? Features::Sense::Teammate::DrawDistance : Features::Sense::Enemy::DrawDistance;
         bool DrawNames = p->IsAlly ? Features::Sense::Teammate::DrawNames : Features::Sense::Enemy::DrawNames;
@@ -704,67 +704,10 @@ struct Sense {
         }
 
         if (DrawLegend)
-          Renderer::DrawText(Canvas, LegendPosition, p->getPlayerModelName().c_str(), ImColor(LegendColor), Features::Sense::TextOutline, true, false);
+          Renderer::DrawText(Canvas, LegendPosition, p->GetPlayerModelName().c_str(), ImColor(LegendColor), Features::Sense::TextOutline, true, false);
 
-        if (DrawWeapon) {
-          int WeaponHeldId = p->WeaponIndex;
-          auto WeaponHeldColor = ImColor(255, 255, 255);
-          std::string WeaponHeldText = "Unknown";
-
-          // Map of weapon IDs to weapon names and colors
-          std::unordered_map<int, std::pair<std::string, ImColor> > weaponInfo = {
-            // Light Weapons
-            { WeaponIDs::P2020, { "P2020", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            { WeaponIDs::RE45, { "RE-45", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            { WeaponIDs::ALTERNATOR, { "Alternator", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            { WeaponIDs::R99, { "R-99", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            { WeaponIDs::R301, { "R-301", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            { WeaponIDs::SPITFIRE, { "Spitfire", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            { WeaponIDs::G7, { "G7 Scout", ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]) } },
-            // Heavy Weapons
-            { WeaponIDs::CAR, { "CAR SMG", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
-            { WeaponIDs::RAMPAGE, { "Rampage", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
-            { WeaponIDs::REPEATER, { "Repeater", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
-            { WeaponIDs::HEMLOCK, { "Hemlock", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
-            { WeaponIDs::FLATLINE, { "Flatline", ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]) } },
-            // Energy Weapons
-            { WeaponIDs::NEMESIS, { "Nemesis", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
-            { WeaponIDs::VOLT, { "Volt", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
-            { WeaponIDs::TRIPLETAKE, { "Triple Take", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
-            { WeaponIDs::LSTAR, { "L-STAR", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
-            { WeaponIDs::DEVOTION, { "Devotion", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
-            { WeaponIDs::HAVOC, { "Havoc", ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]) } },
-            // Shotguns
-            { WeaponIDs::MOZAMBIQUE, { "Mozambique", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
-            { WeaponIDs::EVA8, { "EVA-8 Auto", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
-            { WeaponIDs::PEACEKEEPER, { "Peacekeeper", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
-            { WeaponIDs::MASTIFF, { "Mastiff", ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]) } },
-            // Snipers
-            { WeaponIDs::SENTINEL, { "Sentinel", ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]) } },
-            { WeaponIDs::CHARGE_RIFLE, { "Charge Rifle", ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]) } },
-            { WeaponIDs::LONGBOW, { "Longbow", ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]) } },
-            // Legendary Weapons
-            { WeaponIDs::WINGMAN, { "Wingman", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
-            { WeaponIDs::PROWLER, { "Prowler", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
-            { WeaponIDs::BOCEK, { "Bocek", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
-            { WeaponIDs::KRABER, { "Kraber", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
-            { WeaponIDs::KNIFE, { "Throwing Knife", ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]) } },
-            // Melee
-            { WeaponIDs::HANDS, { "Melee", ImColor(Features::Colors::Enemy::MeleeWeaponColor[0], Features::Colors::Enemy::MeleeWeaponColor[1], Features::Colors::Enemy::MeleeWeaponColor[2], Features::Colors::Enemy::MeleeWeaponColor[3]) } },
-          };
-
-          if (p->IsHoldingGrenade) {
-            WeaponHeldText = "Grenade";
-            WeaponHeldColor = ImColor(Features::Colors::Enemy::ThrowableWeaponColor[0], Features::Colors::Enemy::ThrowableWeaponColor[1], Features::Colors::Enemy::ThrowableWeaponColor[2], Features::Colors::Enemy::ThrowableWeaponColor[3]);
-          } else {
-            if (auto WeaponIt = weaponInfo.find(WeaponHeldId); WeaponIt != weaponInfo.end()) {
-              WeaponHeldText = WeaponIt->second.first;
-              WeaponHeldColor = WeaponIt->second.second;
-            }
-          }
-
-          Renderer::DrawText(Canvas, WeaponPosition, WeaponHeldText.c_str(), Features::Colors::WeaponColorMode == 1 ? WeaponHeldColor : ImColor(WeaponColor), Features::Sense::TextOutline, true, false);
-        }
+        if (DrawWeapon)
+          Renderer::DrawText(Canvas, WeaponPosition, p->GetWeaponHeldName().c_str(), Features::Colors::WeaponColorMode == 1 ? p->GetWeaponHeldColor() : ImColor(WeaponColor), Features::Sense::TextOutline, true, false);
 
         if (DrawBoxes) {
           auto BoxType = p->IsAlly ? Features::Sense::Teammate::BoxType : Features::Sense::Enemy::BoxType;

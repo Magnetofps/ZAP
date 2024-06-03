@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <Weapons.hpp>
 
 #include "LocalPlayer.hpp"
 #include "Offsets.hpp"
@@ -61,8 +62,19 @@ struct Player {
     this->Myself = Me;
   }
 
-  auto Read() -> void {
-    BasePointer = Memory::Read<long>(OFF_REGION + OFF_ENTITY_LIST + ((Index + 1) << 5));
+  auto shortRead() -> void {
+    BasePointer = Memory::Read<long>(OFF_REGION + OFF_ENTITY_LIST + (Index + 1 << 5));
+    if (BasePointer == 0)
+      return;
+
+    LocalOrigin = Memory::Read<Vector3D>(BasePointer + OFF_LOCAL_ORIGIN);
+    AbsoluteVelocity = Memory::Read<Vector3D>(BasePointer + OFF_ABSVELOCITY);
+    ViewAngles = Memory::Read<Vector2D>(BasePointer + OFF_VIEW_ANGLES);
+    ViewYaw = Memory::Read<float>(BasePointer + OFF_YAW);
+  }
+
+  auto fullRead() -> void {
+    BasePointer = Memory::Read<long>(OFF_REGION + OFF_ENTITY_LIST + (Index + 1 << 5));
     if (BasePointer == 0)
       return;
 
@@ -74,8 +86,8 @@ struct Player {
       return;
     }
 
-    IsDead = (IsDummy()) ? false : Memory::Read<short>(BasePointer + OFF_LIFE_STATE) > 0;
-    IsKnocked = (IsDummy()) ? false : Memory::Read<short>(BasePointer + OFF_BLEEDOUT_STATE) > 0;
+    IsDead = !IsDummy() && Memory::Read<short>(BasePointer + OFF_LIFE_STATE) > 0;
+    IsKnocked = !IsDummy() && Memory::Read<short>(BasePointer + OFF_BLEEDOUT_STATE) > 0;
 
     LocalOrigin = Memory::Read<Vector3D>(BasePointer + OFF_LOCAL_ORIGIN);
     AbsoluteVelocity = Memory::Read<Vector3D>(BasePointer + OFF_ABSVELOCITY);
@@ -100,13 +112,9 @@ struct Player {
     MaxShield = Memory::Read<int>(BasePointer + OFF_MAXSHIELD);
 
     if (!IsDead && !IsKnocked && IsHostile) {
-      long WeaponHandle = Memory::Read<long>(BasePointer + OFF_WEAPON_HANDLE);
-      long WeaponHandleMasked = WeaponHandle & 0xffff;
+      const long WeaponHandleMasked = Memory::Read<long>(BasePointer + OFF_WEAPON_HANDLE) & 0xffff;
       WeaponEntity = Memory::Read<long>(OFF_REGION + OFF_ENTITY_LIST + (WeaponHandleMasked << 5));
-
-      int OffHandWeaponID = Memory::Read<int>(BasePointer + OFF_OFFHAND_WEAPON);
-      IsHoldingGrenade = OffHandWeaponID == -251 ? true : false;
-
+      IsHoldingGrenade = Memory::Read<int>(BasePointer + OFF_OFFHAND_WEAPON) == -251;
       WeaponIndex = Memory::Read<int>(WeaponEntity + OFF_WEAPON_INDEX);
     }
 
@@ -129,7 +137,7 @@ struct Player {
     return PlayerName;
   }
 
-  [[nodiscard]] auto getPlayerModelName() const -> std::string {
+  [[nodiscard]] auto GetPlayerModelName() const -> std::string {
     const auto ModelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
     const std::string ModelName = Memory::ReadString(ModelOffset, 1024);
 
@@ -144,6 +152,52 @@ struct Player {
     }
 
     return ReplacedName;
+  }
+
+  [[nodiscard]] auto GetWeaponHeldName() const -> std::string {
+    if (IsHoldingGrenade)
+        return "Throwable";
+
+    static std::unordered_map<int, std::string> WeaponMap = { {WeaponIDs::P2020, "P2020"}, {WeaponIDs::RE45, "RE-45"}, {WeaponIDs::ALTERNATOR, "Alternator"}, {WeaponIDs::R301, "R-301"}, {WeaponIDs::R99, "R-99"}, {WeaponIDs::SPITFIRE, "Spitfire"}, {WeaponIDs::G7, "G7 Scout"}, {WeaponIDs::FLATLINE, "Flatline"}, {WeaponIDs::PROWLER, "Prowler"}, {WeaponIDs::HEMLOCK, "Hemlock"}, {WeaponIDs::REPEATER, "30-30 Repeater"}, {WeaponIDs::RAMPAGE, "Rampage"}, {WeaponIDs::CAR, "CAR-SMG"}, {WeaponIDs::HAVOC, "Havoc"}, {WeaponIDs::DEVOTION, "Devotion"}, {WeaponIDs::LSTAR, "L-STAR"}, {WeaponIDs::TRIPLETAKE, "Triple Take"}, {WeaponIDs::VOLT, "Volt"}, {WeaponIDs::NEMESIS, "Nemesis"}, {WeaponIDs::MOZAMBIQUE, "Mozambique"}, {WeaponIDs::PEACEKEEPER, "Peacekeeper"}, {WeaponIDs::MASTIFF, "Mastiff"}, {WeaponIDs::SENTINEL, "Sentinel"}, {WeaponIDs::CHARGE_RIFLE, "Charge Rifle"}, {WeaponIDs::LONGBOW, "Longbow"}, {WeaponIDs::WINGMAN, "Wingman"}, {WeaponIDs::EVA8, "EVA-8 Auto"}, {WeaponIDs::BOCEK, "Bocek"}, {WeaponIDs::KRABER, "Kraber"}, {WeaponIDs::KNIFE, "Throwing Knife"}, {WeaponIDs::HANDS, "Melee"}, };
+
+    if (const auto it = WeaponMap.find(WeaponIndex); it != WeaponMap.end())
+      return it->second;
+
+    return "Hands";
+  }
+
+  [[nodiscard]] auto GetWeaponHeldColor() const -> ImColor {
+    ImColor LightCol, HeavyCol, EnergyCol, ShotgunCol, SniperCol, LegendaryCol, MeleeCol;
+    if (IsHoldingGrenade) {
+      if (IsHostile)
+        return {Features::Colors::Enemy::ThrowableWeaponColor[0], Features::Colors::Enemy::ThrowableWeaponColor[1], Features::Colors::Enemy::ThrowableWeaponColor[2], Features::Colors::Enemy::ThrowableWeaponColor[3]};
+      return {Features::Colors::Teammate::ThrowableWeaponColor[0], Features::Colors::Teammate::ThrowableWeaponColor[1], Features::Colors::Teammate::ThrowableWeaponColor[2], Features::Colors::Teammate::ThrowableWeaponColor[3]};
+    }
+
+    if (IsHostile) {
+      LightCol = ImColor(Features::Colors::Enemy::LightWeaponColor[0], Features::Colors::Enemy::LightWeaponColor[1], Features::Colors::Enemy::LightWeaponColor[2], Features::Colors::Enemy::LightWeaponColor[3]);
+      HeavyCol = ImColor(Features::Colors::Enemy::HeavyWeaponColor[0], Features::Colors::Enemy::HeavyWeaponColor[1], Features::Colors::Enemy::HeavyWeaponColor[2], Features::Colors::Enemy::HeavyWeaponColor[3]);
+      EnergyCol = ImColor(Features::Colors::Enemy::EnergyWeaponColor[0], Features::Colors::Enemy::EnergyWeaponColor[1], Features::Colors::Enemy::EnergyWeaponColor[2], Features::Colors::Enemy::EnergyWeaponColor[3]);
+      ShotgunCol = ImColor(Features::Colors::Enemy::ShotgunWeaponColor[0], Features::Colors::Enemy::ShotgunWeaponColor[1], Features::Colors::Enemy::ShotgunWeaponColor[2], Features::Colors::Enemy::ShotgunWeaponColor[3]);
+      SniperCol = ImColor(Features::Colors::Enemy::SniperWeaponColor[0], Features::Colors::Enemy::SniperWeaponColor[1], Features::Colors::Enemy::SniperWeaponColor[2], Features::Colors::Enemy::SniperWeaponColor[3]);
+      LegendaryCol = ImColor(Features::Colors::Enemy::LegendaryWeaponColor[0], Features::Colors::Enemy::LegendaryWeaponColor[1], Features::Colors::Enemy::LegendaryWeaponColor[2], Features::Colors::Enemy::LegendaryWeaponColor[3]);
+      MeleeCol = ImColor(Features::Colors::Enemy::MeleeWeaponColor[0], Features::Colors::Enemy::MeleeWeaponColor[1], Features::Colors::Enemy::MeleeWeaponColor[2], Features::Colors::Enemy::MeleeWeaponColor[3]);
+    } else {
+      LightCol = ImColor(Features::Colors::Teammate::LightWeaponColor[0], Features::Colors::Teammate::LightWeaponColor[1], Features::Colors::Teammate::LightWeaponColor[2], Features::Colors::Teammate::LightWeaponColor[3]);
+      HeavyCol = ImColor(Features::Colors::Teammate::HeavyWeaponColor[0], Features::Colors::Teammate::HeavyWeaponColor[1], Features::Colors::Teammate::HeavyWeaponColor[2], Features::Colors::Teammate::HeavyWeaponColor[3]);
+      EnergyCol = ImColor(Features::Colors::Teammate::EnergyWeaponColor[0], Features::Colors::Teammate::EnergyWeaponColor[1], Features::Colors::Teammate::EnergyWeaponColor[2], Features::Colors::Teammate::EnergyWeaponColor[3]);
+      ShotgunCol = ImColor(Features::Colors::Teammate::ShotgunWeaponColor[0], Features::Colors::Teammate::ShotgunWeaponColor[1], Features::Colors::Teammate::ShotgunWeaponColor[2], Features::Colors::Teammate::ShotgunWeaponColor[3]);
+      SniperCol = ImColor(Features::Colors::Teammate::SniperWeaponColor[0], Features::Colors::Teammate::SniperWeaponColor[1], Features::Colors::Teammate::SniperWeaponColor[2], Features::Colors::Teammate::SniperWeaponColor[3]);
+      LegendaryCol = ImColor(Features::Colors::Teammate::LegendaryWeaponColor[0], Features::Colors::Teammate::LegendaryWeaponColor[1], Features::Colors::Teammate::LegendaryWeaponColor[2], Features::Colors::Teammate::LegendaryWeaponColor[3]);
+      MeleeCol = ImColor(Features::Colors::Teammate::MeleeWeaponColor[0], Features::Colors::Teammate::MeleeWeaponColor[1], Features::Colors::Teammate::MeleeWeaponColor[2], Features::Colors::Teammate::MeleeWeaponColor[3]);
+    }
+
+    static std::unordered_map<int, ImColor> WeaponMap = { {WeaponIDs::P2020, LightCol}, {WeaponIDs::RE45, LightCol}, {WeaponIDs::ALTERNATOR, LightCol}, {WeaponIDs::R301, LightCol}, {WeaponIDs::R99, LightCol}, {WeaponIDs::SPITFIRE, LightCol}, {WeaponIDs::G7, LightCol}, {WeaponIDs::FLATLINE, HeavyCol}, {WeaponIDs::PROWLER, HeavyCol}, {WeaponIDs::HEMLOCK, HeavyCol}, {WeaponIDs::REPEATER, HeavyCol}, {WeaponIDs::RAMPAGE, HeavyCol}, {WeaponIDs::CAR, HeavyCol}, {WeaponIDs::HAVOC, EnergyCol}, {WeaponIDs::DEVOTION, EnergyCol}, {WeaponIDs::LSTAR, EnergyCol}, {WeaponIDs::TRIPLETAKE, EnergyCol}, {WeaponIDs::VOLT, EnergyCol}, {WeaponIDs::NEMESIS, EnergyCol}, {WeaponIDs::MOZAMBIQUE, ShotgunCol}, {WeaponIDs::PEACEKEEPER, ShotgunCol}, {WeaponIDs::MASTIFF, ShotgunCol}, {WeaponIDs::SENTINEL, SniperCol}, {WeaponIDs::CHARGE_RIFLE, SniperCol}, {WeaponIDs::LONGBOW, SniperCol}, {WeaponIDs::WINGMAN, LegendaryCol}, {WeaponIDs::EVA8, LegendaryCol}, {WeaponIDs::BOCEK, LegendaryCol}, {WeaponIDs::KRABER, LegendaryCol}, {WeaponIDs::KNIFE, LegendaryCol}, {WeaponIDs::HANDS, MeleeCol}, };
+
+    if (const auto it = WeaponMap.find(WeaponIndex); it != WeaponMap.end())
+      return it->second;
+
+    return {255, 255, 255};
   }
 
   [[nodiscard]] auto GetViewYaw() const -> float {

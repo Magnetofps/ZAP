@@ -296,139 +296,40 @@ struct Legitbot {
   }
 
   static auto UpdateAimList() -> void {
+    const std::vector<std::pair<bool, int>> weaponStates = {
+      {Features::Aimbot::P2020, WeaponIDs::P2020}, {Features::Aimbot::RE45, WeaponIDs::RE45}, {Features::Aimbot::Alternator, WeaponIDs::ALTERNATOR}, {Features::Aimbot::R99, WeaponIDs::R99}, {Features::Aimbot::R301, WeaponIDs::R301}, {Features::Aimbot::Spitfire, WeaponIDs::SPITFIRE}, {Features::Aimbot::G7, WeaponIDs::G7},
+      {Features::Aimbot::Flatline, WeaponIDs::FLATLINE}, {Features::Aimbot::Hemlock, WeaponIDs::HEMLOCK}, {Features::Aimbot::Repeater, WeaponIDs::REPEATER}, {Features::Aimbot::Rampage, WeaponIDs::RAMPAGE}, {Features::Aimbot::CARSMG, WeaponIDs::CAR},
+      {Features::Aimbot::Havoc, WeaponIDs::HAVOC}, {Features::Aimbot::Devotion, WeaponIDs::DEVOTION}, {Features::Aimbot::LSTAR, WeaponIDs::LSTAR}, {Features::Aimbot::TripleTake, WeaponIDs::TRIPLETAKE}, {Features::Aimbot::Volt, WeaponIDs::VOLT}, {Features::Aimbot::Nemesis, WeaponIDs::NEMESIS},
+      {Features::Aimbot::Mozambique, WeaponIDs::MOZAMBIQUE}, {Features::Aimbot::EVA8, WeaponIDs::EVA8}, {Features::Aimbot::Peacekeeper, WeaponIDs::PEACEKEEPER}, {Features::Aimbot::Mastiff, WeaponIDs::MASTIFF},
+      {Features::Aimbot::Longbow, WeaponIDs::LONGBOW}, {Features::Aimbot::ChargeRifle, WeaponIDs::CHARGE_RIFLE}, {Features::Aimbot::Sentinel, WeaponIDs::SENTINEL},
+      {Features::Aimbot::Wingman, WeaponIDs::WINGMAN}, {Features::Aimbot::Prowler, WeaponIDs::PROWLER}, {Features::Aimbot::Bocek, WeaponIDs::BOCEK}, {Features::Aimbot::Kraber, WeaponIDs::KRABER}, {Features::Aimbot::Knife, WeaponIDs::KNIFE}
+    };
+
     Features::Aimbot::AimList.clear();
-    // Light
-    if (Features::Aimbot::P2020)
-      Features::Aimbot::AimList.insert(WeaponIDs::P2020);
-    if (Features::Aimbot::RE45)
-      Features::Aimbot::AimList.insert(WeaponIDs::RE45);
-    if (Features::Aimbot::Alternator)
-      Features::Aimbot::AimList.insert(WeaponIDs::ALTERNATOR);
-    if (Features::Aimbot::R99)
-      Features::Aimbot::AimList.insert(WeaponIDs::R99);
-    if (Features::Aimbot::R301)
-      Features::Aimbot::AimList.insert(WeaponIDs::R301);
-    if (Features::Aimbot::Spitfire)
-      Features::Aimbot::AimList.insert(WeaponIDs::SPITFIRE);
-    if (Features::Aimbot::G7)
-      Features::Aimbot::AimList.insert(WeaponIDs::G7);
-    // Heavy
-    if (Features::Aimbot::Flatline)
-      Features::Aimbot::AimList.insert(WeaponIDs::FLATLINE);
-    if (Features::Aimbot::Hemlock)
-      Features::Aimbot::AimList.insert(WeaponIDs::HEMLOCK);
-    if (Features::Aimbot::Repeater)
-      Features::Aimbot::AimList.insert(WeaponIDs::REPEATER);
-    if (Features::Aimbot::Rampage)
-      Features::Aimbot::AimList.insert(WeaponIDs::RAMPAGE);
-    if (Features::Aimbot::CARSMG)
-      Features::Aimbot::AimList.insert(WeaponIDs::CAR);
-    // Energy
-    if (Features::Aimbot::Havoc)
-      Features::Aimbot::AimList.insert(WeaponIDs::HAVOC);
-    if (Features::Aimbot::Devotion)
-      Features::Aimbot::AimList.insert(WeaponIDs::DEVOTION);
-    if (Features::Aimbot::LSTAR)
-      Features::Aimbot::AimList.insert(WeaponIDs::LSTAR);
-    if (Features::Aimbot::TripleTake)
-      Features::Aimbot::AimList.insert(WeaponIDs::TRIPLETAKE);
-    if (Features::Aimbot::Volt)
-      Features::Aimbot::AimList.insert(WeaponIDs::VOLT);
-    if (Features::Aimbot::Nemesis)
-      Features::Aimbot::AimList.insert(WeaponIDs::NEMESIS);
-    // Shotguns
-    if (Features::Aimbot::Mozambique)
-      Features::Aimbot::AimList.insert(WeaponIDs::MOZAMBIQUE);
-    if (Features::Aimbot::EVA8)
-      Features::Aimbot::AimList.insert(WeaponIDs::EVA8);
-    if (Features::Aimbot::Peacekeeper)
-      Features::Aimbot::AimList.insert(WeaponIDs::PEACEKEEPER);
-    if (Features::Aimbot::Mastiff)
-      Features::Aimbot::AimList.insert(WeaponIDs::MASTIFF);
-    // Snipers
-    if (Features::Aimbot::Longbow)
-      Features::Aimbot::AimList.insert(WeaponIDs::LONGBOW);
-    if (Features::Aimbot::ChargeRifle)
-      Features::Aimbot::AimList.insert(WeaponIDs::CHARGE_RIFLE);
-    if (Features::Aimbot::Sentinel)
-      Features::Aimbot::AimList.insert(WeaponIDs::SENTINEL);
-    // Legendary
-    if (Features::Aimbot::Wingman)
-      Features::Aimbot::AimList.insert(WeaponIDs::WINGMAN);
-    if (Features::Aimbot::Prowler)
-      Features::Aimbot::AimList.insert(WeaponIDs::PROWLER);
-    if (Features::Aimbot::Bocek)
-      Features::Aimbot::AimList.insert(WeaponIDs::BOCEK);
-    if (Features::Aimbot::Kraber)
-      Features::Aimbot::AimList.insert(WeaponIDs::KRABER);
-    if (Features::Aimbot::Knife)
-      Features::Aimbot::AimList.insert(WeaponIDs::KNIFE);
+    for (const auto& [isEnabled, weaponID] : weaponStates) {
+      if (isEnabled) {
+        Features::Aimbot::AimList.insert(weaponID);
+      }
+    }
   }
 
   static auto UpdateRCSList() -> void {
+
+    const std::vector<std::pair<bool, int>> weaponStates = {
+      {Features::RCS::P2020, WeaponIDs::P2020}, {Features::RCS::RE45, WeaponIDs::RE45}, {Features::RCS::Alternator, WeaponIDs::ALTERNATOR}, {Features::RCS::R99, WeaponIDs::R99}, {Features::RCS::R301, WeaponIDs::R301}, {Features::RCS::Spitfire, WeaponIDs::SPITFIRE}, {Features::RCS::G7, WeaponIDs::G7},
+      {Features::RCS::Flatline, WeaponIDs::FLATLINE}, {Features::RCS::Hemlock, WeaponIDs::HEMLOCK}, {Features::RCS::Repeater, WeaponIDs::REPEATER}, {Features::RCS::Rampage, WeaponIDs::RAMPAGE}, {Features::RCS::CARSMG, WeaponIDs::CAR},
+      {Features::RCS::Havoc, WeaponIDs::HAVOC}, {Features::RCS::Devotion, WeaponIDs::DEVOTION}, {Features::RCS::LSTAR, WeaponIDs::LSTAR}, {Features::RCS::TripleTake, WeaponIDs::TRIPLETAKE}, {Features::RCS::Volt, WeaponIDs::VOLT}, {Features::RCS::Nemesis, WeaponIDs::NEMESIS},
+      {Features::RCS::Mozambique, WeaponIDs::MOZAMBIQUE}, {Features::RCS::EVA8, WeaponIDs::EVA8}, {Features::RCS::Peacekeeper, WeaponIDs::PEACEKEEPER}, {Features::RCS::Mastiff, WeaponIDs::MASTIFF},
+      {Features::RCS::Longbow, WeaponIDs::LONGBOW}, {Features::RCS::ChargeRifle, WeaponIDs::CHARGE_RIFLE}, {Features::RCS::Sentinel, WeaponIDs::SENTINEL},
+      {Features::RCS::Wingman, WeaponIDs::WINGMAN}, {Features::RCS::Prowler, WeaponIDs::PROWLER},  {Features::RCS::Kraber, WeaponIDs::KRABER}
+    };
+
     Features::RCS::RCSList.clear();
-    // Light
-    if (Features::RCS::P2020)
-      Features::RCS::RCSList.insert(WeaponIDs::P2020);
-    if (Features::RCS::RE45)
-      Features::RCS::RCSList.insert(WeaponIDs::RE45);
-    if (Features::RCS::Alternator)
-      Features::RCS::RCSList.insert(WeaponIDs::ALTERNATOR);
-    if (Features::RCS::R99)
-      Features::RCS::RCSList.insert(WeaponIDs::R99);
-    if (Features::RCS::R301)
-      Features::RCS::RCSList.insert(WeaponIDs::R301);
-    if (Features::RCS::Spitfire)
-      Features::RCS::RCSList.insert(WeaponIDs::SPITFIRE);
-    if (Features::RCS::G7)
-      Features::RCS::RCSList.insert(WeaponIDs::G7);
-    // Heavy
-    if (Features::RCS::Flatline)
-      Features::RCS::RCSList.insert(WeaponIDs::FLATLINE);
-    if (Features::RCS::Hemlock)
-      Features::RCS::RCSList.insert(WeaponIDs::HEMLOCK);
-    if (Features::RCS::Repeater)
-      Features::RCS::RCSList.insert(WeaponIDs::REPEATER);
-    if (Features::RCS::Rampage)
-      Features::RCS::RCSList.insert(WeaponIDs::RAMPAGE);
-    if (Features::RCS::CARSMG)
-      Features::RCS::RCSList.insert(WeaponIDs::CAR);
-    // Energy
-    if (Features::RCS::Havoc)
-      Features::RCS::RCSList.insert(WeaponIDs::HAVOC);
-    if (Features::RCS::Devotion)
-      Features::RCS::RCSList.insert(WeaponIDs::DEVOTION);
-    if (Features::RCS::LSTAR)
-      Features::RCS::RCSList.insert(WeaponIDs::LSTAR);
-    if (Features::RCS::TripleTake)
-      Features::RCS::RCSList.insert(WeaponIDs::TRIPLETAKE);
-    if (Features::RCS::Volt)
-      Features::RCS::RCSList.insert(WeaponIDs::VOLT);
-    if (Features::RCS::Nemesis)
-      Features::RCS::RCSList.insert(WeaponIDs::NEMESIS);
-    // Shotguns
-    if (Features::RCS::Mozambique)
-      Features::RCS::RCSList.insert(WeaponIDs::MOZAMBIQUE);
-    if (Features::RCS::EVA8)
-      Features::RCS::RCSList.insert(WeaponIDs::EVA8);
-    if (Features::RCS::Peacekeeper)
-      Features::RCS::RCSList.insert(WeaponIDs::PEACEKEEPER);
-    if (Features::RCS::Mastiff)
-      Features::RCS::RCSList.insert(WeaponIDs::MASTIFF);
-    // Snipers
-    if (Features::RCS::Longbow)
-      Features::RCS::RCSList.insert(WeaponIDs::LONGBOW);
-    if (Features::RCS::ChargeRifle)
-      Features::RCS::RCSList.insert(WeaponIDs::CHARGE_RIFLE);
-    if (Features::RCS::Sentinel)
-      Features::RCS::RCSList.insert(WeaponIDs::SENTINEL);
-    // Legendary
-    if (Features::RCS::Wingman)
-      Features::RCS::RCSList.insert(WeaponIDs::WINGMAN);
-    if (Features::RCS::Prowler)
-      Features::RCS::RCSList.insert(WeaponIDs::PROWLER);
-    if (Features::RCS::Kraber)
-      Features::RCS::RCSList.insert(WeaponIDs::KRABER);
+    for (const auto& [isEnabled, weaponID] : weaponStates) {
+      if (isEnabled) {
+        Features::RCS::RCSList.insert(weaponID);
+      }
+    }
   }
 
   auto UpdateAimbot() -> void {
@@ -457,6 +358,11 @@ struct Legitbot {
       return;
     }
 
+    if (Features::Aimbot::BindMethod == 2 && !isKeybindDown()) { // keybinds
+      ReleaseTarget();
+      return;
+    }
+
     if (Features::Aimbot::BindMethod == 0) { // OnFire and OnADS
       if (Features::Aimbot::OnFire) {
         if (Features::Aimbot::OnADS) {
@@ -478,15 +384,11 @@ struct Legitbot {
           }
         }
       }
-    } else { // Keybinds
-      if (!isKeybindDown()) {
-        ReleaseTarget();
-        return;
-      }
     }
 
     if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
-      if (TargetSelected && !Features::Aimbot::TargetSwitching) { return; }
+      if (TargetSelected && !Features::Aimbot::TargetSwitching)
+        return;
 
       Target = FindBestTarget();
       if (!IsValidTarget(Target)) {
@@ -643,15 +545,12 @@ struct Legitbot {
     const Vector3D CameraPosition = Myself->CameraPosition;
 
     if (Myself->WeaponProjectileSpeed > 1.0f) {
-      if (Features::Aimbot::PredictBulletDrop && Features::Aimbot::PredictMovement) {
+      if (Features::Aimbot::PredictBulletDrop && Features::Aimbot::PredictMovement)
         return Resolver::CalculateAimRotationNew(CameraPosition, TargetPosition, TargetVelocity, Myself->WeaponProjectileSpeed, Myself->WeaponProjectileScale, 255, Angle);
-      }
-      if (Features::Aimbot::PredictBulletDrop) {
+      if (Features::Aimbot::PredictBulletDrop)
         return Resolver::CalculateAimRotationNew(CameraPosition, TargetPosition, Vector3D(0, 0, 0), Myself->WeaponProjectileSpeed, Myself->WeaponProjectileScale, 255, Angle);
-      }
-      if (Features::Aimbot::PredictMovement) {
+      if (Features::Aimbot::PredictMovement)
         return Resolver::CalculateAimRotation(CameraPosition, TargetPosition, TargetVelocity, Myself->WeaponProjectileSpeed, Angle);
-      }
     }
 
     Angle = Resolver::CalculateAngle(CameraPosition, TargetPosition);
@@ -796,184 +695,183 @@ struct Legitbot {
   }
 
   auto UpdateRCSSettings() const -> void {
-    if (!Features::RCS::AdvancedRCS) { return; }
+    if (!Features::RCS::AdvancedRCS)
+      return;
 
     const int weaponHeld = Myself->WeaponIndex;
 
-    if (Features::RCS::AdvancedRCS) {
-      if (weaponHeld == WeaponIDs::P2020) { // P2020
-        Features::RCS::AdvancedPitchPower = Features::RCS::P2020Pitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::P2020Yaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::P2020PitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::P2020YawReduction;
-      }
-      if (weaponHeld == WeaponIDs::RE45) { // RE-45
-        Features::RCS::AdvancedPitchPower = Features::RCS::RE45Pitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::RE45Yaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::RE45PitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::RE45YawReduction;
-      }
-      if (weaponHeld == WeaponIDs::ALTERNATOR) { // Alternator
-        Features::RCS::AdvancedPitchPower = Features::RCS::AlternatorPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::AlternatorYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::AlternatorPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::AlternatorYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::R99) { // R-99
-        Features::RCS::AdvancedPitchPower = Features::RCS::R99Pitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::R99Yaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::R99PitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::R99YawReduction;
-      }
-      if (weaponHeld == WeaponIDs::R301) { // R-301
-        Features::RCS::AdvancedPitchPower = Features::RCS::R301Pitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::R301Yaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::R301PitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::R301YawReduction;
-      }
-      if (weaponHeld == WeaponIDs::SPITFIRE) { // Spitfire
-        Features::RCS::AdvancedPitchPower = Features::RCS::SpitfirePitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::SpitfireYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::SpitfirePitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::SpitfireYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::G7) { // G7
-        Features::RCS::AdvancedPitchPower = Features::RCS::G7Pitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::G7Yaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::G7PitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::G7YawReduction;
-      }
-      // Heavy Weapons
-      if (weaponHeld == WeaponIDs::CAR) { // CARSMG
-        Features::RCS::AdvancedPitchPower = Features::RCS::CARSMGPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::CARSMGYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::CARSMGPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::CARSMGYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::RAMPAGE) { // Rampage
-        Features::RCS::AdvancedPitchPower = Features::RCS::RampagePitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::RampageYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::RampagePitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::RampageYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::REPEATER) { // Repeater
-        Features::RCS::AdvancedPitchPower = Features::RCS::RepeaterPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::RepeaterYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::RepeaterPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::RepeaterYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::HEMLOCK) { // Hemlock
-        Features::RCS::AdvancedPitchPower = Features::RCS::HemlockPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::HemlockYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::HemlockPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::HemlockYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::FLATLINE) { // Flatline
-        Features::RCS::AdvancedPitchPower = Features::RCS::FlatlinePitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::FlatlineYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::FlatlinePitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::FlatlineYawReduction;
-      }
-      // Energy Weapons
-      if (weaponHeld == WeaponIDs::NEMESIS) { // Nemesis
-        Features::RCS::AdvancedPitchPower = Features::RCS::NemesisPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::NemesisYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::NemesisPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::NemesisYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::VOLT) { // Volt
-        Features::RCS::AdvancedPitchPower = Features::RCS::VoltPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::VoltYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::VoltPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::VoltYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::TRIPLETAKE) { // TripleTake
-        Features::RCS::AdvancedPitchPower = Features::RCS::TripleTakePitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::TripleTakeYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::TripleTakePitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::TripleTakeYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::LSTAR) { // LSTAR
-        Features::RCS::AdvancedPitchPower = Features::RCS::LSTARPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::LSTARYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::LSTARPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::LSTARYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::DEVOTION) { // Devotion
-        Features::RCS::AdvancedPitchPower = Features::RCS::DevotionPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::DevotionYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::DevotionPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::DevotionYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::HAVOC) { // Havoc
-        Features::RCS::AdvancedPitchPower = Features::RCS::HavocPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::HavocYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::HavocPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::HavocYawReduction;
-      }
-      // Shotguns
-      if (weaponHeld == WeaponIDs::MOZAMBIQUE) { // Mozambique
-        Features::RCS::AdvancedPitchPower = Features::RCS::MozambiquePitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::MozambiqueYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::MozambiquePitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::MozambiqueYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::EVA8) { // EVA8
-        Features::RCS::AdvancedPitchPower = Features::RCS::EVA8Pitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::EVA8Yaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::EVA8PitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::EVA8YawReduction;
-      }
-      if (weaponHeld == WeaponIDs::PEACEKEEPER) { // Peacekeeper
-        Features::RCS::AdvancedPitchPower = Features::RCS::PeacekeeperPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::PeacekeeperYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::PeacekeeperPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::PeacekeeperYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::MASTIFF) { // Mastiff
-        Features::RCS::AdvancedPitchPower = Features::RCS::MastiffPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::MastiffYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::MastiffPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::MastiffYawReduction;
-      }
-      // Snipers
-      if (weaponHeld == WeaponIDs::SENTINEL) { // Sentinel
-        Features::RCS::AdvancedPitchPower = Features::RCS::SentinelPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::SentinelYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::SentinelPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::SentinelYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::CHARGE_RIFLE) { // ChargeRifle
-        Features::RCS::AdvancedPitchPower = Features::RCS::ChargeRiflePitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::ChargeRifleYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::ChargeRiflePitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::ChargeRifleYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::LONGBOW) { // Longbow
-        Features::RCS::AdvancedPitchPower = Features::RCS::LongbowPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::LongbowYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::LongbowPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::LongbowYawReduction;
-      }
-      // Legendary Weapons
-      if (weaponHeld == WeaponIDs::WINGMAN) { // Wingman
-        Features::RCS::AdvancedPitchPower = Features::RCS::WingmanPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::WingmanYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::WingmanPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::WingmanYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::PROWLER) { // Prowler
-        Features::RCS::AdvancedPitchPower = Features::RCS::ProwlerPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::ProwlerYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::ProwlerPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::ProwlerYawReduction;
-      }
-      if (weaponHeld == WeaponIDs::KRABER) { // Kraber
-        Features::RCS::AdvancedPitchPower = Features::RCS::KraberPitch;
-        Features::RCS::AdvancedYawPower = Features::RCS::KraberYaw;
-        Features::RCS::AdvancedPitchReduction = Features::RCS::KraberPitchReduction;
-        Features::RCS::AdvancedYawReduction = Features::RCS::KraberYawReduction;
-      }
+    if (weaponHeld == WeaponIDs::P2020) { // P2020
+      Features::RCS::AdvancedPitchPower = Features::RCS::P2020Pitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::P2020Yaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::P2020PitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::P2020YawReduction;
+    }
+    if (weaponHeld == WeaponIDs::RE45) { // RE-45
+      Features::RCS::AdvancedPitchPower = Features::RCS::RE45Pitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::RE45Yaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::RE45PitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::RE45YawReduction;
+    }
+    if (weaponHeld == WeaponIDs::ALTERNATOR) { // Alternator
+      Features::RCS::AdvancedPitchPower = Features::RCS::AlternatorPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::AlternatorYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::AlternatorPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::AlternatorYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::R99) { // R-99
+      Features::RCS::AdvancedPitchPower = Features::RCS::R99Pitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::R99Yaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::R99PitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::R99YawReduction;
+    }
+    if (weaponHeld == WeaponIDs::R301) { // R-301
+      Features::RCS::AdvancedPitchPower = Features::RCS::R301Pitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::R301Yaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::R301PitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::R301YawReduction;
+    }
+    if (weaponHeld == WeaponIDs::SPITFIRE) { // Spitfire
+      Features::RCS::AdvancedPitchPower = Features::RCS::SpitfirePitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::SpitfireYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::SpitfirePitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::SpitfireYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::G7) { // G7
+      Features::RCS::AdvancedPitchPower = Features::RCS::G7Pitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::G7Yaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::G7PitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::G7YawReduction;
+    }
+    // Heavy Weapons
+    if (weaponHeld == WeaponIDs::CAR) { // CARSMG
+      Features::RCS::AdvancedPitchPower = Features::RCS::CARSMGPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::CARSMGYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::CARSMGPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::CARSMGYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::RAMPAGE) { // Rampage
+      Features::RCS::AdvancedPitchPower = Features::RCS::RampagePitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::RampageYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::RampagePitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::RampageYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::REPEATER) { // Repeater
+      Features::RCS::AdvancedPitchPower = Features::RCS::RepeaterPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::RepeaterYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::RepeaterPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::RepeaterYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::HEMLOCK) { // Hemlock
+      Features::RCS::AdvancedPitchPower = Features::RCS::HemlockPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::HemlockYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::HemlockPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::HemlockYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::FLATLINE) { // Flatline
+      Features::RCS::AdvancedPitchPower = Features::RCS::FlatlinePitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::FlatlineYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::FlatlinePitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::FlatlineYawReduction;
+    }
+    // Energy Weapons
+    if (weaponHeld == WeaponIDs::NEMESIS) { // Nemesis
+      Features::RCS::AdvancedPitchPower = Features::RCS::NemesisPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::NemesisYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::NemesisPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::NemesisYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::VOLT) { // Volt
+      Features::RCS::AdvancedPitchPower = Features::RCS::VoltPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::VoltYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::VoltPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::VoltYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::TRIPLETAKE) { // TripleTake
+      Features::RCS::AdvancedPitchPower = Features::RCS::TripleTakePitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::TripleTakeYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::TripleTakePitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::TripleTakeYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::LSTAR) { // LSTAR
+      Features::RCS::AdvancedPitchPower = Features::RCS::LSTARPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::LSTARYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::LSTARPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::LSTARYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::DEVOTION) { // Devotion
+      Features::RCS::AdvancedPitchPower = Features::RCS::DevotionPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::DevotionYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::DevotionPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::DevotionYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::HAVOC) { // Havoc
+      Features::RCS::AdvancedPitchPower = Features::RCS::HavocPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::HavocYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::HavocPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::HavocYawReduction;
+    }
+    // Shotguns
+    if (weaponHeld == WeaponIDs::MOZAMBIQUE) { // Mozambique
+      Features::RCS::AdvancedPitchPower = Features::RCS::MozambiquePitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::MozambiqueYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::MozambiquePitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::MozambiqueYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::EVA8) { // EVA8
+      Features::RCS::AdvancedPitchPower = Features::RCS::EVA8Pitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::EVA8Yaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::EVA8PitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::EVA8YawReduction;
+    }
+    if (weaponHeld == WeaponIDs::PEACEKEEPER) { // Peacekeeper
+      Features::RCS::AdvancedPitchPower = Features::RCS::PeacekeeperPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::PeacekeeperYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::PeacekeeperPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::PeacekeeperYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::MASTIFF) { // Mastiff
+      Features::RCS::AdvancedPitchPower = Features::RCS::MastiffPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::MastiffYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::MastiffPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::MastiffYawReduction;
+    }
+    // Snipers
+    if (weaponHeld == WeaponIDs::SENTINEL) { // Sentinel
+      Features::RCS::AdvancedPitchPower = Features::RCS::SentinelPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::SentinelYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::SentinelPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::SentinelYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::CHARGE_RIFLE) { // ChargeRifle
+      Features::RCS::AdvancedPitchPower = Features::RCS::ChargeRiflePitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::ChargeRifleYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::ChargeRiflePitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::ChargeRifleYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::LONGBOW) { // Longbow
+      Features::RCS::AdvancedPitchPower = Features::RCS::LongbowPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::LongbowYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::LongbowPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::LongbowYawReduction;
+    }
+    // Legendary Weapons
+    if (weaponHeld == WeaponIDs::WINGMAN) { // Wingman
+      Features::RCS::AdvancedPitchPower = Features::RCS::WingmanPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::WingmanYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::WingmanPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::WingmanYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::PROWLER) { // Prowler
+      Features::RCS::AdvancedPitchPower = Features::RCS::ProwlerPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::ProwlerYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::ProwlerPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::ProwlerYawReduction;
+    }
+    if (weaponHeld == WeaponIDs::KRABER) { // Kraber
+      Features::RCS::AdvancedPitchPower = Features::RCS::KraberPitch;
+      Features::RCS::AdvancedYawPower = Features::RCS::KraberYaw;
+      Features::RCS::AdvancedPitchReduction = Features::RCS::KraberPitchReduction;
+      Features::RCS::AdvancedYawReduction = Features::RCS::KraberYawReduction;
     }
   }
 };
