@@ -1448,10 +1448,8 @@ struct Menu {
 
       ImGui::Checkbox("Super glide", &Features::Misc::SuperGlide);
       if (Features::Misc::SuperGlide) {
-        const char *SuperGlideModeIndex[] = { "Manual", "Automatic" };
-        const char *SuperGlideFPSIndex[] = { "75", "144", "240" };
-        ImGui::ComboBox("Super glide mode", &Features::Misc::SuperGlideMode, SuperGlideModeIndex, IM_ARRAYSIZE(SuperGlideModeIndex));
-        ImGui::ComboBox("Super glide framerate", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
+        const char *SuperGlideModeIndex[] = { "Require space held", "Automatic (controller)" };
+        ImGui::ComboBox("Mode", &Features::Misc::SuperGlideMode, SuperGlideModeIndex, IM_ARRAYSIZE(SuperGlideModeIndex));
       }
 
       ImGui::Checkbox("Bunny hop", &Features::Misc::BHop);

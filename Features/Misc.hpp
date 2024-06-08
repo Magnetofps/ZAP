@@ -40,13 +40,6 @@ typedef void *PVOID;
 struct Misc {
   std::set<int> RapidFireList = {};
 
-  float HangOnWall1;
-  float HangOnWall2;
-  float TraversalProgress1;
-  float HangOnWall3;
-  float HangOnWall4;
-  float StartJumpTime1;
-
   XDisplay *X11Display;
   Level *Map;
   LocalPlayer *Myself;
@@ -63,7 +56,6 @@ struct Misc {
     try {
       Config::Misc::SuperGlide = Features::Misc::SuperGlide;
       Config::Misc::SuperGlideMode = Features::Misc::SuperGlideMode;
-      Config::Misc::SuperGlideFPS = Features::Misc::SuperGlideFPS;
 
       Config::Misc::QuickTurn = Features::Misc::QuickTurn;
       Config::Misc::QuickTurnAngle = Features::Misc::QuickTurnAngle;
@@ -215,94 +207,37 @@ struct Misc {
     }
   } // End of update
 
-  void SuperGlide() {
-    UpdateSuperGlide();
-    if (Features::Misc::SuperGlideMode == 0) { // Requires Space Held, Keyboard Only
-      if (InputManager::isKeyDownOrPress(InputKeyType::KEYBOARD_SPACE)) {
-        static float startjumpTime = 0;
-        static auto startSg = false;
+  void SuperGlide() const {
+    if (Features::Misc::SuperGlideMode == 0 && !InputManager::isKeyDownOrPress(InputKeyType::KEYBOARD_SPACE))
+      return;
 
-        const auto worldtime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE); // Current time
-        const auto traversalStartTime = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_START_TIME); // Time to start wall climbing
-        const auto traversalProgress = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_PROGRESS); // Wall climbing, if > 0.87 it is almost over.
-        const float HangOnWall = -(traversalStartTime - worldtime);
+    static float startjumpTime = 0;
+    static auto startSg = false;
 
-        if (HangOnWall > HangOnWall1 && HangOnWall < HangOnWall2)
-          Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
+    const auto worldtime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE);
+    const auto traversalStartTime = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_START_TIME);
+    const auto traversalProgress = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_PROGRESS);
+    const float TraversalDuration = worldtime - traversalStartTime;
 
-        if (traversalProgress > TraversalProgress1 && !startSg && HangOnWall > HangOnWall3 && HangOnWall < HangOnWall4) {
-          startjumpTime = worldtime;
-          startSg = true;
-        }
+    if (TraversalDuration > 0.1 && TraversalDuration < 0.12)
+      Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
 
-        if (startSg) {
-          Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 5);
-          while (Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE) - startjumpTime < StartJumpTime1)
-            ;
-          {
-            Memory::Write<int>(OFF_REGION + OFF_IN_DUCK + 0x8, 6);
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
-            std::this_thread::sleep_for(std::chrono::milliseconds(600));
-          }
-          startSg = false;
-        }
-      }
-    } else { // Automatic, Controller Support
-      static float startjumpTime = 0;
-      static auto startSg = false;
-
-      const auto worldtime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE);
-      const auto traversalStartTime = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_START_TIME);
-      const auto traversalProgress = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_PROGRESS);
-      const float HangOnWall = -(traversalStartTime - worldtime);
-
-      if (HangOnWall > HangOnWall1 && HangOnWall < HangOnWall2)
-        Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
-
-      if (traversalProgress > TraversalProgress1 && !startSg && HangOnWall > HangOnWall3 && HangOnWall < HangOnWall4) {
-        startjumpTime = worldtime;
-        startSg = true;
-      }
-
-      if (startSg) {
-        Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 5);
-        while (Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE) - startjumpTime < StartJumpTime1)
-          ;
-        {
-          Memory::Write<int>(OFF_REGION + OFF_IN_DUCK + 0x8, 6);
-          std::this_thread::sleep_for(std::chrono::milliseconds(50));
-          Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
-          std::this_thread::sleep_for(std::chrono::milliseconds(600));
-        }
-        startSg = false;
-      }
+    if (traversalProgress > 0.87f && !startSg && TraversalDuration > 0.1f && TraversalDuration < 1.5f) {
+      startjumpTime = worldtime;
+      startSg = true;
     }
-  }
 
-  void UpdateSuperGlide() {
-    if (Features::Misc::SuperGlideFPS == 0) { // 75 FPS
-      HangOnWall1 = 0.1;
-      HangOnWall2 = 0.12;
-      TraversalProgress1 = 0.87f;
-      HangOnWall3 = 0.1f;
-      HangOnWall4 = 1.5f;
-      StartJumpTime1 = 0.011;
-    } else if (Features::Misc::SuperGlideFPS == 1) { // 144 FPS
-      HangOnWall1 = 0.05;
-      HangOnWall2 = 0.07;
-      TraversalProgress1 = 0.90f;
-      HangOnWall3 = 0.05f;
-      HangOnWall4 = 0.75f;
-      StartJumpTime1 = 0.007;
-    } else if (Features::Misc::SuperGlideFPS == 2) { // 240 FPS
-      HangOnWall1 = 0.033;
-      HangOnWall2 = 0.04;
-      TraversalProgress1 = 0.95f;
-      HangOnWall3 = 0.033f;
-      HangOnWall4 = 0.2f;
-      StartJumpTime1 = 0.004;
-    }
+    if (!startSg)
+      return;
+
+    Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 5);
+    while (Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE) - startjumpTime < 0.011) {};
+
+    Memory::Write<int>(OFF_REGION + OFF_IN_DUCK + 0x8, 6);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
+    std::this_thread::sleep_for(std::chrono::milliseconds(600));
+    startSg = false;
   }
 
   void BHop() {
@@ -315,15 +250,16 @@ struct Misc {
   }
 
   void QuickTurn() {
-    if (Features::Misc::QuickTurn) {
-      FloatVector2D localYawtoClamp = Myself->viewAngles;
-      localYawtoClamp.clamp();
-      float localYaw = localYawtoClamp.y;
-      // quickTurn
-      if (InputManager::isKeyDown(Features::Misc::QuickTurnBind)) {
-        Myself->setYaw((localYaw + Features::Misc::QuickTurnAngle));
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-      }
+    if (!Features::Misc::QuickTurn)
+      return;
+
+    const FloatVector2D localYawtoClamp = Myself->viewAngles;
+    localYawtoClamp.clamp();
+    const float localYaw = localYawtoClamp.y;
+
+    if (InputManager::isKeyDownOrPress(Features::Misc::QuickTurnBind)) {
+      Myself->setYaw(localYaw + Features::Misc::QuickTurnAngle);
+      std::this_thread::sleep_for(std::chrono::milliseconds(350));
     }
   }
 

@@ -586,7 +586,6 @@ namespace Config {
   namespace Misc {
     bool SuperGlide = true;
     int SuperGlideMode = 0;
-    int SuperGlideFPS = 1; // 0 = 75, 1 = 144, 2 = 240
 
     bool QuickTurn = false;
     int QuickTurnAngle = 180;

@@ -228,22 +228,21 @@ void UpdateCore() {
     if (!Myself->IsValid())
       return;
 
-    // update once per tick, trust me μαλάκα
     const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    if (Now >= LastReset + std::chrono::milliseconds(5000)) {
+    if (Now >= LastReset + std::chrono::milliseconds(5000)) { // update entire entity list (10k in practice range)
       Players->clear();
-      LastReset = LastRead = Now;;
+      LastReset = LastRead = Now;
       for (auto p: Map->IsFiringRange ? *Dummies : *HumanPlayers) {
         p->fullRead();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
       }
-    } else if (Now >= LastRead + std::chrono::milliseconds(50)) {
+    } else if (Now >= LastRead + std::chrono::milliseconds(50)) { // update known players every tick
       LastRead = Now;
       for (const auto p : *Players)
         p->fullRead();
     } else { // update *some* things constantly to keep ESP & aimbot smooth
-      for (const auto p : *Players) {
+      for (const auto p : *Players) { // update important data about known players constantly
         p->shortRead();
       }
     }

@@ -647,7 +647,6 @@ struct ConfigManager {
 
       WritePair(Misc, SuperGlide);
       WritePair(Misc, SuperGlideMode);
-      WritePair(Misc, SuperGlideFPS);
 
       WritePair(Misc, QuickTurn);
       WritePair(Misc, QuickTurnAngle);
@@ -1513,7 +1512,6 @@ struct ConfigManager {
 
     Features::Misc::SuperGlide = Config::Misc::SuperGlide;
     Features::Misc::SuperGlideMode = Config::Misc::SuperGlideMode;
-    Features::Misc::SuperGlideFPS = Config::Misc::SuperGlideFPS;
     Features::Misc::QuickTurn = Config::Misc::QuickTurn;
     Features::Misc::QuickTurnAngle = Config::Misc::QuickTurnAngle;
     Features::Misc::QuickTurnBind = static_cast<InputKeyType>(Config::Misc::QuickTurnBind);
@@ -2333,7 +2331,6 @@ struct ConfigManager {
 
     ReadBool(Misc, SuperGlide);
     ReadInt(Misc, SuperGlideMode);
-    ReadInt(Misc, SuperGlideFPS);
     ReadBool(Misc, QuickTurn);
     ReadInt(Misc, QuickTurnAngle);
     ReadInt(Misc, QuickTurnBind);
