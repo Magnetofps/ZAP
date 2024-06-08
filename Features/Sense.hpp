@@ -555,6 +555,8 @@ struct Sense {
         auto LocalOrigin3D = p->LocalOrigin;
         auto Head3D = p->GetBonePosition(HitboxType::Head);
         auto AboveHead3D = Head3D;
+        AboveHead3D.x = LocalOrigin3D.x;
+        AboveHead3D.y = LocalOrigin3D.y;
         AboveHead3D.z += 10.f; // Y Offset
 
         Vector2D LocalOriginW2S, HeadW2S, AboveHeadW2S;
