@@ -13,7 +13,7 @@ struct GlowMode {
   GlowMode(std::byte x_val, std::byte y_val, std::byte z_val, std::byte transparency_val) : bodyStyle(x_val), borderStyle(y_val), borderWidth(z_val), transparency(transparency_val) {
   }
 
-  bool IsZeroVector() const { return bodyStyle == std::byte(0) && borderStyle == std::byte(0) && borderWidth == std::byte(0) && borderWidth == std::byte(0); }
+  [[nodiscard]] bool IsZeroVector() const { return bodyStyle == static_cast<std::byte>(0) && borderStyle == static_cast<std::byte>(0) && borderWidth == static_cast<std::byte>(0) && borderWidth == static_cast<std::byte>(0); }
 
   bool operator==(const GlowMode &other) const { return bodyStyle == other.bodyStyle && borderStyle == other.borderStyle && borderWidth == other.borderWidth && transparency == other.transparency; }
 
