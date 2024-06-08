@@ -407,7 +407,6 @@ struct Sense {
           std::vector<std::string> TempSpectators;
 
           for (const auto p: *Players) {
-            printf("Name: %s - PlayerName: %s\n", p->Name.c_str(), p->PlayerName.c_str());
             if (p->IsSpectating()) {
               TempTotalSpectators++;
               TempSpectators.push_back(p->GetPlayerName());

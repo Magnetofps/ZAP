@@ -61,6 +61,7 @@ auto Configs = new ConfigManager(Legit, Trigger, GlowESP, ESP, MapRadar, MiscTab
 // Booleans and Variables
 auto IsMenuOpened = true;
 std::chrono::milliseconds LastRead;
+std::chrono::milliseconds LastReset;
 
 // Thread
 std::atomic_bool StopThread(false);
@@ -228,15 +229,20 @@ void UpdateCore() {
       return;
 
     // update once per tick, trust me μαλάκα
-    if (const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); Now >= LastRead + std::chrono::milliseconds(50)) {
+    const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if (Now >= LastReset + std::chrono::milliseconds(5000)) {
       Players->clear();
-      LastRead = Now;
+      LastReset = LastRead = Now;;
       for (auto p: Map->IsFiringRange ? *Dummies : *HumanPlayers) {
         p->fullRead();
         if (p->BasePointer != 0 && (p->IsPlayer() || p->IsDummy()))
           Players->push_back(p);
       }
-    } else { // update *some* things constantly to keep ESP smooth
+    } else if (Now >= LastRead + std::chrono::milliseconds(50)) {
+      LastRead = Now;
+      for (const auto p : *Players)
+        p->fullRead();
+    } else { // update *some* things constantly to keep ESP & aimbot smooth
       for (const auto p : *Players) {
         p->shortRead();
       }
