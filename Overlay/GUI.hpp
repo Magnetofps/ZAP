@@ -735,7 +735,7 @@ struct Menu {
             ImGui::ComboBox("Bar Style", &Features::Sense::Enemy::BarStyle, BarStyleIndex, IM_ARRAYSIZE(BarStyleIndex));
 
             if (Features::Sense::Enemy::BarStyle == 0 or Features::Sense::Enemy::BarStyle == 1) {
-              const char *BarModeIndex[] = { "Health Only", "Shield Only", "Health & Shield", "SUPERNEW" };
+              const char *BarModeIndex[] = { "Health Only", "Shield Only", "Health & Shield" };
               ImGui::ComboBox("Bar Mode", &Features::Sense::Enemy::BarMode, BarModeIndex, IM_ARRAYSIZE(BarModeIndex));
             }
 
