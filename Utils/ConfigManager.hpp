@@ -646,6 +646,7 @@ struct ConfigManager {
       WriteSection(Misc);
 
       WritePair(Misc, SuperGlide);
+      WritePair(Misc, SuperGlideMode);
       WritePair(Misc, SuperGlideFPS);
 
       WritePair(Misc, QuickTurn);
@@ -998,11 +999,12 @@ struct ConfigManager {
 
       WriteSection(Watermark);
 
-      WritePair(Watermark, Watermark);
+      WritePair(Watermark, Enabled);
       WritePair(Watermark, WatermarkPosition);
       WritePair(Watermark, Name);
       WritePair(Watermark, ProcessingSpeed);
       WritePair(Watermark, Spectators);
+      WritePair(Watermark, GameFPS);
 
       WriteSectionEnd();
 
@@ -1508,6 +1510,7 @@ struct ConfigManager {
     Features::Radar::CircleColor[3] = Config::Radar::CircleColorA;
 
     Features::Misc::SuperGlide = Config::Misc::SuperGlide;
+    Features::Misc::SuperGlideMode = Config::Misc::SuperGlideMode;
     Features::Misc::SuperGlideFPS = Config::Misc::SuperGlideFPS;
     Features::Misc::QuickTurn = Config::Misc::QuickTurn;
     Features::Misc::QuickTurnAngle = Config::Misc::QuickTurnAngle;
@@ -1813,11 +1816,12 @@ struct ConfigManager {
     Features::Colors::Teammate::ThrowableWeaponColor[2] = Config::TeammateColors::ThrowableWeaponColorB;
     Features::Colors::Teammate::ThrowableWeaponColor[3] = Config::TeammateColors::ThrowableWeaponColorA;
 
-    Features::Watermark::Watermark = Config::Watermark::Watermark;
+    Features::Watermark::Enabled = Config::Watermark::Enabled;
     Features::Watermark::WatermarkPosition = Config::Watermark::WatermarkPosition;
     Features::Watermark::Name = Config::Watermark::Name;
     Features::Watermark::ProcessingSpeed = Config::Watermark::ProcessingSpeed;
     Features::Watermark::Spectators = Config::Watermark::Spectators;
+    Features::Watermark::GameFPS = Config::Watermark::GameFPS;
 
     Features::Settings::ESPEnabled = Config::Settings::ESPEnabled;
     Features::Settings::OverlayEnabled = Config::Settings::OverlayEnabled;
@@ -2325,6 +2329,7 @@ struct ConfigManager {
     ReadFloat(Radar, CircleColorA);
 
     ReadBool(Misc, SuperGlide);
+    ReadInt(Misc, SuperGlideMode);
     ReadInt(Misc, SuperGlideFPS);
     ReadBool(Misc, QuickTurn);
     ReadInt(Misc, QuickTurnAngle);
@@ -2648,11 +2653,12 @@ struct ConfigManager {
     ReadFloat(TeammateColors, ThrowableWeaponColorB);
     ReadFloat(TeammateColors, ThrowableWeaponColorA);
 
-    ReadBool(Watermark, Watermark);
+    ReadBool(Watermark, Enabled);
     ReadInt(Watermark, WatermarkPosition);
     ReadBool(Watermark, Name);
     ReadBool(Watermark, ProcessingSpeed);
     ReadBool(Watermark, Spectators);
+    ReadBool(Watermark, GameFPS);
 
     ReadBool(Settings, ESPEnabled);
     ReadBool(Settings, OverlayEnabled);

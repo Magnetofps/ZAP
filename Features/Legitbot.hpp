@@ -314,7 +314,6 @@ struct Legitbot {
   }
 
   static auto UpdateRCSList() -> void {
-
     const std::vector<std::pair<bool, int>> weaponStates = {
       {Features::RCS::P2020, WeaponIDs::P2020}, {Features::RCS::RE45, WeaponIDs::RE45}, {Features::RCS::Alternator, WeaponIDs::ALTERNATOR}, {Features::RCS::R99, WeaponIDs::R99}, {Features::RCS::R301, WeaponIDs::R301}, {Features::RCS::Spitfire, WeaponIDs::SPITFIRE}, {Features::RCS::G7, WeaponIDs::G7},
       {Features::RCS::Flatline, WeaponIDs::FLATLINE}, {Features::RCS::Hemlock, WeaponIDs::HEMLOCK}, {Features::RCS::Repeater, WeaponIDs::REPEATER}, {Features::RCS::Rampage, WeaponIDs::RAMPAGE}, {Features::RCS::CARSMG, WeaponIDs::CAR},
@@ -358,7 +357,7 @@ struct Legitbot {
       return;
     }
 
-    if (Features::Aimbot::BindMethod == 2 && !isKeybindDown()) { // keybinds
+    if (Features::Aimbot::BindMethod == 1 && !isKeybindDown()) { // keybinds
       ReleaseTarget();
       return;
     }
@@ -386,6 +385,7 @@ struct Legitbot {
       }
     }
 
+    // getting our target
     if (Player *Target = CurrentTarget; !IsValidTarget(Target)) {
       if (TargetSelected && !Features::Aimbot::TargetSwitching)
         return;
@@ -401,6 +401,7 @@ struct Legitbot {
       TargetSelected = true;
     }
 
+    // aiming at target
     if (TargetSelected && CurrentTarget) {
       if (const auto Now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); Now >= LastAimTime + std::chrono::milliseconds(Features::Aimbot::Delay)) {
         StartAiming();
@@ -450,7 +451,6 @@ struct Legitbot {
 
   auto StartAiming() const -> void {
     if (Features::Aimbot::InputMethod == 0) { // Mouse movement
-      // Get Target Angle
       auto DesiredAngles = QAngle(0, 0);
       if (!GetAngle(CurrentTarget, DesiredAngles))
         return;

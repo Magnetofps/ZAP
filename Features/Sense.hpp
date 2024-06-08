@@ -383,7 +383,7 @@ struct Sense {
     int ScreenHeight;
     OverlayWindow.GetScreenResolution(ScreenWidth, ScreenHeight);
 
-    if (Features::Watermark::Watermark) {
+    if (Features::Watermark::Enabled) {
       ImGui::SetNextWindowPos(ImVec2(10.0f, 22.0f), ImGuiCond_Once, ImVec2(0.02f, 0.5f));
       ImGui::SetNextWindowBgAlpha(0.75f);
 

@@ -62,6 +62,7 @@ struct Misc {
   static bool Save() {
     try {
       Config::Misc::SuperGlide = Features::Misc::SuperGlide;
+      Config::Misc::SuperGlideMode = Features::Misc::SuperGlideMode;
       Config::Misc::SuperGlideFPS = Features::Misc::SuperGlideFPS;
 
       Config::Misc::QuickTurn = Features::Misc::QuickTurn;
@@ -216,25 +217,58 @@ struct Misc {
 
   void SuperGlide() {
     UpdateSuperGlide();
-    if (InputManager::isKeyDownOrPress(InputKeyType::KEYBOARD_SPACE)) {
+    if (Features::Misc::SuperGlideMode == 0) { // Requires Space Held, Keyboard Only
+      if (InputManager::isKeyDownOrPress(InputKeyType::KEYBOARD_SPACE)) {
+        static float startjumpTime = 0;
+        static auto startSg = false;
+
+        const auto worldtime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE); // Current time
+        const auto traversalStartTime = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_START_TIME); // Time to start wall climbing
+        const auto traversalProgress = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_PROGRESS); // Wall climbing, if > 0.87 it is almost over.
+        const float HangOnWall = -(traversalStartTime - worldtime);
+
+        if (HangOnWall > HangOnWall1 && HangOnWall < HangOnWall2)
+          Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
+
+        if (traversalProgress > TraversalProgress1 && !startSg && HangOnWall > HangOnWall3 && HangOnWall < HangOnWall4) {
+          startjumpTime = worldtime;
+          startSg = true;
+        }
+
+        if (startSg) {
+          Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 5);
+          while (Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE) - startjumpTime < StartJumpTime1)
+            ;
+          {
+            Memory::Write<int>(OFF_REGION + OFF_IN_DUCK + 0x8, 6);
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
+            std::this_thread::sleep_for(std::chrono::milliseconds(600));
+          }
+          startSg = false;
+        }
+      }
+    } else { // Automatic, Controller Support
       static float startjumpTime = 0;
-      static bool startSg = false;
-      static float traversalProgressTmp = 0.0;
+      static auto startSg = false;
 
-      float worldtime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE); // Current time
-      float traversalStartTime = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_START_TIME); // Time to start wall climbing
-      float traversalProgress = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_PROGRESS); // Wall climbing, if > 0.87 it is almost over.
-      float HangOnWall = -(traversalStartTime - worldtime);
+      const auto worldtime = Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE);
+      const auto traversalStartTime = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_START_TIME);
+      const auto traversalProgress = Memory::Read<float>(Myself->BasePointer + OFF_TRAVERSAL_PROGRESS);
+      const float HangOnWall = -(traversalStartTime - worldtime);
 
-      if (HangOnWall > HangOnWall1 && HangOnWall < HangOnWall2) { Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4); }
+      if (HangOnWall > HangOnWall1 && HangOnWall < HangOnWall2)
+        Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 4);
+
       if (traversalProgress > TraversalProgress1 && !startSg && HangOnWall > HangOnWall3 && HangOnWall < HangOnWall4) {
-        // start SG
         startjumpTime = worldtime;
         startSg = true;
       }
+
       if (startSg) {
         Memory::Write<int>(OFF_REGION + OFF_IN_JUMP + 0x8, 5);
-        while (Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE) - startjumpTime < StartJumpTime1); //why is this here...
+        while (Memory::Read<float>(Myself->BasePointer + OFF_TIME_BASE) - startjumpTime < StartJumpTime1)
+          ;
         {
           Memory::Write<int>(OFF_REGION + OFF_IN_DUCK + 0x8, 6);
           std::this_thread::sleep_for(std::chrono::milliseconds(50));

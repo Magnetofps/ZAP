@@ -30,6 +30,7 @@ namespace Config {
     bool OverlayEnabled = true;
     bool FPSCap = false;
     int CappedFPS = 144;
+    bool DodgeWindows = true;
   };
 
   namespace AimbotHitboxes {
@@ -584,6 +585,7 @@ namespace Config {
 
   namespace Misc {
     bool SuperGlide = true;
+    int SuperGlideMode = 0;
     int SuperGlideFPS = 1; // 0 = 75, 1 = 144, 2 = 240
 
     bool QuickTurn = false;
@@ -952,7 +954,7 @@ namespace Config {
   };
 
   namespace Watermark {
-    bool Watermark = true;
+    bool Enabled = true;
     int WatermarkPosition = 0;
     bool Name = true;
     bool ProcessingSpeed = true;

@@ -1,3 +1,6 @@
+// TODO: Optimize memory reads in functions called each frame
+// TODO: Refactor
+
 #pragma once
 #include <string>
 #include <Weapons.hpp>
@@ -200,10 +203,12 @@ struct Player {
     return {255, 255, 255};
   }
 
+
+
   [[nodiscard]] auto GetViewYaw() const -> float {
-    if (!IsDummy() || IsPlayer()) {
+    if (!IsDummy() || IsPlayer())
       return Memory::Read<float>(BasePointer + OFF_YAW);
-    }
+
     return 0.0f;
   }
 

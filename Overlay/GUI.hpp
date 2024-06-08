@@ -100,12 +100,12 @@ struct Menu {
             ImGui::SetCursorPosY(80.0f);
             ImGui::Columns(2, "aimbotkeybinds", false);
             ImGui::SetColumnWidth(0, 182.5f);
-            int AimBind = static_cast<int>(Features::AimbotBinds::AimBind);
+            auto AimBind = static_cast<int>(Features::AimbotBinds::AimBind);
             ImGui::ComboBox("##Bind 1 aimbot", &AimBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
             Features::AimbotBinds::AimBind = static_cast<InputKeyType>(AimBind);
             ImGui::NextColumn();
             ImGui::SetColumnWidth(1, 182.5f);
-            int ExtraBind = static_cast<int>(Features::AimbotBinds::ExtraBind);
+            auto ExtraBind = static_cast<int>(Features::AimbotBinds::ExtraBind);
             ImGui::ComboBox("##Bind 2 aimbot", &ExtraBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
             Features::AimbotBinds::ExtraBind = static_cast<InputKeyType>(ExtraBind);
           }
@@ -1298,8 +1298,8 @@ struct Menu {
           ImGui::SetTooltip("Show Spectators");
 
         ImGui::Text("Watermark");
-        ImGui::Checkbox("Draw Watermark", &Features::Watermark::Watermark);
-        if (Features::Watermark::Watermark) {
+        ImGui::Checkbox("Draw Watermark", &Features::Watermark::Enabled);
+        if (Features::Watermark::Enabled) {
           ImGui::Text("Watermark Settings");
           ImGui::Checkbox("Display Name", &Features::Watermark::Name);
           ImGui::Checkbox("Display Processing Speed", &Features::Watermark::ProcessingSpeed);
@@ -1447,18 +1447,18 @@ struct Menu {
       ImGui::Spacing();
 
       ImGui::Checkbox("Super glide", &Features::Misc::SuperGlide);
-      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-        ImGui::SetTooltip("Hold [ SPACE ] when climbing over an object to gain speed");
-      //if (Features::Misc::SuperGlide) {
-      //  const char *SuperGlideFPSIndex[] = { "75", "144", "240" };
-      //  ImGui::ComboBox("Superglide framerate", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
-      //}
+      if (Features::Misc::SuperGlide) {
+        const char *SuperGlideModeIndex[] = { "Manual", "Automatic" };
+        const char *SuperGlideFPSIndex[] = { "75", "144", "240" };
+        ImGui::ComboBox("Super glide mode", &Features::Misc::SuperGlideMode, SuperGlideModeIndex, IM_ARRAYSIZE(SuperGlideModeIndex));
+        ImGui::ComboBox("Super glide framerate", &Features::Misc::SuperGlideFPS, SuperGlideFPSIndex, IM_ARRAYSIZE(SuperGlideFPSIndex));
+      }
 
       ImGui::Checkbox("Bunny hop", &Features::Misc::BHop);
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
         ImGui::SetTooltip("Activates when holding a selected keybind and [ SPACE ]");
       if (Features::Misc::BHop) {
-        int BhopBind = static_cast<int>(Features::Misc::BHopBind);
+        auto BhopBind = static_cast<int>(Features::Misc::BHopBind);
         ImGui::ComboBox("Bind##Bunny hop", &BhopBind, InputKeyTypeNames, IM_ARRAYSIZE(InputKeyTypeNames));
         Features::Misc::BHopBind = static_cast<InputKeyType>(BhopBind);
         ImGui::MainSliderInt("Delay", &Features::Misc::BHopDelay, 1, 200);
@@ -1488,11 +1488,12 @@ struct Menu {
       ImGui::Spacing();
 
       ImGui::Checkbox("Enable overlay", &Features::Settings::OverlayEnabled);
+      if (Features::Settings::OverlayEnabled)
+        ImGui::Checkbox("Enable ESP", &Features::Settings::ESPEnabled);
 
-      if (Features::Settings::OverlayEnabled) { ImGui::Checkbox("Enable ESP", &Features::Settings::ESPEnabled); }
-
-      ImGui::Checkbox("FPS Cap", &Features::Settings::FPSCap);
-      if (Features::Settings::FPSCap) { ImGui::MainSliderInt("Max FPS", &Features::Settings::CappedFPS, 30, 480); }
+      ImGui::Checkbox("FPS cap", &Features::Settings::FPSCap);
+      if (Features::Settings::FPSCap)
+        ImGui::MainSliderInt("Max FPS", &Features::Settings::CappedFPS, 30, 480);
 
       ImGui::EndChildFrame();
     }
