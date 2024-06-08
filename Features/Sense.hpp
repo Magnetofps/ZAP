@@ -522,6 +522,7 @@ struct Sense {
 
     // Draw lot of things
     if (Features::Settings::ESPEnabled) {
+      ImGui::PushFont(OverlayWindow.SenseFont);
       if (Features::Sense::DrawSpectatorWarning && TotalSpectators >= 1) {
         std::stringstream WarningTextStart, Space1, Amount, Space2;
         WarningTextStart << "SPECTATOR WARNING";
@@ -764,6 +765,8 @@ struct Sense {
           Renderer::DrawCircle(Canvas, HeadPos2D, 3650 / p->DistanceToLocalPlayer, 255, ImColor(HeadCircleColor), p->IsAlly ? Features::Sense::Teammate::HeadCircleThickness : Features::Sense::Enemy::HeadCircleThickness);
         }
       }
+
+      ImGui::PopFont();
     }
   }
 };

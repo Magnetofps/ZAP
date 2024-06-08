@@ -17,6 +17,7 @@ add_library(imgui STATIC
   imgui/imgui_impl_glfw.cpp
   imgui/imgui_draw.cpp
   imgui/imgui_tables.cpp
+  imgui/imgui_freetype.cpp
         Overlay/IconsFontAwesome5.h
 )
 
@@ -27,6 +28,9 @@ target_include_directories(imgui PUBLIC
 
 # Find packages
 find_package (X11 REQUIRED)
+find_package (Freetype REQUIRED)
+
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 # Add additional libs
 link_directories(/usr/local/lib)
@@ -45,6 +49,7 @@ target_link_libraries(zap
   udev
   ${X11_LIBRARIES}
   ${X11_XTest_LIB}
+  ${FREETYPE_LIBRARIES}
 )
 
 # Set the include directories for the executable

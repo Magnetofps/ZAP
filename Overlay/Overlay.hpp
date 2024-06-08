@@ -1,24 +1,27 @@
 // Externals
 #pragma once
 #include <chrono>
-#include <thread>
-#include <string>
 #include <cstdio>
 #include <ctime>
 #include <random>
-#include <GLFW/glfw3.h>
+#include <string>
+#include <thread>
 #include <GL/gl.h>
-#define GLFW_EXPOSE_NATIVE_X11
+#include <GLFW/glfw3.h>
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
+#define GLFW_EXPOSE_NATIVE_X11
 
 // Internals
+#include <imgui/imgui_internal.h>
+
 #include "Font.hpp"
-#include "IconsFontAwesome5.h"
 #include "Fontawesome.hpp"
-#include "../Utils/InputManager.hpp"
+#include "IconsFontAwesome5.h"
+#include "SenseFont.hpp"
 #include "../Utils/Features.hpp"
+#include "../Utils/InputManager.hpp"
 
 
 class Overlay {
@@ -28,6 +31,8 @@ class Overlay {
   int ScreenHeight = 0;
   int ScreenPosX = 0;
   int ScreenPosY = 0;
+public:
+  mutable ImFont *SenseFont{ nullptr };
 
   void GrabScreenSize() {
     GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
@@ -160,6 +165,14 @@ public:
     icons_config.GlyphMinAdvanceX = 32.0f;
     io.Fonts->AddFontFromMemoryCompressedTTF(fontAwesome900_compressed_data, fontAwesome900_compressed_size, 32.0f, &icons_config, icons_ranges);
 
+    ImFontConfig sense_config;
+    sense_config.SizePixels = 10.0f;
+    sense_config.PixelSnapH = false;
+    sense_config.GlyphOffset = {0.0f, 0.0f};
+    sense_config.OversampleH = sense_config.OversampleV = 3;
+    SenseFont = io.Fonts->AddFontFromMemoryCompressedTTF(senseFontData, senseFontSize, sense_config.SizePixels, &sense_config, GetFontGlyphRanges());
+
+
     ImGui::StyleColorsDark();
     ImGuiStyle &style = ImGui::GetStyle();
 
@@ -192,6 +205,8 @@ public:
     style.WindowRounding = 7;
     style.ChildRounding = 4;
     style.FrameRounding = 7;
+
+    style.AntiAliasedLines = true;
 
     ImGui_ImplGlfw_InitForOpenGL(OverlayWindow, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
