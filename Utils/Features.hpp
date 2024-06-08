@@ -18,6 +18,7 @@ namespace Features {
     bool OverlayEnabled = true;
     bool FPSCap = false;
     int CappedFPS = 144;
+    bool DodgeWindows = true;
   };
 
   namespace AimbotHitboxes {

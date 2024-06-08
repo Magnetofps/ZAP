@@ -107,9 +107,8 @@ void CreateTabButton(const char *title, const Menu::MenuTabs tab, const ImVec2 s
 }
 
 void RenderUI() {
-
   const auto io = ImGui::GetIO();
-  if (Features::Settings::OverlayEnabled) {
+  if (Features::Settings::OverlayEnabled && (!Features::Settings::DodgeWindows || (X11Display->Focused() || Features::Home::IsMenuOpened))) {
     ImGui::SetNextWindowSize(io.DisplaySize);
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::Begin("##Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiSliderFlags_AlwaysClamp);

@@ -735,7 +735,7 @@ struct Menu {
             ImGui::ComboBox("Bar Style", &Features::Sense::Enemy::BarStyle, BarStyleIndex, IM_ARRAYSIZE(BarStyleIndex));
 
             if (Features::Sense::Enemy::BarStyle == 0 or Features::Sense::Enemy::BarStyle == 1) {
-              const char *BarModeIndex[] = { "Health Only", "Shield Only", "Health & Shield" };
+              const char *BarModeIndex[] = { "Health Only", "Shield Only", "Health & Shield", "SUPERNEW" };
               ImGui::ComboBox("Bar Mode", &Features::Sense::Enemy::BarMode, BarModeIndex, IM_ARRAYSIZE(BarModeIndex));
             }
 
@@ -1486,6 +1486,10 @@ struct Menu {
     ImGui::Text("Settings");
     ImGui::BeginChildFrame(5, ImVec2((WindowWidth - 225) / 2, 0), true); {
       ImGui::Spacing();
+
+      ImGui::Checkbox("Dodge windows", &Features::Settings::DodgeWindows);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("Disable the overlay if the game & overlay are unfocused and the menu is closed");
 
       ImGui::Checkbox("Enable overlay", &Features::Settings::OverlayEnabled);
       if (Features::Settings::OverlayEnabled)

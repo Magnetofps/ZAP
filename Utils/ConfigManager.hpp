@@ -1014,6 +1014,7 @@ struct ConfigManager {
       WritePair(Settings, OverlayEnabled);
       WritePair(Settings, FPSCap);
       WritePair(Settings, CappedFPS);
+      WritePair(Settings, DodgeWindows);
 
       WriteSectionEnd();
 
@@ -1045,6 +1046,7 @@ struct ConfigManager {
       Config::Settings::OverlayEnabled = Features::Settings::OverlayEnabled;
       Config::Settings::FPSCap = Features::Settings::FPSCap;
       Config::Settings::CappedFPS = Features::Settings::CappedFPS;
+      Config::Settings::DodgeWindows = Features::Settings::DodgeWindows;
 
       return true;
     } catch (...) { return false; }
@@ -1827,6 +1829,7 @@ struct ConfigManager {
     Features::Settings::OverlayEnabled = Config::Settings::OverlayEnabled;
     Features::Settings::FPSCap = Config::Settings::FPSCap;
     Features::Settings::CappedFPS = Config::Settings::CappedFPS;
+    Features::Settings::DodgeWindows = Config::Settings::DodgeWindows;
   }
 
   bool ReadConfig() {
@@ -2664,6 +2667,7 @@ struct ConfigManager {
     ReadBool(Settings, OverlayEnabled);
     ReadBool(Settings, FPSCap);
     ReadInt(Settings, CappedFPS);
+    ReadBool(Settings, DodgeWindows);
 
     UpdateConfig();
     return true;
