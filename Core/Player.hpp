@@ -60,6 +60,11 @@ struct Player {
 
   bool IsLockedOn = false;
 
+  std::string ModelName;
+  std::string PlayerName;
+
+  bool Spectating{};
+
   Player(const int PlayerIndex, LocalPlayer *Me) {
     this->Index = PlayerIndex;
     this->Myself = Me;
@@ -131,19 +136,29 @@ struct Player {
 
     DistanceToLocalPlayer = Myself->LocalOrigin.Distance(LocalOrigin);
     Distance2DToLocalPlayer = Myself->LocalOrigin.To2D().Distance(LocalOrigin.To2D());
+
+    const auto ModelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
+    ModelName = Memory::ReadString(ModelOffset, 1024);
+
+    if (!IsDummy()) {
+      const auto NameIndex = Memory::Read<uintptr_t>(BasePointer + OFF_NAME_INDEX);
+      const auto NameOffset = Memory::Read<uintptr_t>(OFF_REGION + OFF_NAME_LIST + (NameIndex - 1) * 24);
+      PlayerName = Memory::ReadString(NameOffset, 64);
+    }
+
+    if (IsDead) {
+      const auto SpecIndex = Memory::Read<int>(Memory::Read<uint64_t>(OFF_REGION + OFF_OBSERVER_LIST) + Memory::Read<int>(BasePointer + 0x38) * 8 + 0x964);
+      Spectating = Memory::Read<uint64_t>(OFF_REGION + OFF_ENTITY_LIST + ((SpecIndex & 0xFFFF) << 5)) == Myself->BasePointer;
+    } else {
+      Spectating = false;
+    }
   }
 
   [[nodiscard]] auto GetPlayerName() const -> std::string {
-    const auto NameIndex = Memory::Read<uintptr_t>(BasePointer + OFF_NAME_INDEX);
-    const auto NameOffset = Memory::Read<uintptr_t>(OFF_REGION + OFF_NAME_LIST + ((NameIndex - 1) * 24));
-    std::string PlayerName = Memory::ReadString(NameOffset, 64);
     return PlayerName;
   }
 
   [[nodiscard]] auto GetPlayerModelName() const -> std::string {
-    const auto ModelOffset = Memory::Read<uintptr_t>(BasePointer + OFF_MODELNAME);
-    const std::string ModelName = Memory::ReadString(ModelOffset, 1024);
-
     const std::unordered_map<std::string, std::string> ModelNameMap = {{"dummie", "Dummy"}, {"ash", "Ash"}, {"alter", "Alter"}, {"ballistic", "Ballistic"}, {"bangalore", "Bangalore"}, {"bloodhound", "Bloodhound"}, {"catalyst", "Catalyst"}, {"caustic", "Caustic"}, {"conduit", "Conduit"}, {"crypto", "Crypto"}, {"fuse", "Fuse"}, {"gibraltar", "Gibraltar"}, {"horizon", "Horizon"}, {"nova", "Nova"}, {"holo", "Holo"}, {"mirage", "Mirage"}, {"lifeline", "Lifeline"}, {"loba", "Loba"}, {"madmaggie", "Mad Maggie"}, {"newcastle", "Newcastle"}, {"octane", "Octane"}, {"pathfinder", "Pathfinder"}, {"rampart", "Rampart"}, {"revenant", "Revenant"}, {"seer", "Seer"}, {"stim", "Stim"}, {"valkyrie", "Valkyrie"}, {"vantage", "Vantage"}, {"wattson", "Wattson"}, {"wraith", "Wraith"},};
 
     std::string ReplacedName = ModelName;
@@ -203,15 +218,6 @@ struct Player {
     return {255, 255, 255};
   }
 
-
-
-  [[nodiscard]] auto GetViewYaw() const -> float {
-    if (!IsDummy() || IsPlayer())
-      return Memory::Read<float>(BasePointer + OFF_YAW);
-
-    return 0.0f;
-  }
-
   [[nodiscard]] auto IsValid() const -> bool {
     return BasePointer != 0 && Health > 0 && (IsPlayer() || IsDummy());
   }
@@ -233,11 +239,7 @@ struct Player {
   }
 
   [[nodiscard]] auto IsSpectating() const -> bool {
-    if (!IsDead)
-      return false;
-
-    const auto SpecIndex = Memory::Read<int>(Memory::Read<uint64_t>(OFF_REGION + OFF_OBSERVER_LIST) + Memory::Read<int>(BasePointer + 0x38) * 8 + 0x964);
-    return Memory::Read<uint64_t>(OFF_REGION + OFF_ENTITY_LIST + ((SpecIndex & 0xFFFF) << 5)) == Myself->BasePointer;
+    return Spectating;
   }
 
   // Bones //
