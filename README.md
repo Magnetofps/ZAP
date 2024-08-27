@@ -49,9 +49,7 @@ KDE Plasma is known not to allow the overlay to be drawn above the game.
     make
     sudo make install
 
-**3. Navigate to directory for cheat files (I use `/Documents/development/` for example)**
-
-    cd ~
+****3. Exit the terminal and re-open it (So that you dont build the cheat directly into the GLFW build folder, wont work otherwise)**
 
 **4. Clone repo**
 
