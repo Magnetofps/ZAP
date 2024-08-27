@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
   std::cout << tc::color<255, 230, 0> << "      (_   )  /__\\  (  _ \\" << std::endl;
   std::cout << tc::color<255, 190, 0> << "       / /_  /(__)\\  )___/" << std::endl;
   std::cout << tc::color<255, 165, 0> << "      (____)(__)(__)(__)  \n" << tc::reset << std::endl;
-  std::cout << tc::color<255, 100, 0> << "  " << ZAP_VERSION << " - hir0xygen's fork" << std::endl;
+  std::cout << tc::color<255, 100, 0> << "  " << ZAP_VERSION << " - Magneto's fork" << std::endl;
   std::cout << tc::color<133, 255, 133> << " ✔  " << tc::reset << ">> Apex Legends " << GAME_VERSION << std::endl;
 
   if (isOutdated()) {
