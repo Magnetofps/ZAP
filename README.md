@@ -82,7 +82,7 @@ KDE Plasma is known not to allow the overlay to be drawn above the game.
 
 **4. Clone repo**
 
-    git clone https://github.com/hir0xygen/zap-client.git
+    git clone https://github.com/Magnetofps/ZAP.git
     cd zap-client
 
 **5. Build & Run**
