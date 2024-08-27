@@ -2,7 +2,7 @@
 # DO NOT BUY IT, IT'S A SCAM.
 
 # ⚡ ZAP
-hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (X11).
+hir0xygen's fork of zap-client by Gerosity,Maintained by Magneto | an Apex Legends external for Linux (X11).
 
 ![](https://i.imgur.com/4bwo36x.png)
 
@@ -22,38 +22,6 @@ hir0xygen's fork of zap-client by Gerosity, an Apex Legends external for Linux (
         - Auto shoot
         - Skin changer
     Config system
-
-<details>
-<summary><b>:memo: Changelog</b></summary>
-
-    v1.0.8 - 10th May 2024
-        - Menu styling changes
-        - Removed rage bot and flick bot
-        - Removed legit bot weapon config (might rewrite)
-        - Removed additional legit bot modes, more follow up soon
-        - Fixed all menu key issues preventing from launching
-
-    v1.0.7c - 30th April 2024
-        - Added game framerate to watermark
-
-    v1.0.7b - 29th April 2024
-        - Now spawns on primary monitor, at maximum refresh rate for that monitor
-        - Now caps to the primary monitors refresh rate by default
-        - Fixed trigger bot hip fire range not saving in config
-
-    v1.0.7 - 28th April 2024
-        - Changed game version check to scan all existing Steam libraries
-        - Split trigger bot range in independent ADS/hip fire options
-        - Removed sub-tabs in "MISC" tab, instead moved it into separate containers
-        - Menu style changes
-
-    v1.0.6b - 22nd April 2024
-        - Forked from zap-client by Gerosity
-        - Redesigned console output
-        - Removed "cool" looking delays in run.sh and initialization (was annoying)
-
-    view changelog for prior versions at Gerosity/zap-client
-</details>
 
 ## :card_file_box: Installation
 <details>
@@ -78,7 +46,7 @@ KDE Plasma is known not to allow the overlay to be drawn above the game.
 
 **3. Navigate to directory for cheat files (I use `/Documents/development/` for example)**
 
-    cd ~/Documents/
+    cd ~
 
 **4. Clone repo**
 
