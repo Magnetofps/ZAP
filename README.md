@@ -63,7 +63,7 @@ KDE Plasma is known not to allow the overlay to be drawn above the game.
     cmake ..
     make
     chmod +x run.sh
-    ./run.sh
+    ./run.sh or sudo ./run.sh
 
 **6. Press insert to toggle the menu (you can only interact with the menu and the game when the menu is active)**
 **Note: You will need to tab between the cheat overlay and Apex**  
