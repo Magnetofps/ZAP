@@ -1,7 +1,7 @@
 #pragma once
 // https://www.unknowncheats.me/forum/apex-legends/319804-apex-legends-reversal-structs-offsets.html
 
-constexpr std::string GAME_VERSION = "v3.0.78.32";
+constexpr std::string GAME_VERSION = "v3.0.79.44";
 constexpr std::string ZAP_VERSION = "ZAP 1.1.2";
 
 // Core
